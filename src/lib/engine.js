@@ -110,6 +110,9 @@ export function assertExpectedPhase(state, expectedPhase) {
 /** Host-action guard evaluated INSIDE the compare-and-set (item 5) and, for
  * stepped reveals, against the exact step the host was looking at (item F). */
 export function applyHostAction(state, action, now, ctx = {}, expected = {}) {
+  // Moderation must never be blocked by a stale screen: hiding a rude answer
+  // is exactly the action a host takes while phases are moving (item 4).
+  if (action.type === "HIDE" || action.type === "KICK") return applyAction(state, action, now, ctx);
   const phaseError = assertExpectedPhase(state, expected.phase);
   if (phaseError) return { state, error: phaseError };
   if (action.type === "NEXT" && ["finishPresent", "finishReveal"].includes(state.phase)
@@ -367,7 +370,12 @@ export function applyAction(state, action, now, ctx = {}) {
       const target = findPlayer(state, action.playerId);
       if (!target) return fail("Player not found.");
       let next = { ...state, players: state.players.filter((p) => p.id !== action.playerId), updatedAt: now };
-      const votes = { ...next.votes }; delete votes[action.playerId]; next = { ...next, votes };
+      const votes = { ...next.votes }; delete votes[action.playerId];
+      for (const [voter, choice] of Object.entries(votes)) if (choice === action.playerId) delete votes[voter];
+      next = { ...next, votes };
+      if (next.finishOrder?.includes(action.playerId)) {
+        next = { ...next, finishOrder: next.finishOrder.filter((id) => id !== action.playerId) };
+      }
       if (next.featuredOrder?.includes(action.playerId)) {
         const removedIdx = next.featuredOrder.indexOf(action.playerId);
         const wasFeatured = featured(next)?.id === action.playerId || state.featuredOrder[state.featuredIdx] === action.playerId;
@@ -450,17 +458,18 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
           prompt: finishItem,
           ...(state.phase === "finishPresent" ? {
             presenting: true, totalCandidates: state.finishOrder.length,
-            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => { const p = findPlayer(state, id); return { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer }; }),
+            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => { const p = findPlayer(state, id); return p ? { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean),
           } : {}),
-          ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer }; }) } : {}),
+          ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return p ? { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean) } : {}),
           ...(state.phase === "finishReveal" ? {
             authorsRevealed: !!state.finishAuthors,
             totalCandidates: state.finishOrder.length,
             candidates: state.finishOrder.map((id) => {
               const p = findPlayer(state, id);
+              if (!p) return null;
               const text = p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer;
               return { id, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints };
-            }),
+            }).filter(Boolean),
           } : {}),
         }
       : null,

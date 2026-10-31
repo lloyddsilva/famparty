@@ -32,7 +32,7 @@ export async function GET(req, { params }) {
       const beforeExpiry = state;
       const out = await casUpdate(code, (s) => ({ state: advanceIfExpired(s, Date.now(), { answers: preAnswers }) }));
       if (out.state) {
-        if (out.state.version !== beforeExpiry.version) scheduleFamilyWrites(beforeExpiry, out.state);
+        if (out.changed) scheduleFamilyWrites(beforeExpiry, out.state);
         state = out.state;
       }
     }

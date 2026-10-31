@@ -57,13 +57,13 @@ export async function casUpdate(code, mutate, ctx = {}) {
     const state = await loadRoom(code);
     if (!state) return { state: null, error: "Room not found or expired." };
     const out = mutate(state, ctx);
-    if (!out || out.error) return { state, error: out?.error };
-    if (out.state === state) return { state };
+    if (!out || out.error) return { state, error: out?.error, changed: false };
+    if (out.state === state) return { state, changed: false };
     const next = { ...out.state, version: state.version + 1 };
     const res = await r.eval(CAS_LUA, [roomKey(code)], [String(state.version), JSON.stringify(next), String(ROOM_TTL_SECONDS)]);
     if (res === 1) {
       if (out.effects?.removeAnswerFor) await r.hdel(answersKey(code, next.roundId), out.effects.removeAnswerFor);
-      return { state: next };
+      return { state: next, changed: true };
     }
     if (res === -1) return { state: null, error: "Room not found or expired." };
     // conflict: another writer won — reload and retry

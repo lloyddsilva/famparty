@@ -43,7 +43,7 @@ export default function Page() {
             <Link className="btn primary big lp-cta" href="/host">📱 Host a show — it's free</Link>
             <Link className="btn big lp-cta" href="/join">🎮 Join with a code</Link>
           </div>
-          <p className="lp-micro">Free · No accounts · 3–12 players · Designed to be playing in about a minute</p>
+          <p className="lp-micro">Free · No accounts · 3–12 players · Scan, pick an avatar, play</p>
           <div className="lp-avatars"><span>🦊</span><span>🐼</span><span>🦄</span><span>🐸</span><span>🦁</span><span>🐙</span><span>🦖</span><span>🦩</span></div>
         </div>
 
@@ -197,7 +197,7 @@ export default function Page() {
         <div className="lp-final card center">
           <div className="lp-avatars big"><span>🦊</span><span>🐼</span><span>🦄</span><span>🐸</span><span>🦁</span></div>
           <h2 className="lp-h2">The room is already together.<br />Give it a game.</h2>
-          <p className="sub">Free. No signup. Playing in under a minute.</p>
+          <p className="sub">Free. No signup. Scan, pick an avatar, play.</p>
           <Link className="btn primary big lp-cta-inline" href="/host">📱 Host a show</Link>
           <p className="lp-micro">On a phone instead? <Link href="/join">Join with a code →</Link></p>
         </div>

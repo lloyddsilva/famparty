@@ -7,7 +7,11 @@ export const hashToken = (token) => createHash("sha256").update(String(token || 
 
 const BLOCKED_WORDS = ["fuck", "shit", "cunt", "nigger", "faggot", "bitch", "whore", "rape", "penis", "vagina", "porn", "hitler"];
 export const cleanName = (v) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, 16);
-const containsBlocked = (v) => BLOCKED_WORDS.some((b) => String(v ?? "").toLowerCase().includes(b));
+// Word boundaries only: "grapes", "drapes", "trapeze" and "scraped" are innocent.
+const containsBlocked = (v) => {
+  const text = String(v ?? "").toLowerCase();
+  return BLOCKED_WORDS.some((b) => new RegExp(`\\b${b}\\b`).test(text));
+};
 /** Names are shown on a family TV: reject blocked words outright. The host hide/kick tools are the backstop. */
 export const isCleanName = (v) => !!cleanName(v) && !containsBlocked(v);
 /** Free text (statements, answers, stories) gets the same screen (item 6). Filters miss things — host hide exists for the rest. */

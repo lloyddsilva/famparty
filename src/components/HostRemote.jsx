@@ -17,7 +17,12 @@ export default function HostRemote() {
 
   const { view, act, gone } = useRoom(room?.code, { role: "host", token: room?.hostToken || "" });
   // Host actions carry the phase on screen so stale taps are rejected server-side (item 4).
-  const hostAct = (a) => act({ ...a, expectedPhase: view?.phase, expectedStep: view?.finishit?.candidates.length ?? 0 });
+  const hostAct = async (a) => {
+    const data = await act({ ...a, expectedPhase: view?.phase, expectedStep: view?.finishit?.candidates.length ?? 0 });
+    if (data && data.ok === false) setError(data.error || "That action did not go through — your screen may be out of date.");
+    else setError("");
+    return data;
+  };
 
   useEffect(() => {
     if (gone && room) {
@@ -63,6 +68,7 @@ export default function HostRemote() {
         <h2>Room {room.code}</h2>
         <p className="sub">On the TV, open:<br /><strong className="join-url">{tvUrl.replace(/^https?:\/\//, "")}</strong></p>
         {!view && <p className="sub">Connecting…</p>}
+        {error && view && <p className="error">{error}</p>}
         {view && (
           <>
             <p className="sub">Phase: <strong>{view.phase}</strong> · {view.players.length} player(s){view.locked ? " · 🔒 locked" : ""}</p>

@@ -24,7 +24,7 @@ async function initImpl() {
     let rawQuery;
     if (process.env.DATABASE_URL) {
       const { Pool } = await import("pg");
-      const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, max: 3 });
+      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 }); // sslmode=require comes from the Neon URL; no rejectUnauthorized override
       rawQuery = async (sql, params = []) => (await pool.query(sql, params)).rows;
     } else {
       const { PGlite } = await import("@electric-sql/pglite");
@@ -46,12 +46,31 @@ async function initImpl() {
       id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
       member_id TEXT NOT NULL, text TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'truth',
       created_at BIGINT NOT NULL)`);
+    // Idempotency: a statement/result can be scheduled by more than one caller
+    // (host action + expiry poll); the dedupe key makes repeats no-ops.
+    try { await query(`ALTER TABLE saved_statements ADD COLUMN dedupe_key TEXT`); } catch {}
+    try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS saved_statements_dedupe ON saved_statements(dedupe_key)`); } catch {}
+    try { await query(`ALTER TABLE game_results ADD COLUMN dedupe_key TEXT`); } catch {}
+    try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS game_results_dedupe ON game_results(dedupe_key)`); } catch {}
     await query(`CREATE TABLE IF NOT EXISTS game_results (
       id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
       member_id TEXT NOT NULL, game TEXT NOT NULL, points INTEGER NOT NULL, played_at BIGINT NOT NULL)`);
     return { query };
   })();
   return implPromise;
+}
+
+/** Read-only readiness probe. Reports configuration, never content or credentials. */
+export async function dbHealth() {
+  const configured = !!process.env.DATABASE_URL;
+  if (process.env.VERCEL && !configured) return { ok: false, configured: false, backend: "none" };
+  try {
+    const { query } = await getImpl();
+    await query(`SELECT 1 AS one`);
+    return { ok: true, configured, backend: configured ? "postgres" : "pglite-local" };
+  } catch (e) {
+    return { ok: false, configured, backend: configured ? "postgres" : "pglite-local", code: e?.code || "DB_UNAVAILABLE" };
+  }
 }
 
 export const hashSecret = (v) => createHash("sha256").update(String(v || "")).digest("hex");
@@ -96,12 +115,13 @@ export async function getMember(familyId, memberId) {
   return rows[0] || null;
 }
 
-export async function saveStatements(familyId, memberId, texts, kind = "truth") {
+export async function saveStatements(familyId, memberId, texts, kind = "truth", dedupeScope = "") {
   if (!familyId || !memberId || !texts?.length) return;
   const { query } = await getImpl();
   for (const text of texts) {
-    await query(`INSERT INTO saved_statements (id, family_id, member_id, text, kind, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [id("st"), familyId, memberId, text, kind, Date.now()]);
+    const dedupe = `${familyId}:${memberId}:${kind}:${dedupeScope}:${text}`;
+    await query(`INSERT INTO saved_statements (id, family_id, member_id, text, kind, created_at, dedupe_key) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (dedupe_key) DO NOTHING`,
+      [id("st"), familyId, memberId, text, kind, Date.now(), dedupe]);
   }
 }
 
@@ -122,8 +142,9 @@ export async function saveGameResults(familyId, results) {
   const { query } = await getImpl();
   for (const r of results) {
     if (!r.memberId || !r.points) continue;
-    await query(`INSERT INTO game_results (id, family_id, member_id, game, points, played_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-      [id("gr"), familyId, r.memberId, r.game, r.points, Date.now()]);
+    const dedupe = `${familyId}:${r.memberId}:${r.game}:${r.dedupeScope || ""}:${r.points}`;
+    await query(`INSERT INTO game_results (id, family_id, member_id, game, points, played_at, dedupe_key) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (dedupe_key) DO NOTHING`,
+      [id("gr"), familyId, r.memberId, r.game, r.points, Date.now(), dedupe]);
   }
 }
 

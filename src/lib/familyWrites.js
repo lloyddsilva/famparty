@@ -6,6 +6,11 @@
 import { after } from "next/server";
 import { saveStatements, saveGameResults } from "./db.js";
 
+function logFailure(scope, e) {
+  // Server-side only; never log statement text, names, or tokens.
+  console.error(`[familyWrites] ${scope} failed`, { code: e?.code || e?.cause?.code || e?.name || "unknown" });
+}
+
 export function scheduleFamilyWrites(before, afterState) {
   if (!afterState?.familyId || !before) return;
   const familyId = afterState.familyId;
@@ -16,7 +21,7 @@ export function scheduleFamilyWrites(before, afterState) {
     const f = afterState.players.find((p) => p.id === afterState.featuredOrder[afterState.featuredIdx]);
     if (f?.memberId && f.statements) {
       const truths = f.statements.texts.filter((_, i) => i !== f.statements.lieIndex && !f.statements.dontSave?.[i]);
-      if (truths.length) after(async () => { try { await saveStatements(familyId, f.memberId, truths, "truth"); } catch {} });
+      if (truths.length) after(async () => { try { await saveStatements(familyId, f.memberId, truths, "truth", afterState.code); } catch (e) { logFailure("spotlight truths", e); } });
     }
   }
 
@@ -25,12 +30,12 @@ export function scheduleFamilyWrites(before, afterState) {
     const featuredId = before.featuredOrder[before.featuredIdx];
     const f = afterState.players.find((p) => p.id === featuredId);
     if (f?.memberId && f.storyLine) {
-      after(async () => { try { await saveStatements(familyId, f.memberId, [f.storyLine], "story"); } catch {} });
+      after(async () => { try { await saveStatements(familyId, f.memberId, [f.storyLine], "story", afterState.code); } catch (e) { logFailure("story line", e); } });
     }
   }
 
   if (afterState.phase === "finale" && before.phase !== "finale") {
-    const results = afterState.players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, game: afterState.game, points: p.score }));
-    if (results.length) after(async () => { try { await saveGameResults(familyId, results); } catch {} });
+    const results = afterState.players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, game: afterState.game, points: p.score, dedupeScope: afterState.code }));
+    if (results.length) after(async () => { try { await saveGameResults(familyId, results); } catch (e) { logFailure("game results", e); } });
   }
 }
