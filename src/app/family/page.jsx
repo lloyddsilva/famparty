@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { SiteHeader, SiteFooter } from "../../components/SiteChrome";
 
 export default function Page() {
   const [name, setName] = useState("");
@@ -16,26 +18,41 @@ export default function Page() {
   }
 
   return (
-    <main className="shell">
-      <div className="card">
-        <p className="eyebrow">PERMANENT FAMILY LINK</p>
-        <h2>Save your family&apos;s games</h2>
-        <p className="sub">Create a family space with a roster. True statements and scores from Spotlight save here, and come back in Remember This? Nobody signs in — the links below are the only keys, so share them carefully.</p>
-        {!links ? (
-          <form onSubmit={create}>
-            <label>Family name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. The River Family" required /></label>
-            {error && <p className="error">{error}</p>}
-            <button className="btn primary big">Create family link</button>
-          </form>
-        ) : (
-          <>
-            <p className="sub">Save these now — the owner link is shown only once here:</p>
-            <label>Member link (play + view)<input readOnly value={`${window.location.origin}/f/${links.memberToken}`} onFocus={(e) => e.target.select()} /></label>
-            <label>Owner link (export + delete)<input readOnly value={`${window.location.origin}/f/${links.ownerToken}`} onFocus={(e) => e.target.select()} /></label>
-            <a className="btn primary big" href={`/f/${links.memberToken}`}>Open your family →</a>
-          </>
-        )}
-      </div>
-    </main>
+    <>
+      <SiteHeader />
+      <main className="shell">
+        <div style={{ marginTop: 26 }}>
+          <span className="sticker">Family album</span>
+          <h1 style={{ fontSize: "2.6rem", marginTop: 14 }}>Your family, remembered — for a while.</h1>
+          <p className="sub" style={{ fontSize: "1.08rem" }}>A family album is one private link with your roster on it. True stories people choose to save in Spotlight land here, scores add up across shows, and Remember This? deals the stories back as a game. No accounts — the link is the only key.</p>
+          <div className="how-list">
+            <div className="how-item"><span style={{ fontSize: 24 }}>👨‍👩‍👧</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>One roster.</b> Everyone joins as themselves, so scores and stories attach to the person.</p></div>
+            <div className="how-item"><span style={{ fontSize: 24 }}>🗓️</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>Kept for 60 days after your last show</b>, then deleted. Every show, member or saved story restarts the clock.</p></div>
+            <div className="how-item"><span style={{ fontSize: 24 }}>🔑</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>Two links:</b> a member link to play and view, an owner link to export or delete. Share them only with family.</p></div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Start your family album</h2>
+          {!links ? (
+            <form onSubmit={create}>
+              <label>Family name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. The River Family" required /></label>
+              {error && <p className="error">{error}</p>}
+              <button className="btn primary big">Create family album</button>
+              <p className="sub" style={{ fontSize: ".9rem" }}>We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key.</p>
+            </form>
+          ) : (
+            <>
+              <p className="sub"><strong>Save these now — the owner link is shown only once here.</strong> We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key.</p>
+              <label>Member link (play + view)<input readOnly value={`${window.location.origin}/f/${links.memberToken}`} onFocus={(e) => e.target.select()} /></label>
+              <label>Owner link (export + delete)<input readOnly value={`${window.location.origin}/f/${links.ownerToken}`} onFocus={(e) => e.target.select()} /></label>
+              <a className="btn primary big" href={`/f/${links.memberToken}`}>Open your album →</a>
+            </>
+          )}
+        </div>
+        <p className="center" style={{ marginTop: 18 }}><Link href="/blog/your-family-album-explained">How the family album works →</Link></p>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

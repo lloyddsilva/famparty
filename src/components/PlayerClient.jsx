@@ -12,6 +12,7 @@ export default function PlayerClient() {
   const [creds, setCreds] = useState(null);
   const [memberJoin, setMemberJoin] = useState(null); // {memberId, familyToken}
   const [familyLinkedRoom, setFamilyLinkedRoom] = useState(false);
+  const [takenAvatars, setTakenAvatars] = useState([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -42,6 +43,9 @@ export default function PlayerClient() {
   useEffect(() => {
     if (code.length !== 4) return;
     fetch(`/api/rooms/${code}/peek`).then((r) => r.json()).then((d) => setFamilyLinkedRoom(!!d.familyLinked)).catch(() => {});
+    fetch(`/api/rooms/${code}/state?role=display`).then((r) => r.json()).then((d) => {
+      if (d.view) setTakenAvatars(d.view.players.map((p) => p.avatar));
+    }).catch(() => {});
   }, [code]);
 
   const { view, act, serverNow, gone } = useRoom(creds?.code, { role: "player", token: creds?.playerToken || "" });
@@ -89,10 +93,10 @@ export default function PlayerClient() {
               <h2>Pick your avatar</h2>
               <label>Room code<input className="code-input" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 4))} placeholder="ABCD" required /></label>
               <label>Your name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 16))} placeholder="e.g. Alex" required /></label>
-              <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>)}</div>
+              <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} disabled={takenAvatars.includes(a)} title={takenAvatars.includes(a) ? "Taken in this room" : undefined} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>)}</div>
             </>
           )}
-          {familyLinkedRoom && <p className="error">💾 This room is linked to a family. Spotlight true statements and scores may save to the family roster — you can opt out per statement with "don't save this".</p>}
+          {familyLinkedRoom && <p className="error">💾 This room belongs to a family album. Saved statements are kept for 60 days. Spotlight true statements and scores may save — you can say "don't save this" on any statement.</p>}
           {error && <p className="error">{error}</p>}
           <button className="btn primary big" disabled={busy}>{busy ? "Joining…" : "Join game"}</button>
         </form>

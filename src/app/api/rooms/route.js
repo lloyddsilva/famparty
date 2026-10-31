@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createRoom } from "../../../lib/engine.js";
 import { createRoom as storeRoom } from "../../../lib/roomStore.js";
 import { makeRoomCode, newToken, hashToken, parseJsonBody } from "../../../lib/validate.js";
-import { familyByToken } from "../../../lib/db.js";
+import { familyByToken, touchFamily } from "../../../lib/db.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
 export const dynamic = "force-dynamic";
@@ -19,8 +19,9 @@ export async function POST(req) {
     let familyId = null;
     if (body?.familyToken) {
       const found = await familyByToken(body.familyToken);
-      if (!found) return NextResponse.json({ ok: false, error: "Family link not recognised." }, { status: 404, headers: noStore });
+      if (!found) return NextResponse.json({ ok: false, error: "Family album not recognised." }, { status: 404, headers: noStore });
       familyId = found.family.id;
+      await touchFamily(familyId).catch(() => {});
     }
     for (let attempt = 0; attempt < 8; attempt++) {
       const hostToken = newToken();

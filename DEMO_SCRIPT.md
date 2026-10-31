@@ -29,12 +29,12 @@
 - Cut to: statements already written (prep off-camera). Spotlight opens on Ana; the three statements are on TV, the lie shuffled in.
 - Other players vote on their phones. Reveal: who was fooled, who spotted it; Ana scores for every person she fooled.
 - **Story beat:** the TV hands her the microphone for 30 seconds. She *talks* — "You should be talking, not typing."
-- Afterward: the optional one-line save appears ("Save a line for the family album?"). Show it saving to the family link.
+- Afterward: the optional one-line save appears ("Save a line for the family album?"). Show it saving to the family album.
 
 ### 1:25–1:55 — Remember This? (from a previous show)
 *Same room, back to the lobby. Host picks Remember This?*
 
-> "This statement isn't from tonight. It's from a **previous show** — the family link saved it, and now it's tonight's game."
+> "This statement isn't from tonight. It's from a **previous show** — the family album saved it, and now it's tonight's game."
 
 - A true statement seeded in step 0 (from the earlier session, not the round just played) is on TV.
 - Players guess who wrote it. The writer can't score on their own — then the reveal.

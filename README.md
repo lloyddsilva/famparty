@@ -21,7 +21,7 @@ FamParty removes all of that:
 3. Players scan, pick a name and an emoji avatar, and they're in. Under 30 seconds.
 4. Short rounds play out on the TV — big reveals, silly answers, real conversations.
 5. The host drives everything from their phone: start, pause, skip, reveal, next.
-6. At the end there's a winner's podium — and, if the group uses a family link, the best moments are saved for next time.
+6. At the end there's a winner's podium — and, if the group uses a family album, the best moments are saved for next time.
 
 There are no accounts, no passwords, no app installs, no payments, and nothing to print. If you can open a link, you can play.
 
@@ -61,7 +61,7 @@ Design and product decisions should be tested against these, in this order:
 5. **Safe to put on a family TV.** All shipped content is family-safe and original. Free-text moments (names, statements, answers) are paired with host moderation — hide or kick, at any moment — because filters alone will miss things.
 6. **Nobody is put on the spot.** Every game has a low-pressure way in: watch-only roles, private writing time, anonymous answers, passing without penalty. Shy players and young kids must be able to participate sideways.
 7. **Memory is the moat.** A one-off game is a commodity. A family whose true stories, scores, and inside jokes accumulate — and resurface in later games — has a reason to come back to *their* FamParty.
-8. **No accounts is a feature, not a missing feature.** Identity is a name + avatar for tonight, or a roster member under a family link. We say plainly how the (admittedly thin) security model works rather than pretending it's something it isn't.
+8. **No accounts is a feature, not a missing feature.** Identity is a name + avatar for tonight, or a roster member under a family album. We say plainly how the (admittedly thin) security model works rather than pretending it's something it isn't.
 
 ## 5. The core experience
 
@@ -106,19 +106,19 @@ Everyone privately completes the same sentence ("The secret to surviving a famil
 - **Design moments:** the one-at-a-time anonymous reveal (comic timing matters — the host controls the pace) and the author unmasking.
 - **Care points:** 80-character answers, exact-duplicate answers pool their votes, answers are moderated by host hide before anyone knows whose they are.
 
-### 🧠 Remember This? — *the memory game (family link only)*
+### 🧠 Remember This? — *the memory game (family album only)*
 True statements saved from earlier Spotlight sessions resurface: "I once met a penguin." Whose was it? Everyone guesses; the writer can't score on their own.
 - **Feels like:** proof the family has a history. It rewards returning and turns last month's game into tonight's content.
 - **Design moment:** the "from a previous show" framing — this should feel like opening a family album, not a quiz rerun.
 
-## 7. The family link (retention layer)
+## 7. The family album (retention layer)
 
-Any group can play anonymously tonight. A **family link** is for groups who come back:
+Any group can play anonymously tonight. A **family album** is for groups who come back:
 
-- An unguessable permanent link for one family — like an unlisted video. **The link is the key**: whoever has it can get in. We say this plainly in the UI, in friendly language, because it's the truth of the model.
+- An unguessable private link for one family — like an unlisted video. **The link is the key**: whoever has it can get in. We say this plainly in the UI, in friendly language, because it's the truth of the model. The album is kept for **60 days after your last show**, then deleted; the UI shows the expiry date.
 - The link holds a **roster**: the family's actual people (Mum 🦊, Grandpa 🦄…). Joining through the link means picking *your* roster member, so scores, authorship, and history attach to the person — not to whatever name they typed tonight.
 - Two links per family: a **member link** (play + view) and an **owner link** (everything, plus export and delete). Deleting a family requires typing a confirmation, and it's permanent.
-- **What gets saved** (and only this): true statements from Spotlight (each with a per-statement "don't save this" opt-out), saved one-line stories, and game scores per member. Players are told at join when a room is family-linked. Room play itself is never recorded.
+- **What gets saved** (and only this): true statements from Spotlight (each with a per-statement "don't save this" opt-out), saved one-line stories, and game scores per member. Players are told at join when a room is album-linked. Room play itself is never recorded.
 - **Why it matters:** it's the difference between "a fun website we used once" and "our family's game." Remember This? only exists because the link does.
 
 Family pages are quiet, private-feeling pages — no marketing, no trackers or third-party scripts, `noindex` headers, `Referrer-Policy: no-referrer`. Design them like a private album, not like the show.
@@ -176,7 +176,7 @@ There are exactly four surfaces. A redesign should treat them as one system with
 - The privacy model is explained in one honest sentence, without scare tactics: the link is the only protection.
 
 ### Cross-surface states the design must cover
-Lobby filling up · waiting on host · mid-round (answered / not yet) · paused · reveal · leaderboard movement · podium · a player marked "away" · room full · room expired · kicked · your content hidden by the host (should be silent — no player-facing signal) · family-linked room (saving notice at join) · "just watch" mode.
+Lobby filling up · waiting on host · mid-round (answered / not yet) · paused · reveal · leaderboard movement · podium · a player marked "away" · room full · room expired · kicked · your content hidden by the host (should be silent — no player-facing signal) · album-linked room (saving notice at join) · "just watch" mode.
 
 ### Accessibility & inclusion
 - Don't rely on colour alone: pair it with labels/icons (answer letters A–D already do this).
@@ -198,7 +198,7 @@ Signals we care about, in order:
 1. **Time from host landing to first round** (target: under a minute, including joins).
 2. **Join completion rate** after scanning the QR code.
 3. **Games per session** (did they immediately play another?).
-4. **Family link creation and return visits** (did a saved statement bring them back?).
+4. **Family album creation and return visits** (did a saved statement bring them back?).
 5. Host rescue actions (pause/skip/hide) used without the session dying — moderation working is a *good* signal.
 
 Not optimised for: time-on-site, accounts created, anything involving ads or payments (non-goals for now).
@@ -228,7 +228,7 @@ FamParty is a Meta hackathon entry. Accurate status:
 
 ## 15. Current state & honest gaps
 
-- All five games, the family link, roster, and Remember This? are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
+- All five games, the family album, roster, and Remember This? are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
 - **Production status:** family features and Remember This? now work on the live URL (Neon Postgres connected under the lloyddsilva account; verified by the Playwright family flow against production). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
 - The Spectrum awards (*Lonely Island*, *Mind Reader*, *Dead Center*) and the host-paced Finish It reveal are implemented in the engine and TV view; the earlier README described them before they existed.
 - The current visual design is a functional placeholder (dark purple/orange cards, emoji identity) built to prove the engine. **A full visual redesign is wanted — that's the brief this README supports.** Keep routes, phases, and control inventories; everything visual is on the table.

@@ -64,14 +64,18 @@ export default function HostRemote() {
   return (
     <main className="shell">
       <div className="card">
-        <p className="eyebrow">HOST REMOTE</p>
-        <h2>Room {room.code}</h2>
+        <span className="sticker">Host remote</span>
+        <h2 style={{ fontSize: "1.9rem", marginTop: 12 }}>Room {room.code} {view ? <span className="player-chip" style={{ fontSize: ".85rem", verticalAlign: "middle" }}>{view.players.length} in{view.locked ? " · 🔒" : ""}</span> : null}</h2>
         <p className="sub">On the TV, open:<br /><strong className="join-url">{tvUrl.replace(/^https?:\/\//, "")}</strong></p>
         {!view && <p className="sub">Connecting…</p>}
         {error && view && <p className="error">{error}</p>}
         {view && (
           <>
-            <p className="sub">Phase: <strong>{view.phase}</strong> · {view.players.length} player(s){view.locked ? " · 🔒 locked" : ""}</p>
+            <div style={{ background: "var(--dark)", color: "#fff", borderRadius: 24, padding: "18px 20px", marginBottom: 16 }}>
+              <p style={{ margin: 0, color: "var(--yellow)", textTransform: "uppercase", letterSpacing: ".08em", fontSize: ".72rem", fontWeight: 700 }}>{view.game} · {view.phase}</p>
+              <p style={{ margin: "6px 0 0", fontFamily: "Gelasio, Georgia, serif", fontWeight: 700, fontSize: "1.6rem" }}>{view.players.length} player(s) in the room</p>
+              <p style={{ margin: "4px 0 0", color: "#c9c2f2" }}>On the TV, open: <strong style={{ color: "#fff" }}>{tvUrl.replace(/^https?:\/\//, "")}</strong></p>
+            </div>
             <div className="player-grid">
               {view.players.map((p) => (
                 <div key={p.id} className="player-chip">{p.avatar} {p.name}

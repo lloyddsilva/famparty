@@ -52,8 +52,11 @@ export default function FamilyPage({ token }) {
   return (
     <main className="shell">
       <div className="card">
-        <p className="eyebrow">FAMILY LINK · {isOwner ? "OWNER" : "MEMBER"} ACCESS</p>
-        <h2>{data.family.name}</h2>
+        <span className="sticker">Family album · {isOwner ? "owner" : "member"}</span>
+        <h2 style={{ fontSize: "2.4rem", marginTop: 14 }}>{data.family.name}</h2>
+        {data.expiresAt && (
+          <p className="sub">This album is kept for 60 days after your last show. Last activity: {new Date(data.lastActiveAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })} · Expires {new Date(data.expiresAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}.</p>
+        )}
         <p className="error">⚠️ This link is the only protection. Anyone who has it can get in{isOwner ? ", export, and delete this family" : ""}. Share it only with your family.</p>
 
         <h3>Roster</h3>
@@ -82,7 +85,7 @@ export default function FamilyPage({ token }) {
             </a>
           ))}
         </div>
-        <p className="sub">Games played in a family room save true statements and scores to this roster — every player is told at join, and each statement has a "don't save this" option.</p>
+        <p className="sub">Games played in a family room save true statements and scores to this roster — every player is told at join, each statement has a "don't save this" option, and everything is kept for 60 days after your last show.</p>
 
         <h3 style={{ marginTop: 28 }}>Saved statements ({data.statements.length})</h3>
         {data.statements.slice(0, 20).map((s) => (
@@ -94,10 +97,10 @@ export default function FamilyPage({ token }) {
           <>
             <h3 style={{ marginTop: 28 }}>Owner</h3>
             <a className="btn big" href={`/api/families/${token}/export`}>⬇ Export family data (JSON)</a>
-            <label>Type DELETE to delete this family permanently
+            <label>Type DELETE to delete this album
               <input value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="DELETE" />
             </label>
-            <button className="btn big" disabled={confirmText !== "DELETE"} onClick={deleteFamily}>Delete family forever</button>
+            <button className="btn big" disabled={confirmText !== "DELETE"} onClick={deleteFamily}>Delete this album</button>
           </>
         )}
         {error && <p className="error">{error}</p>}

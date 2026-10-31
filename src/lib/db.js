@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 
 let implPromise = null;
 function dbUnavailable(cause) {
-  const e = new Error("Family saving is temporarily unavailable. Games still work — try the family link again later.");
+  const e = new Error("Family saving is temporarily unavailable. Games still work — try the family album again later.");
   e.code = "DB_UNAVAILABLE";
   e.cause = cause;
   return e;
@@ -38,7 +38,9 @@ async function initImpl() {
     await query(`CREATE TABLE IF NOT EXISTS families (
       id TEXT PRIMARY KEY, name TEXT NOT NULL,
       member_token_hash TEXT UNIQUE NOT NULL, owner_token_hash TEXT UNIQUE NOT NULL,
-      created_at BIGINT NOT NULL)`);
+      created_at BIGINT NOT NULL, last_active_at BIGINT NOT NULL DEFAULT 0)`);
+    try { await query(`ALTER TABLE families ADD COLUMN last_active_at BIGINT NOT NULL DEFAULT 0`); } catch {}
+    await query(`UPDATE families SET last_active_at = created_at WHERE last_active_at = 0`);
     await query(`CREATE TABLE IF NOT EXISTS members (
       id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
       name TEXT NOT NULL, avatar TEXT NOT NULL, created_at BIGINT NOT NULL)`);
@@ -76,12 +78,31 @@ export async function dbHealth() {
 export const hashSecret = (v) => createHash("sha256").update(String(v || "")).digest("hex");
 const id = (p) => `${p}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
 
+export const RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
+
 export async function createFamily(name, memberToken, ownerToken) {
   const { query } = await getImpl();
-  const fam = { id: id("fam"), name, created_at: Date.now() };
-  await query(`INSERT INTO families (id, name, member_token_hash, owner_token_hash, created_at) VALUES ($1,$2,$3,$4,$5)`,
-    [fam.id, fam.name, hashSecret(memberToken), hashSecret(ownerToken), fam.created_at]);
+  const now = Date.now();
+  const fam = { id: id("fam"), name, created_at: now };
+  await query(`INSERT INTO families (id, name, member_token_hash, owner_token_hash, created_at, last_active_at) VALUES ($1,$2,$3,$4,$5,$6)`,
+    [fam.id, fam.name, hashSecret(memberToken), hashSecret(ownerToken), now, now]);
   return fam;
+}
+
+/** Any real activity (show started, member added, statement saved) keeps the album alive. */
+export async function touchFamily(familyId) {
+  if (!familyId) return;
+  const { query } = await getImpl();
+  await query(`UPDATE families SET last_active_at = $2 WHERE id = $1`, [familyId, Date.now()]);
+}
+
+/** Purge albums idle longer than the retention window. Returns how many were deleted. */
+export async function purgeExpiredFamilies(now = Date.now()) {
+  const { query } = await getImpl();
+  const cutoff = now - RETENTION_MS;
+  const rows = await query(`SELECT id FROM families WHERE last_active_at < $1 AND last_active_at > 0`, [cutoff]);
+  for (const r of rows) await deleteFamily(r.id);
+  return rows.length;
 }
 
 /** Returns { family, access: 'member'|'owner' } or null. */
@@ -106,6 +127,7 @@ export async function addMember(familyId, name, avatar) {
   const m = { id: id("mem"), name, avatar };
   await query(`INSERT INTO members (id, family_id, name, avatar, created_at) VALUES ($1,$2,$3,$4,$5)`,
     [m.id, familyId, name, avatar, Date.now()]);
+  await touchFamily(familyId);
   return m;
 }
 
@@ -117,6 +139,7 @@ export async function getMember(familyId, memberId) {
 
 export async function saveStatements(familyId, memberId, texts, kind = "truth", dedupeScope = "") {
   if (!familyId || !memberId || !texts?.length) return;
+  await touchFamily(familyId);
   const { query } = await getImpl();
   for (const text of texts) {
     const dedupe = `${familyId}:${memberId}:${kind}:${dedupeScope}:${text}`;

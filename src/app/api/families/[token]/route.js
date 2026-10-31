@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { familyByToken, listMembers, listStatements, addMember, exportFamily, deleteFamily } from "../../../../lib/db.js";
+import { familyByToken, listMembers, listStatements, addMember, exportFamily, deleteFamily, RETENTION_MS } from "../../../../lib/db.js";
 import { cleanName, isCleanName, isAvatar, parseJsonBody } from "../../../../lib/validate.js";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ const bad = (error, status = 400) => NextResponse.json({ ok: false, error }, { s
 
 async function auth(token) {
   const found = await familyByToken(token);
-  if (!found) throw Object.assign(new Error("Family link not recognised."), { status: 404 });
+  if (!found) throw Object.assign(new Error("Family album not recognised."), { status: 404 });
   return found;
 }
 
@@ -17,7 +17,8 @@ export async function GET(req, { params }) {
   try {
     const { family, access } = await auth(token);
     const [members, statements] = await Promise.all([listMembers(family.id), listStatements(family.id, 100)]);
-    return NextResponse.json({ ok: true, access, family: { id: family.id, name: family.name }, members, statements }, { headers: noStore });
+    const lastActiveAt = Number(family.last_active_at || family.created_at);
+    return NextResponse.json({ ok: true, access, family: { id: family.id, name: family.name }, lastActiveAt, expiresAt: lastActiveAt + RETENTION_MS, members, statements }, { headers: noStore });
   } catch (e) { return bad(e.message, e.status || 500); }
 }
 

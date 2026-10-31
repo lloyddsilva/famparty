@@ -23,13 +23,14 @@ export default function TvDisplay({ code }) {
   if (!view) return <main className="shell wide"><div className="card center">Connecting to room {code}…</div></main>;
 
   return (
-    <main className="shell wide">
+    <main className="tv-shell">
+     <div className="tv-frame-big"><div className="tv-panel white">
       {view.phase === "lobby" && (
         <div className="card center">
-          <p className="eyebrow">SCAN TO JOIN · OR ENTER THE CODE ON YOUR PHONE</p>
+          <p className="eyebrow">SCAN, OR GO TO FAMPARTY.COM/JOIN</p>
           {qr && <img className="qr" src={qr} alt="QR code to join this room" />}
           <div className="room-code">{view.code}</div>
-          <p className="sub">{view.players.length} / 12 players in — the host starts the show from their phone.</p>
+          <h2 style={{ fontSize: "2.6rem" }}>{view.players.length} of 12 are in.</h2><p className="sub">The host starts the show from their phone.</p>
           <div className="player-grid tv-grid">
             {view.players.map((p) => <div key={p.id} className="player-chip"><span>{p.avatar}</span>{p.name}</div>)}
             {view.players.length === 0 && <p className="sub">Waiting for players…</p>}
@@ -100,9 +101,11 @@ export default function TvDisplay({ code }) {
           <div className="spectrum-track">
             <span className="spectrum-end">{view.spectrum.left}</span>
             <div className="spectrum-line">
-              {view.phase === "spectrumReveal" && view.spectrum.placements.map((pl) => {
+              {view.phase === "spectrumReveal" && view.spectrum.placements.map((pl, i, arr) => {
                 const p = view.players.find((x) => x.id === pl.id);
-                return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%` }} title={p?.name}>{p?.avatar}</span>;
+                // Stagger rows when avatars would collide (within 6%).
+                const near = arr.slice(0, i).filter((o) => Math.abs(o.pos - pl.pos) < 6).length;
+                return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%`, top: near % 2 ? -78 : -38 }} title={p?.name}>{p?.avatar}</span>;
               })}
               {view.phase === "spectrumReveal" && <span className="spectrum-median" style={{ left: `${view.spectrum.median}%` }} />}
             </div>
@@ -163,6 +166,7 @@ export default function TvDisplay({ code }) {
           <Leaderboard players={view.players} />
         </div>
       )}
+     </div></div>
     </main>
   );
 }
