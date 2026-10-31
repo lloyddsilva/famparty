@@ -17,7 +17,15 @@
 // any edits, places approved art in public/pack-art/, and only then flips
 // reviewed:true. Lloyd's review is the shipping gate.
 
-const apiKey = process.env.MODEL_API_KEY || process.env.META_API_KEY;
+// The key comes from the environment, or from .env.content.local (git-ignored,
+// Lloyd's machine only). It is never committed and never logged.
+let fileKey;
+try {
+  const { readFileSync } = await import("node:fs");
+  const text = readFileSync(".env.content.local", "utf8");
+  fileKey = text.match(/^MODEL_API_KEY=(.+)$/m)?.[1]?.trim().replace(/^"|"$/g, "");
+} catch {}
+const apiKey = process.env.MODEL_API_KEY || process.env.META_API_KEY || fileKey;
 const base = (process.env.META_API_BASE_URL || "https://api.meta.ai/v1").replace(/\/$/, "");
 const textModel = process.env.META_TEXT_MODEL || "muse-spark-1.3";
 const imageModel = process.env.META_IMAGE_MODEL || "muse-image-1.0";
