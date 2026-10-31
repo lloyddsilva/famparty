@@ -11,7 +11,7 @@ import naughtyWords from "naughty-words";
 
 const ADDITIONS = [
   "fucking", "fucker", "motherfucker", "shitty", "shithead", "bullshit",
-  "bitches", "whores", "rapist", "nazi", "retard", "slut", "pornstar", "fucked", "shits",
+  "bitches", "whores", "rapist", "nazi", "retard", "slut", "pornstar", "fucked", "shits", "wanker", "arse",
 ];
 const ALLOWANCES = new Set(["dick"]);
 
@@ -20,3 +20,6 @@ export const BLOCKED_TERMS = [...new Set(
     .map((w) => String(w).toLowerCase().trim())
     .filter((w) => w && !ALLOWANCES.has(w)),
 )];
+
+// Exact innocent phrases that are allowed before any matching happens.
+export const ALLOWED_PHRASES = ["cock a doodle doo", "pussy cat", "blue tit", "blue tits"];

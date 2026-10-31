@@ -82,7 +82,7 @@ export async function POST(req, { params }) {
       if (body.type === "SUBMIT_STATEMENTS") {
         const texts = Array.isArray(body.texts) ? body.texts.map((t) => cleanText(t, 120)) : [];
         if (texts.length !== 3 || texts.some((t) => !t)) return bad("Write all three statements (max 120 characters each).");
-        if (!texts.every(isCleanText)) return bad("One of those needs rewording for the family TV.");
+        if (!texts.every(isCleanText)) return bad("Our filter tripped on that one. Mind wording it differently?");
         if (![0, 1, 2].includes(body.lieIndex)) return bad("Mark which statement is the lie.");
         action.statements = { texts, lieIndex: body.lieIndex, dontSave: Array.isArray(body.dontSave) ? body.dontSave.slice(0, 3).map(Boolean) : [false, false, false] };
       }
@@ -91,11 +91,11 @@ export async function POST(req, { params }) {
       if (body.type === "FINISH_SUBMIT") {
         action.text = cleanText(body.text, 80);
         if (!action.text) return bad("Write something first.");
-        if (!isCleanText(action.text)) return bad("That one needs rewording for the family TV.");
+        if (!isCleanText(action.text)) return bad("Our filter tripped on that one. Mind wording it differently?");
       }
       if (body.type === "STORY_SAVE") {
         action.text = cleanText(body.text, 140);
-        if (action.text && !isCleanText(action.text)) return bad("That story line needs rewording for the family TV.");
+        if (action.text && !isCleanText(action.text)) return bad("Our filter tripped on that one. Mind wording it differently?");
       }
     } else {
       return bad("Unknown action.");

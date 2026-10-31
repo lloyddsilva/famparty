@@ -14,6 +14,19 @@ test("LDNOOBW list is wired in, including phrases", () => {
   assert.equal(isCleanText("a perfectly ordinary sentence"), true);
 });
 
+test("final pass: innocent phrases, additions, and light normalisation", () => {
+  for (const s of ["cock-a-doodle-doo", "pussy cat", "blue tit", "blue tits"]) {
+    assert.equal(isCleanText(s), true, s);
+  }
+  for (const s of ["wanker", "arse", "fuuuck", "sh!t", "f*ck", "f-uck"]) {
+    assert.equal(isCleanText(s), false, s);
+  }
+  // the four innocents survive normalisation too
+  for (const s of ["I love grapes", "We hung new drapes", "My trapeze class", "I scraped my knee"]) {
+    assert.equal(isCleanText(s), true, s);
+  }
+});
+
 test("the word dick is intentionally allowed (it is also a name)", () => {
   assert.equal(isCleanName("Dick"), true);
 });

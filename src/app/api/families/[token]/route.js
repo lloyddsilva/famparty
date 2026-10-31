@@ -28,7 +28,7 @@ export async function POST(req, { params }) {
     const { family } = await auth(token);
     if (body?.action === "addMember") {
       const name = cleanName(body.name);
-      if (!isCleanName(name) || !isAvatar(body.avatar)) return bad("A clean name and an avatar are required.");
+      if (!isCleanName(name) || !isAvatar(body.avatar)) return bad("Name and avatar required — and our filter tripped on that name. Mind wording it differently?");
       const members = await listMembers(family.id);
       if (members.length >= 24) return bad("Roster is full (24).");
       if (members.some((m) => m.avatar === body.avatar)) return bad("That avatar is already taken on this roster. Pick another.");

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createFamily } from "../../../lib/db.js";
-import { newToken, parseJsonBody } from "../../../lib/validate.js";
+import { newToken, parseJsonBody, isCleanText } from "../../../lib/validate.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,9 @@ export async function POST(req) {
   } catch { /* rate limiting unavailable — creation still proceeds */ }
   const body = await parseJsonBody(req);
   const name = String(body?.name || "Our Family").replace(/\s+/g, " ").trim().slice(0, 40) || "Our Family";
+  if (!isCleanText(name)) {
+    return NextResponse.json({ ok: false, error: "Our filter tripped on that name. Mind wording it differently?" }, { status: 400, headers: noStore });
+  }
   try {
     const memberToken = newToken();
     const ownerToken = newToken();
