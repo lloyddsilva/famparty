@@ -23,7 +23,7 @@ export default function Page() {
         <p className="sub">Create a family space with a roster. True statements and scores from Spotlight save here, and come back in Remember This? Nobody signs in — the links below are the only keys, so share them carefully.</p>
         {!links ? (
           <form onSubmit={create}>
-            <label>Family name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. The D'Silva Family" required /></label>
+            <label>Family name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. The River Family" required /></label>
             {error && <p className="error">{error}</p>}
             <button className="btn primary big">Create family link</button>
           </form>

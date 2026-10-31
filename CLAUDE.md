@@ -83,8 +83,9 @@ vercel ls famparty                         # confirm deployment Ready — a push
 ## Outstanding / open questions for Lloyd
 - Real-device milestone (1 TV + 3 phones, HDMI + cast tab, lock/wake, cellular,
   redeploy mid-game) still needs physical devices.
-- Neon must be provisioned under lloyddsilva (Vercel Marketplace) and
-  `DATABASE_URL` set for production family data; locally PGLite is used.
+- Neon is provisioned (`famparty-db`, `DATABASE_URL` live; `/api/health/db`
+  reports postgres). Locally, dev uses the same Neon database via pulled env;
+  PGLite remains the no-DATABASE_URL fallback.
 - `famparty.com` domain/trademark — parked, must not block anything.
 - Content packs are unreviewed starter placeholders (see Hard rules); Lloyd's
   human review after the Muse Spark/Image run is the shipping gate.
