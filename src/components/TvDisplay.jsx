@@ -63,6 +63,75 @@ export default function TvDisplay({ code }) {
         </div>
       )}
 
+      {view.phase === "prep" && (
+        <div className="card center">
+          <p className="eyebrow">SPOTLIGHT · WRITING TIME</p>
+          <h2>✍️ Two truths and a lie — check your phone</h2>
+          <div className="player-grid tv-grid">
+            {view.players.map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.ready ? "✅ ready" : p.watching ? "👀 just watching" : "✍️ writing…"}</div>)}
+          </div>
+        </div>
+      )}
+
+      {["spotlight", "spotlightReveal", "story", "storySave"].includes(view.phase) && view.spotlight && (
+        <div className="card center">
+          <p className="eyebrow">SPOTLIGHT · {view.spotlight.turn} OF {view.spotlight.totalTurns}{view.phase === "spotlight" ? ` · ⏱ ${seconds ?? 30}s · ${view.votedCount} voted` : ""}</p>
+          <div className="me-avatar" style={{ fontSize: "4rem", display: "inline-block" }}>{view.spotlight.avatar}</div>
+          <h2>{view.spotlight.name}</h2>
+          {view.phase !== "story" && view.phase !== "storySave" && (
+            <div className="choices">
+              {view.spotlight.statements.map((s, i) => (
+                <div key={i} className={`choice ${view.phase !== "spotlight" && i === view.spotlight.liePosition ? "correct" : ""}`}>
+                  <b>{CHOICE_LABELS[i]}</b>{s}{view.phase !== "spotlight" && i === view.spotlight.liePosition ? " ← THE LIE" : ""}
+                </div>
+              ))}
+            </div>
+          )}
+          {view.phase === "spotlight" && <p className="sub">Which one is the lie? Vote on your phones!</p>}
+          {view.phase === "story" && <><div className="big-emoji">🎤</div><h2>Tell us the story, {view.spotlight.name}!</h2><p className="timer" style={{ fontSize: "2rem" }}>⏱ {seconds ?? 30}s</p></>}
+          {view.phase === "storySave" && <><h2>One for the family album?</h2><p className="sub">{view.spotlight.name} can save a one-line version from their phone — or just keep talking.</p>{view.spotlight.storyLine && <p className="choice correct">“{view.spotlight.storyLine}”</p>}</>}
+          {view.phase === "spotlightReveal" && <div className="player-grid tv-grid">{view.players.map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.id === view.spotlight.featuredId ? `+${p.lastPoints} for fooling` : p.lastCorrect ? `+${p.lastPoints}` : "fooled!"}</div>)}</div>}
+        </div>
+      )}
+
+      {["spectrum", "spectrumReveal"].includes(view.phase) && view.spectrum && (
+        <div className="card center">
+          <p className="eyebrow">SPECTRUM · ROUND {view.qIndex + 1}{view.phase === "spectrum" ? ` · ⏱ ${seconds ?? 20}s` : ""}</p>
+          <div className="spectrum-track">
+            <span className="spectrum-end">{view.spectrum.left}</span>
+            <div className="spectrum-line">
+              {view.phase === "spectrumReveal" && view.spectrum.placements.map((pl) => {
+                const p = view.players.find((x) => x.id === pl.id);
+                return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%` }} title={p?.name}>{p?.avatar}</span>;
+              })}
+              {view.phase === "spectrumReveal" && <span className="spectrum-median" style={{ left: `${view.spectrum.median}%` }} />}
+            </div>
+            <span className="spectrum-end">{view.spectrum.right}</span>
+          </div>
+          {view.phase === "spectrum" ? <p className="sub">Place yourself on your phone — and predict where the crowd lands.</p> : <p className="sub">The crowd leans <strong>{view.spectrum.majority}</strong>. Who read the room best?</p>}
+        </div>
+      )}
+
+      {["finishWrite", "finishVote", "finishReveal"].includes(view.phase) && view.finishit && (
+        <div className="card center">
+          <p className="eyebrow">FINISH IT · ROUND {view.qIndex + 1}</p>
+          <h2>{view.finishit.prompt.replace("___", "________")}</h2>
+          {view.phase === "finishWrite" && <p className="sub">{view.players.filter((p) => p.hasAnswer).length}/{view.players.length} answers in — write yours on your phone.</p>}
+          {view.phase === "finishVote" && <div className="choices">{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>}
+          {view.phase === "finishReveal" && <div className="choices">{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
+        </div>
+      )}
+
+      {["remember", "rememberReveal"].includes(view.phase) && view.remember && (
+        <div className="card center">
+          <p className="eyebrow">REMEMBER THIS? · {view.qIndex + 1} OF {view.totalQuestions}</p>
+          <div className="big-emoji">🧠</div>
+          <h2>“{view.remember.text}”</h2>
+          {view.phase === "remember" ? <p className="sub">True story. But whose? Guess on your phones — the writer can't score on their own.</p> : <p className="sub">It was <strong>{view.remember.writerName}</strong>!</p>}
+          {view.phase === "rememberReveal" && <div className="player-grid tv-grid">{view.players.map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.lastCorrect ? `+${p.lastPoints}` : ""}</div>)}</div>}
+        </div>
+      )}
+
       {view.phase === "scores" && (
         <div className="card">
           <h2 className="center">🏆 Leaderboard</h2>

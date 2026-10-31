@@ -62,8 +62,7 @@ export async function casUpdate(code, mutate, ctx = {}) {
     const next = { ...out.state, version: state.version + 1 };
     const res = await r.eval(CAS_LUA, [roomKey(code)], [String(state.version), JSON.stringify(next), String(ROOM_TTL_SECONDS)]);
     if (res === 1) {
-      if (out.effects?.clearAnswers) await r.del(answersKey(code, next.qIndex));
-      if (out.effects?.removeAnswerFor) await r.hdel(answersKey(code, next.qIndex), out.effects.removeAnswerFor);
+      if (out.effects?.removeAnswerFor) await r.hdel(answersKey(code, next.roundId), out.effects.removeAnswerFor);
       return { state: next };
     }
     if (res === -1) return { state: null, error: "Room not found or expired." };
@@ -72,9 +71,11 @@ export async function casUpdate(code, mutate, ctx = {}) {
   return { state: null, error: "Room is busy. Try again." };
 }
 
-export async function recordAnswer(code, round, playerId, choice) {
+export async function recordAnswer(code, round, playerId, choice, at) {
   // One hash field per player: simultaneous answers cannot conflict.
-  const added = await redis().hsetnx(answersKey(code, round), playerId, String(choice));
+  // The value carries the answer time so scoring at reveal can price speed
+  // without booking anything on the answer path (review items 1-2).
+  const added = await redis().hsetnx(answersKey(code, round), playerId, JSON.stringify({ choice, at }));
   if (added) await redis().expire(answersKey(code, round), ROOM_TTL_SECONDS);
   return !!added;
 }
@@ -82,7 +83,12 @@ export async function recordAnswer(code, round, playerId, choice) {
 export async function loadAnswers(code, round) {
   const obj = await redis().hgetall(answersKey(code, round));
   if (!obj) return {};
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, Number(v)]));
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => {
+    // Upstash may return hash values already JSON-deserialized.
+    if (v && typeof v === "object") return [k, { choice: Number(v.choice), at: Number(v.at) || 0 }];
+    try { const p = JSON.parse(v); return [k, typeof p === "object" ? { choice: Number(p.choice), at: Number(p.at) || 0 } : { choice: Number(p), at: 0 }]; }
+    catch { return [k, { choice: Number(v), at: 0 }]; }
+  }));
 }
 
 export async function touchPresence(code, playerId) {

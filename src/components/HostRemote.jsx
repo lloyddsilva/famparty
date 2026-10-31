@@ -15,7 +15,18 @@ export default function HostRemote() {
     if (code && hostToken) setRoom({ code, hostToken });
   }, []);
 
-  const { view, act } = useRoom(room?.code, { role: "host", token: room?.hostToken || "" });
+  const { view, act, gone } = useRoom(room?.code, { role: "host", token: room?.hostToken || "" });
+  // Host actions carry the phase on screen so stale taps are rejected server-side (item 4).
+  const hostAct = (a) => act({ ...a, expectedPhase: view?.phase });
+
+  useEffect(() => {
+    if (gone && room) {
+      localStorage.removeItem("famparty:hostCode");
+      localStorage.removeItem("famparty:hostToken");
+      setError("That room has expired. Create a new one.");
+      setRoom(null);
+    }
+  }, [gone, room]);
 
   async function create() {
     setBusy(true); setError("");
@@ -58,7 +69,8 @@ export default function HostRemote() {
             <div className="player-grid">
               {view.players.map((p) => (
                 <div key={p.id} className="player-chip">{p.avatar} {p.name}
-                  {view.phase === "lobby" && <button className="kick" title="Kick" onClick={() => act({ type: "KICK", playerId: p.id })}>✕</button>}
+                  <button className="kick" title={p.hidden ? "Unhide name/text on TV" : "Hide name/text on TV"} onClick={() => hostAct({ type: "HIDE", targetId: p.id, hidden: !p.hidden })}>{p.hidden ? "👁" : "🙈"}</button>
+                  <button className="kick" title="Kick" onClick={() => hostAct({ type: "KICK", playerId: p.id })}>✕</button>
                 </div>
               ))}
               {view.players.length === 0 && <p className="sub">Waiting for players…</p>}
@@ -66,23 +78,46 @@ export default function HostRemote() {
 
             {view.phase === "lobby" && (
               <>
-                <button className="btn primary big" disabled={!canStart} onClick={() => act({ type: "START" })}>
-                  ▶ Start Emoji Decoder ({view.totalQuestions} rounds)
+                <div className="choices">
+                  {[["emoji", "🧩 Emoji Decoder", "Guess the phrase from emojis"], ["spotlight", "🎤 Spotlight", "Two truths and a lie"], ["spectrum", "🎚️ Spectrum", "Place yourself, predict the crowd"], ["finishit", "✍️ Finish It", "Funniest ending wins"], ["remember", "🧠 Remember This?", "Whose true statement is this?"]].map(([g, label, desc]) => (
+                    <button key={g} className={`choice btn-choice ${view.game === g ? "correct" : ""}`} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}><b>{label}</b><br /><small>{desc}</small></button>
+                  ))}
+                </div>
+                <button className="btn primary big" disabled={!canStart} onClick={() => hostAct({ type: "START" })}>
+                  ▶ Start {view.game === "emoji" ? "Emoji Decoder" : view.game === "spotlight" ? "Spotlight — writing time" : view.game === "spectrum" ? "Spectrum" : view.game === "finishit" ? "Finish It" : "Remember This?"}
                 </button>
                 {!canStart && <p className="sub center">Need at least 3 players ({view.players.length}/3).</p>}
-                <button className="btn big" onClick={() => act({ type: "LOCK", locked: !view.locked })}>{view.locked ? "🔓 Unlock room" : "🔒 Lock room"}</button>
+                {view.game === "remember" && !view.familyLinked && <p className="error">Remember This? needs a family-linked room with saved statements. Create the room from your family page.</p>}
+                <button className="btn big" onClick={() => hostAct({ type: "LOCK", locked: !view.locked })}>{view.locked ? "🔓 Unlock room" : "🔒 Lock room"}</button>
               </>
             )}
+            {view.phase === "prep" && (
+              <>
+                <p className="sub center">{view.players.filter((p) => p.ready).length} ready · {view.players.filter((p) => p.watching).length} just watching · {view.players.filter((p) => !p.ready && !p.watching).length} still writing</p>
+                <button className="btn primary big" onClick={() => hostAct({ type: "BEGIN_SPOTLIGHT" })}>▶ Start anyway — unfinished players just watch</button>
+              </>
+            )}
+            {["spotlight", "story", "spectrum", "finishWrite", "remember"].includes(view.phase) && (
+              <>
+                <p className="sub center">{view.phase === "spotlight" ? `${view.votedCount} vote(s) in` : view.phase === "story" ? "Story beat — featured player is talking" : "Round in progress"}</p>
+                <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
+                <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.phase === "story" ? "End story beat →" : "Skip / reveal now →"}</button>
+              </>
+            )}
+            {["spotlightReveal", "spectrumReveal", "finishReveal", "rememberReveal", "storySave"].includes(view.phase) && (
+              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.phase === "spotlightReveal" ? "Start story beat →" : view.phase === "storySave" ? "Next player →" : "Show scores / next →"}</button>
+            )}
+            {view.phase === "finishVote" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Close voting →</button>}
             {view.phase === "question" && (
               <>
                 <p className="sub center">{view.answeredCount}/{view.players.length} answered{view.paused ? " · ⏸ paused" : ""}</p>
-                <button className="btn big" onClick={() => act({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
-                <button className="btn primary big" onClick={() => act({ type: "NEXT" })}>Reveal answer now →</button>
+                <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
+                <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Reveal answer now →</button>
               </>
             )}
-            {view.phase === "reveal" && <button className="btn primary big" onClick={() => act({ type: "NEXT" })}>Show scores →</button>}
-            {view.phase === "scores" && <button className="btn primary big" onClick={() => act({ type: "NEXT" })}>{view.qIndex + 1 >= view.totalQuestions ? "Final results →" : "Next round →"}</button>}
-            {view.phase === "finale" && <button className="btn primary big" onClick={() => act({ type: "PLAY_AGAIN" })}>↺ Back to lobby</button>}
+            {view.phase === "reveal" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Show scores →</button>}
+            {view.phase === "scores" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.qIndex + 1 >= view.totalQuestions ? "Final results →" : "Next round →"}</button>}
+            {view.phase === "finale" && <button className="btn primary big" onClick={() => hostAct({ type: "PLAY_AGAIN" })}>↺ Back to lobby</button>}
             {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} />}
           </>
         )}

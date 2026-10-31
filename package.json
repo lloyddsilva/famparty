@@ -5,18 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js",
-    "build": "next build",
+    "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js src/lib/games.test.js",
+    "build": "node scripts/check-packs.mjs && next build",
+    "check:packs": "node scripts/check-packs.mjs",
     "start": "next start"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.14",
     "@upstash/redis": "^1.40.0",
     "next": "~16.4.0",
+    "pg": "^8.23.1",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4.3.3",
     "tailwindcss": "^4.3.3"
   }

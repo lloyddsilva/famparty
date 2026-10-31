@@ -11,6 +11,7 @@ export default function Page() {
           <Link className="btn primary big" href="/host">📱 Host a show (on your phone)</Link>
           <Link className="btn big" href="/join">🎮 Join with a code (on your phone)</Link>
           <Link className="btn big" href="/tv">📺 Open the TV display</Link>
+          <Link className="btn big" href="/family">👨‍👩‍👧 Create a permanent family link</Link>
         </div>
         <ol className="steps">
           <li>Host creates a room on their phone</li>

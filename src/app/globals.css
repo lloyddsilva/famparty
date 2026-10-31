@@ -55,6 +55,12 @@ input { width: 100%; margin-top: 6px; padding: 14px; border-radius: 12px; border
 .podium-spot { display: grid; justify-items: center; gap: 2px; background: #17123a; border: 1px solid #5748b8; border-radius: 14px; padding: 16px 18px; }
 .podium-spot.p0 { transform: scale(1.15); border-color: #ffb340; }
 .podium-avatar { font-size: 2.6rem; }
+.spectrum-track { display: grid; grid-template-columns: 110px 1fr 110px; align-items: center; gap: 12px; margin: 40px 0 24px; }
+.spectrum-end { font-weight: 800; color: #ffb340; }
+.spectrum-line { position: relative; height: 8px; background: linear-gradient(90deg, #5748b8, #ff8a00); border-radius: 99px; margin: 30px 0; }
+.spectrum-dot { position: absolute; top: -22px; transform: translateX(-50%); font-size: 1.8rem; }
+.spectrum-median { position: absolute; top: -8px; width: 4px; height: 24px; background: #fff; border-radius: 2px; transform: translateX(-50%); }
+input[type="range"] { accent-color: #ff8a00; padding: 0; }
 .qr { width: 220px; height: 220px; border-radius: 16px; background: #fff; padding: 8px; margin: 12px auto; display: block; }
 .kick { background: none; border: none; color: #ff8fa3; cursor: pointer; font-size: .95rem; margin-left: 8px; padding: 2px 4px; }
 .tv-grid .player-chip { font-size: 1.1rem; padding: 10px 20px; }

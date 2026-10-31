@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRoom, addPlayer, applyAction, advanceIfExpired, buildView, MIN_PLAYERS } from "./engine.js";
+import { createRoom, addPlayer, applyAction, advanceIfExpired, buildView, MIN_PLAYERS, scoreEmojiReveal, assertExpectedPhase } from "./engine.js";
 
 const NOW = 1_000_000;
 function roomWithPlayers(n = 3) {
@@ -32,11 +32,35 @@ test("answer is hidden from the view during question phase", () => {
   assert.equal(view.question.answer, undefined);
 });
 
-test("allAnswered reveals immediately and books score", () => {
+test("regression 1-2: simultaneous answers are all scored at reveal, in any order", () => {
   let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
-  const out = applyAction(s, { type: "ANSWER_RECORDED", playerId: "p0", choice: 0 }, NOW + 1000, { allAnswered: true });
-  assert.equal(out.state.phase, "reveal");
-  assert.equal(out.state.players.find((p) => p.id === "p0").score > 0, true);
+  // p1 and p2 answer "together"; the reveal is triggered by whichever lands —
+  // both must score. Answer entries carry their own timestamps.
+  const answers = {
+    p0: { choice: 0, at: NOW + 1000 }, // correct, fast
+    p1: { choice: 0, at: NOW + 19000 }, // correct, at the wire (expiry race)
+    p2: { choice: 1, at: NOW + 1000 }, // wrong
+  };
+  s = scoreEmojiReveal(s, answers, NOW + 20000);
+  assert.equal(s.phase, "reveal");
+  assert.ok(s.players.find((p) => p.id === "p0").score > s.players.find((p) => p.id === "p1").score);
+  assert.ok(s.players.find((p) => p.id === "p1").score > 0, "last-second correct answer still scores");
+  assert.equal(s.players.find((p) => p.id === "p2").score, 0);
+});
+
+test("regression 4: expected-phase guard rejects stale host taps", () => {
+  const s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  assert.equal(assertExpectedPhase(s, "question"), null);
+  assert.match(assertExpectedPhase(s, "reveal"), /Stale screen/);
+});
+
+test("regression 5: every question gets a fresh roundId", () => {
+  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const first = s.roundId;
+  s = applyAction(s, { type: "NEXT" }, NOW).state; // reveal
+  s = applyAction(s, { type: "NEXT" }, NOW).state; // scores
+  s = applyAction(s, { type: "NEXT" }, NOW + 1).state; // question 2
+  assert.notEqual(s.roundId, first);
 });
 
 test("host NEXT reveals immediately regardless of deadline", () => {
