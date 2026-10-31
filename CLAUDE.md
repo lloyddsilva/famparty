@@ -68,6 +68,18 @@ vercel ls famparty                         # confirm deployment Ready — a push
   any phase. One fix found by the 13-client run: Upstash returns hash values
   pre-deserialized, so `loadAnswers` handles object values (`roomStore.js`).
 
+## Known gaps (accepted for the hackathon)
+- Remember This? only deals statements whose writer is in the current room
+  (otherwise there would be no right answer). Roster-based choices that can
+  include absent writers are a post-hackathon improvement.
+- Polling cost (measured Oct 31, production, 14 clients = TV + host + 12
+  players at 1s): a fast-played 10-round game (40s) used 602 function
+  invocations; a realistic ~6-minute social game extrapolates to ~5,300
+  invocations and ~16K Redis commands (modelled from code paths; Upstash INFO
+  totals are per-replica and non-monotonic, so they can't be diffed). Hobby
+  includes 1M function invocations/month (~190 such games) and Upstash Free
+  500K commands/month (~30 such games) — Redis commands are the binding limit.
+
 ## Outstanding / open questions for Lloyd
 - Real-device milestone (1 TV + 3 phones, HDMI + cast tab, lock/wake, cellular,
   redeploy mid-game) still needs physical devices.
