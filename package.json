@@ -14,6 +14,7 @@
   "dependencies": {
     "@electric-sql/pglite": "^0.5.14",
     "@upstash/redis": "^1.40.0",
+    "naughty-words": "^1.2.0",
     "next": "~16.4.0",
     "pg": "^8.23.1",
     "qrcode": "^1.5.4",

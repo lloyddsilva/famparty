@@ -1,24 +1,18 @@
 import { createHash, randomBytes } from "node:crypto";
 import { AVATARS } from "./questions.js";
+import { BLOCKED_TERMS } from "./blockedWords.js";
 
 export const newToken = () => randomBytes(24).toString("hex");
 export const newId = () => randomBytes(12).toString("hex");
 export const hashToken = (token) => createHash("sha256").update(String(token || "")).digest("hex");
 
-const BLOCKED_WORDS = [
-  "fuck", "fucking", "fucker", "motherfucker", "shit", "shitty", "shithead", "bullshit",
-  "cunt", "nigger", "faggot", "bitch", "bitches", "whore", "whores",
-  "rape", "raped", "rapist", "penis", "vagina", "porn", "pornstar", "hitler", "nazi",
-  "asshole", "cock", "slut", "fucked", "shits", "retard",
-  // Deliberately NOT blocked: "dick" (also a name). Host hide is the backstop;
-  // filters will always miss things, and that is accepted.
-];
 export const cleanName = (v) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, 16);
-// Word boundaries only: "grapes", "drapes", "trapeze" and "scraped" are innocent.
-const containsBlocked = (v) => {
-  const text = String(v ?? "").toLowerCase();
-  return BLOCKED_WORDS.some((b) => new RegExp(`\\b${b}\\b`).test(text));
-};
+// Whole-term matching on normalised text (word boundaries): "grapes",
+// "drapes", "trapeze" and "scraped" are innocent. One precompiled regex over
+// the LDNOOBW list plus our additions (see blockedWords.js).
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const BLOCKED_RE = new RegExp(`(?:^|[^a-z0-9])(${BLOCKED_TERMS.map(escapeRe).join("|")})(?=$|[^a-z0-9])`, "i");
+const containsBlocked = (v) => BLOCKED_RE.test(String(v ?? "").toLowerCase());
 /** Names are shown on a family TV: reject blocked words outright. The host hide/kick tools are the backstop. */
 export const isCleanName = (v) => !!cleanName(v) && !containsBlocked(v);
 /** Free text (statements, answers, stories) gets the same screen (item 6). Filters miss things — host hide exists for the rest. */

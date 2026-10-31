@@ -9,6 +9,11 @@ test("names and free text reject blocked words", () => {
   assert.equal(isCleanName(""), false);
 });
 
+test("LDNOOBW list is wired in, including phrases", () => {
+  assert.equal(isCleanText("alabama hot pocket"), false);
+  assert.equal(isCleanText("a perfectly ordinary sentence"), true);
+});
+
 test("the word dick is intentionally allowed (it is also a name)", () => {
   assert.equal(isCleanName("Dick"), true);
 });
