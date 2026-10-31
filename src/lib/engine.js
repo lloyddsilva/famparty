@@ -59,7 +59,7 @@ export function applyAction(state, action, now, ctx = {}) {
       return { state: startQuestion({ ...reset, qIndex: 0 }, now), effects: { clearAnswers: true } };
     }
     case "NEXT": {
-      if (state.phase === "question") return { state: { ...advanceIfExpired({ ...state, deadline: 0 }, now + 1), updatedAt: now } };
+      if (state.phase === "question") return { state: { ...state, phase: "reveal", deadline: null, updatedAt: now } };
       if (state.phase === "reveal") return { state: { ...state, phase: "scores", updatedAt: now } };
       if (state.phase === "scores") {
         if (state.qIndex + 1 >= QUESTIONS.length) return { state: { ...state, phase: "finale", deadline: null, updatedAt: now } };

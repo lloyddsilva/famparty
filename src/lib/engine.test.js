@@ -39,6 +39,13 @@ test("allAnswered reveals immediately and books score", () => {
   assert.equal(out.state.players.find((p) => p.id === "p0").score > 0, true);
 });
 
+test("host NEXT reveals immediately regardless of deadline", () => {
+  const s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const out = applyAction(s, { type: "NEXT" }, NOW + 1000);
+  assert.equal(out.state.phase, "reveal");
+  assert.equal(out.state.deadline, null);
+});
+
 test("pause/resume preserves remaining time", () => {
   let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
   s = applyAction(s, { type: "PAUSE" }, NOW + 5000).state;
