@@ -222,7 +222,7 @@ Not optimised for: time-on-site, accounts created, anything involving ads or pay
 
 FamParty is a Meta hackathon entry. Accurate status:
 
-- **Building the app:** the code in this repo was written with Meta's Muse models in the coding environment (Muse Code / OpenCode session), which is also how the content-pack scripts and tests were produced.
+- **Building the app:** Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0. That covers the whole repo — app code, engine, tests, and the content pipeline.
 - **Planned, not yet done:** the offline content run — Muse Spark for pack text and Muse Image for pack title-card art, via the committed scripts in `scripts/generate-content.mjs` (API key from the environment only). **This run has not happened yet.** When it does, the models used, the prompts, and the raw outputs will be recorded here and committed alongside the packs, and each pack will flip to `reviewed: true` only after Lloyd's human review.
 - **Runtime:** the running app makes **no live model calls** and holds no model API keys. Everything it serves is committed files and player input.
 

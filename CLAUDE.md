@@ -83,9 +83,14 @@ vercel ls famparty                         # confirm deployment Ready — a push
 ## Outstanding / open questions for Lloyd
 - Real-device milestone (1 TV + 3 phones, HDMI + cast tab, lock/wake, cellular,
   redeploy mid-game) still needs physical devices.
-- Neon is provisioned (`famparty-db`, `DATABASE_URL` live; `/api/health/db`
-  reports postgres). Locally, dev uses the same Neon database via pulled env;
-  PGLite remains the no-DATABASE_URL fallback.
+- Neon is provisioned (`famparty-db`, `/api/health/db` reports postgres).
+  **Databases are separated:** production uses the Neon `main` branch (Vercel
+  env); local dev and tests point at the Neon `development` branch
+  (`.env.local` DATABASE_URL, rotated Oct 31). Never seed or test against
+  production again. PGLite remains the no-DATABASE_URL fallback.
+  Production still holds 3 invented test families from before the split
+  ("Expiry Test Family" x1, "The Test Family" x2) — deletion proposed to
+  Lloyd, awaiting his approval; do not delete without it.
 - `famparty.com` domain/trademark — parked, must not block anything.
 - Content packs are unreviewed starter placeholders (see Hard rules); Lloyd's
   human review after the Muse Spark/Image run is the shipping gate.
