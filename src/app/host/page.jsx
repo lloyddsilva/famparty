@@ -1,2 +1,2 @@
-import GameApp from "../../components/GameApp";
-export default function Page() { return <GameApp initialMode="host" />; }
+import HostRemote from "../../components/HostRemote";
+export default function Page() { return <HostRemote />; }

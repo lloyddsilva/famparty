@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Family Game Show — Emoji Pictionary",
-  description: "One big screen, everyone plays on their phone. No signup.",
+  title: "FamParty — Emoji Decoder",
+  description: "One big screen, everyone plays on their phone. No signup, just a room code.",
 };
 
 export default function RootLayout({ children }) {

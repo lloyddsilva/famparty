@@ -1,2 +1,2 @@
-import GameApp from "../../components/GameApp";
-export default function Page() { return <GameApp initialMode="join" />; }
+import PlayerClient from "../../components/PlayerClient";
+export default function Page() { return <PlayerClient />; }
