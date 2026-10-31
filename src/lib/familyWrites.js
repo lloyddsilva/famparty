@@ -35,7 +35,7 @@ export function scheduleFamilyWrites(before, afterState) {
   }
 
   if (afterState.phase === "finale" && before.phase !== "finale") {
-    const results = afterState.players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, game: afterState.game, points: p.score, dedupeScope: afterState.code }));
+    const results = afterState.players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, game: afterState.game, points: p.score, dedupeScope: `${afterState.code}:${afterState.gameId || "nogame"}` }));
     if (results.length) after(async () => { try { await saveGameResults(familyId, results); } catch (e) { logFailure("game results", e); } });
   }
 }

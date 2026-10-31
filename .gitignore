@@ -3,6 +3,5 @@ node_modules/
 .env*.local
 .pglite/
 .vercel
-scripts/out/
 test-results/
 .vercel

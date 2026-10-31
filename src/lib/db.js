@@ -46,15 +46,15 @@ async function initImpl() {
       id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
       member_id TEXT NOT NULL, text TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'truth',
       created_at BIGINT NOT NULL)`);
-    // Idempotency: a statement/result can be scheduled by more than one caller
-    // (host action + expiry poll); the dedupe key makes repeats no-ops.
+    await query(`CREATE TABLE IF NOT EXISTS game_results (
+      id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+      member_id TEXT NOT NULL, game TEXT NOT NULL, points INTEGER NOT NULL, played_at BIGINT NOT NULL)`);
+    // Idempotency migrations run AFTER every CREATE TABLE (a fresh database
+    // has no game_results to ALTER yet).
     try { await query(`ALTER TABLE saved_statements ADD COLUMN dedupe_key TEXT`); } catch {}
     try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS saved_statements_dedupe ON saved_statements(dedupe_key)`); } catch {}
     try { await query(`ALTER TABLE game_results ADD COLUMN dedupe_key TEXT`); } catch {}
     try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS game_results_dedupe ON game_results(dedupe_key)`); } catch {}
-    await query(`CREATE TABLE IF NOT EXISTS game_results (
-      id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-      member_id TEXT NOT NULL, game TEXT NOT NULL, points INTEGER NOT NULL, played_at BIGINT NOT NULL)`);
     return { query };
   })();
   return implPromise;

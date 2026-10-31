@@ -120,3 +120,24 @@ test("moderation is exempt from the phase guard", async () => {
   const stale = applyHostAction(s, { type: "NEXT" }, NOW, {}, { phase: "lobby" });
   assert.match(stale.error, /Stale screen/);
 });
+
+test("kick in finishPresent: removing an already-shown author steps the presentation back", () => {
+  let s = act(base("finishit"), { type: "START" });
+  for (const id of ["p0", "p1", "p2", "p3"]) s = act(s, { type: "FINISH_SUBMIT", playerId: id, text: `answer ${id}` });
+  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); // two answers shown
+  assert.equal(s.finishRevealStep, 2);
+  const shownId = s.finishOrder[0];
+  s = act(s, { type: "KICK", playerId: shownId });
+  assert.equal(s.finishRevealStep, 1); // the next unseen answer still needs its own tap
+  const view = buildView(s, { viewer: { role: "display" } });
+  assert.equal(view.finishit.candidates.length, 1);
+});
+
+test("START stamps a distinct game instance id (result dedupe scope)", () => {
+  let s = act(base("emoji"), { type: "START" }, NOW);
+  const first = s.gameId;
+  assert.ok(first);
+  s = act(s, { type: "PLAY_AGAIN" }, NOW + 1);
+  s = act(s, { type: "START" }, NOW + 2);
+  assert.ok(s.gameId && s.gameId !== first);
+});

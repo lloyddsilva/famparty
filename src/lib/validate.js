@@ -5,7 +5,11 @@ export const newToken = () => randomBytes(24).toString("hex");
 export const newId = () => randomBytes(12).toString("hex");
 export const hashToken = (token) => createHash("sha256").update(String(token || "")).digest("hex");
 
-const BLOCKED_WORDS = ["fuck", "shit", "cunt", "nigger", "faggot", "bitch", "whore", "rape", "penis", "vagina", "porn", "hitler"];
+const BLOCKED_WORDS = [
+  "fuck", "fucking", "fucker", "motherfucker", "shit", "shitty", "shithead", "bullshit",
+  "cunt", "nigger", "faggot", "bitch", "bitches", "whore", "whores",
+  "rape", "raped", "penis", "vagina", "porn", "pornstar", "hitler",
+];
 export const cleanName = (v) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, 16);
 // Word boundaries only: "grapes", "drapes", "trapeze" and "scraped" are innocent.
 const containsBlocked = (v) => {

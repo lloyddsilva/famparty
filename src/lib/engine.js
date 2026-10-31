@@ -43,7 +43,7 @@ export function createRoom({ code, hostTokenHash, now, familyId = null }) {
     players: [], qIndex: 0, deadline: null, paused: false, pausedRemainingMs: null,
     locked: false, createdAt: now, updatedAt: now,
     featuredOrder: [], featuredIdx: 0, spotlightOrder: [0, 1, 2], votes: {},
-    finishOrder: [], rememberItems: [], roundId: "lobby-0",
+    finishOrder: [], rememberItems: [], roundId: "lobby-0", gameId: null,
   };
 }
 
@@ -234,6 +234,7 @@ export function applyAction(state, action, now, ctx = {}) {
     case "START": {
       if (!["lobby", "finale"].includes(state.phase)) return fail("Game already started.");
       if (state.players.length < MIN_PLAYERS) return fail(`Need at least ${MIN_PLAYERS} players.`);
+      state = { ...state, gameId: `g-${now}-${state.version}` };
       const base = state.phase === "finale"
         ? { ...state, qIndex: 0, players: state.players.map((p) => ({ ...p, score: 0, streak: 0, statements: null, watching: false, storyLine: null, finishAnswer: null })) }
         : { ...state, qIndex: 0 };
@@ -374,7 +375,13 @@ export function applyAction(state, action, now, ctx = {}) {
       for (const [voter, choice] of Object.entries(votes)) if (choice === action.playerId) delete votes[voter];
       next = { ...next, votes };
       if (next.finishOrder?.includes(action.playerId)) {
+        const removedIdx = next.finishOrder.indexOf(action.playerId);
         next = { ...next, finishOrder: next.finishOrder.filter((id) => id !== action.playerId) };
+        // If the removed answer was already on screen, step back so the next
+        // unseen answer still needs its own host tap (item 4).
+        if (next.phase === "finishPresent" && removedIdx < (next.finishRevealStep ?? 0)) {
+          next = { ...next, finishRevealStep: next.finishRevealStep - 1 };
+        }
       }
       if (next.featuredOrder?.includes(action.playerId)) {
         const removedIdx = next.featuredOrder.indexOf(action.playerId);

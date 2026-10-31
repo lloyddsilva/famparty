@@ -16,3 +16,9 @@ test("word boundaries: innocent words containing blocked substrings pass", () =>
   // …and the actual words still fail, including with punctuation.
   assert.equal(isCleanText("Well, shit."), false);
 });
+
+test("variants and compounds are blocked as whole words", () => {
+  for (const s of ["fucking", "shitty", "bitches", "motherfucker", "shithead", "pornstar", "That was fucking brilliant"]) {
+    assert.equal(isCleanText(s), false, s);
+  }
+});
