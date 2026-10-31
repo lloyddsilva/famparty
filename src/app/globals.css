@@ -130,11 +130,17 @@ input[type="range"] { accent-color: #ff8a00; padding: 0; }
 .lp-faq-item { margin-top: 0; padding: 18px 22px; }
 .lp-faq-item summary { cursor: pointer; font-weight: 800; font-size: 1.05rem; }
 .lp-faq-item p { margin-bottom: 0; }
+.lp-disabled { opacity: .55; cursor: not-allowed; text-decoration: none; }
 .lp-final { padding: 42px 28px; background: linear-gradient(160deg, #3a2360, #211a4a); }
 .lp-footer { display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center; justify-content: space-between; border-top: 1px solid #3b2f7a; margin-top: 48px; padding: 20px 4px 8px; color: #9d94d8; }
 .lp-footer nav { display: flex; gap: 18px; }
 .lp-footer a { color: #c9c2f2; text-decoration: none; font-weight: 600; }
 .lp-footer-note { width: 100%; font-size: .85rem; }
+@media (max-width: 1024px) {
+  /* Collapse before the phone mock can cover the TV choices (review item K). */
+  .lp-hero { grid-template-columns: 1fr; }
+  .lp-phone { position: relative; right: auto; bottom: auto; margin: 18px auto 0; }
+}
 @media (max-width: 860px) {
   .lp-hero, .lp-family, .lp-host { grid-template-columns: 1fr; }
   .lp-hero h1 { font-size: 2.4rem; }

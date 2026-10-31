@@ -14,9 +14,9 @@ const FAQS = [
   ["How many people can play?", "3 to 12 players per room. Games are built for a crowd: voting, fooling, and crowd-reading don't work with two. One room runs one show at a time, and you can play as many games in a row as the night allows."],
   ["Does it cost anything?", "No. There are no payments, no subscriptions, and no accounts. Create a room and play — that's the whole deal."],
   ["What is the family link?", "An optional permanent link for your family. It keeps a roster of your people, saves true stories from Spotlight (each person can opt out per statement), remembers scores, and unlocks Remember This? for your next get-together. The link itself is the key — anyone who has it can get in, so share it only with family."],
-  ["Is it suitable for kids and grandparents?", "Yes — that's who it's designed for. Content is family-safe, answers are big tap targets, the host can pause any timer, and nobody has to perform: every game has a low-pressure way to join in, including just watching and voting."],
-  ["What if someone writes something rude?", "The host sees everything first and can hide any player's name or words from the TV at any moment, or remove them from the room. Names also pass a word filter before they ever reach the screen."],
-  ["Does it work on a video call?", "Yes. Share the TV screen on Zoom, Meet, or Teams, and everyone else plays on their own phone wherever they are."],
+  ["Is it suitable for kids and grandparents?", "Yes — that's who it's designed for. Content is written to be family-friendly (our starter packs are still going through final human review), answers are big tap targets, the host can pause any timer, and nobody has to perform: every game has a low-pressure way to join in, including just watching and voting."],
+  ["What if someone writes something rude?", "Nobody pre-reads answers — the game would stall. Instead, the host can hide any player's name or words from the TV at any moment, or remove them from the room entirely. Names and written answers also pass a word filter, but filters can miss things; the host's hide button is the real safety net, and it works instantly."],
+  ["Does it work on a video call?", "That's the design — share the TV screen on Zoom, Meet, or Teams and everyone plays on their own phone. It runs in a browser tab with nothing to install; we're still completing our real-device and casting test pass, so try your setup with the free games first."],
 ];
 
 export default function Page() {
@@ -38,12 +38,12 @@ export default function Page() {
         <div className="lp-hero-copy">
           <p className="eyebrow">ONE HOST · ONE SCREEN · EVERYONE PLAYS</p>
           <h1>The party game show that lives on your TV.</h1>
-          <p className="lp-lede">Open FamParty on the TV, everyone joins on their phone with a QR code, and the room turns into a game show — emoji puzzles, two truths and a lie, outrageous opinions and all. No signup, no app, nothing to print.</p>
+          <p className="lp-lede">Start a room on your phone, put the show on the TV, and everyone joins with a QR code — the room turns into a game show of emoji puzzles, two truths and a lie, outrageous opinions and all. No signup, no app, nothing to print.</p>
           <div className="lp-cta-row">
             <Link className="btn primary big lp-cta" href="/host">📱 Host a show — it's free</Link>
             <Link className="btn big lp-cta" href="/join">🎮 Join with a code</Link>
           </div>
-          <p className="lp-micro">Free · No accounts · 3–12 players · Playing in under a minute</p>
+          <p className="lp-micro">Free · No accounts · 3–12 players · Designed to be playing in about a minute</p>
           <div className="lp-avatars"><span>🦊</span><span>🐼</span><span>🦄</span><span>🐸</span><span>🦁</span><span>🐙</span><span>🦖</span><span>🦩</span></div>
         </div>
 
@@ -76,7 +76,7 @@ export default function Page() {
 
       {/* HOW IT WORKS */}
       <section className="lp-section" id="how">
-        <p className="eyebrow center">READY IN UNDER A MINUTE</p>
+        <p className="eyebrow center">DESIGNED FOR A FAST START</p>
         <h2 className="lp-h2">Three steps. Zero instructions to read aloud.</h2>
         <div className="lp-steps">
           <div className="lp-step card">
@@ -145,13 +145,14 @@ export default function Page() {
               <li>🔑 Two links: one for playing, one for the owner to export or delete</li>
               <li>🤝 No accounts — the link is the key, and we say so plainly</li>
             </ul>
-            <Link className="btn primary big lp-cta-inline" href="/family">Create your family link</Link>
+            <span className="btn big lp-cta-inline lp-disabled" aria-disabled="true">Create your family link — coming soon</span>
+            <p className="lp-micro">The family link is built and being connected to its database. Until then, rooms play anonymously — which is most of the fun anyway.</p>
           </div>
           <div className="lp-album" aria-hidden="true">
             <p className="eyebrow">FROM YOUR LAST SHOW</p>
             <div className="lp-memory"><span>🦊</span><p>“I once met a penguin.”<br /><small>— Mum · true story · saved</small></p></div>
             <div className="lp-memory"><span>🦄</span><p>“I can juggle three balls.”<br /><small>— Zara · true story · saved</small></p></div>
-            <div className="lp-memory"><span>🐸</span><p>“I have never seen snow.”<br /><small>— Grandpa · the lie nobody spotted</small></p></div>
+            <div className="lp-memory"><span>🐸</span><p>“Locked myself out in my pyjamas. Twice.”<br /><small>— Grandpa · story line he chose to save</small></p></div>
             <p className="lp-album-foot">🧠 Remember This? deals these back next time.</p>
           </div>
         </div>
@@ -207,7 +208,7 @@ export default function Page() {
         <nav>
           <Link href="/host">Host</Link><Link href="/join">Join</Link><Link href="/tv">TV display</Link><Link href="/family">Family link</Link>
         </nav>
-        <span className="lp-footer-note">No accounts · No payments · Family-safe content · Your family's data stays under your family link</span>
+        <span className="lp-footer-note">No accounts · No payments · Family-friendly content · Your family's data stays under your family link</span>
       </footer>
     </div>
   );

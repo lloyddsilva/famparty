@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { createFamily } from "../../../lib/db.js";
 import { newToken, parseJsonBody } from "../../../lib/validate.js";
+import { rateLimit } from "../../../lib/roomStore.js";
 
 export const dynamic = "force-dynamic";
 const noStore = { "Cache-Control": "no-store" };
 
 export async function POST(req) {
+  try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    if (!(await rateLimit(`familycreate:${ip}`, 10, 3600))) {
+      return NextResponse.json({ ok: false, error: "Too many families created from here. Try again later." }, { status: 429, headers: noStore });
+    }
+  } catch { /* rate limiting unavailable — creation still proceeds */ }
   const body = await parseJsonBody(req);
   const name = String(body?.name || "Our Family").replace(/\s+/g, " ").trim().slice(0, 40) || "Our Family";
   try {

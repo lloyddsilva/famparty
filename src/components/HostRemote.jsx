@@ -17,7 +17,7 @@ export default function HostRemote() {
 
   const { view, act, gone } = useRoom(room?.code, { role: "host", token: room?.hostToken || "" });
   // Host actions carry the phase on screen so stale taps are rejected server-side (item 4).
-  const hostAct = (a) => act({ ...a, expectedPhase: view?.phase });
+  const hostAct = (a) => act({ ...a, expectedPhase: view?.phase, expectedStep: view?.finishit?.candidates.length ?? 0 });
 
   useEffect(() => {
     if (gone && room) {
@@ -108,9 +108,15 @@ export default function HostRemote() {
               <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>
                 {view.phase === "spotlightReveal" ? "Start story beat →"
                   : view.phase === "storySave" ? "Next player →"
-                  : view.phase === "finishReveal" && !view.finishit?.authorsRevealed ? `Reveal next answer (${(view.finishit?.candidates.length ?? 0) + 1}/${view.finishit?.totalCandidates ?? 0}) →`
                   : view.phase === "finishReveal" ? "Show scores →"
                   : "Show scores / next →"}
+              </button>
+            )}
+            {view.phase === "finishPresent" && (
+              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>
+                {(view.finishit?.candidates.length ?? 0) < (view.finishit?.totalCandidates ?? 0)
+                  ? `Reveal answer ${(view.finishit?.candidates.length ?? 0) + 1}/${view.finishit?.totalCandidates ?? 0} →`
+                  : "Open voting →"}
               </button>
             )}
             {view.phase === "finishVote" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Close voting →</button>}

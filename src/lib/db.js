@@ -4,20 +4,37 @@
 import { createHash } from "node:crypto";
 
 let implPromise = null;
+function dbUnavailable(cause) {
+  const e = new Error("Family saving is temporarily unavailable. Games still work — try the family link again later.");
+  e.code = "DB_UNAVAILABLE";
+  e.cause = cause;
+  return e;
+}
 
 async function getImpl() {
   if (implPromise) return implPromise;
   implPromise = (async () => {
-    let query;
+    try { return await initImpl(); } catch (e) { implPromise = null; throw e?.code === "DB_UNAVAILABLE" ? e : dbUnavailable(e); }
+  })();
+  return implPromise;
+}
+
+async function initImpl() {
+  return (async () => {
+    let rawQuery;
     if (process.env.DATABASE_URL) {
       const { Pool } = await import("pg");
       const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false }, max: 3 });
-      query = async (sql, params = []) => (await pool.query(sql, params)).rows;
+      rawQuery = async (sql, params = []) => (await pool.query(sql, params)).rows;
     } else {
       const { PGlite } = await import("@electric-sql/pglite");
       const db = new PGlite(process.env.PGLITE_DIR || ".pglite");
-      query = async (sql, params = []) => (await db.query(sql, params)).rows;
+      rawQuery = async (sql, params = []) => (await db.query(sql, params)).rows;
     }
+    const query = async (sql, params = []) => {
+      try { return await rawQuery(sql, params); }
+      catch (e) { throw dbUnavailable(e); }
+    };
     await query(`CREATE TABLE IF NOT EXISTS families (
       id TEXT PRIMARY KEY, name TEXT NOT NULL,
       member_token_hash TEXT UNIQUE NOT NULL, owner_token_hash TEXT UNIQUE NOT NULL,

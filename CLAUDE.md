@@ -3,7 +3,7 @@
 Private repo (do not change visibility without Lloyd's explicit approval; a full
 history scan for secrets/real family data gates going public). GitHub and Vercel
 accounts are both **lloyddsilva**; commits as `lloyddsilva@gmail.com` (repo-local
-config). Production: https://famparty-lloyd-dsilvas-projects.vercel.app
+config). Production: https://famparty.vercel.app
 (Vercel **Hobby** plan, project `lloyd-dsilvas-projects/famparty`).
 
 ## Hard rules
@@ -55,7 +55,7 @@ npm test                                   # pure engine/scoring (node:test)
 npm run build                              # includes the pack gate
 npx playwright test                        # 13-client game + family/Spotlight/Remember (needs dev server + Redis env)
 npm run dev                                # then http://localhost:3000
-curl https://famparty-lloyd-dsilvas-projects.vercel.app/api/health   # build marker = commit sha
+curl https://famparty.vercel.app/api/health   # build marker = commit sha
 vercel ls famparty                         # confirm deployment Ready — a push may not deploy (GitHub app not connected; deploys are via CLI)
 ```
 

@@ -67,6 +67,14 @@ test("finishit: no self-vote, exact-normalized duplicates split points", () => {
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p1", text: "pizza" });
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p2", text: "Salad" });
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p3", text: "Soup" });
+  assert.equal(s.phase, "finishPresent");
+  // host deals the answers out on TV one by one, then opens voting
+  let pv = buildView(s, { viewer: { role: "display" } });
+  assert.equal(pv.finishit.candidates.length, 0);
+  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" });
+  pv = buildView(s, { viewer: { role: "display" } });
+  assert.equal(pv.finishit.candidates.length, 4);
+  s = act(s, { type: "NEXT" });
   assert.equal(s.phase, "finishVote");
   assert.equal(applyAction(s, { type: "VOTE", playerId: "p0", choice: "p0" }, NOW).error, "Invalid vote.");
   s = act(s, { type: "VOTE", playerId: "p2", choice: "p0" });
@@ -78,20 +86,10 @@ test("finishit: no self-vote, exact-normalized duplicates split points", () => {
   assert.equal(s.players.find((p) => p.id === "p0").score, 100);
   assert.equal(s.players.find((p) => p.id === "p1").score, 100);
   assert.equal(s.players.find((p) => p.id === "p2").score, 200);
-  // Host-paced reveal: answers appear one by one, authors only at the end.
-  let view = buildView(s, { viewer: { role: "display" } });
-  assert.equal(view.finishit.candidates.length, 0);
-  assert.equal(view.finishit.authorsRevealed, false);
-  s = act(s, { type: "NEXT" });
-  view = buildView(s, { viewer: { role: "display" } });
-  assert.equal(view.finishit.candidates.length, 1);
-  assert.equal(view.finishit.candidates[0].authorId, undefined);
-  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" });
-  view = buildView(s, { viewer: { role: "display" } });
-  assert.equal(view.finishit.candidates.length, 4);
-  s = act(s, { type: "NEXT" });
-  view = buildView(s, { viewer: { role: "display" } });
+  // After voting closes the reveal is authored immediately — no dead taps.
+  const view = buildView(s, { viewer: { role: "display" } });
   assert.equal(view.finishit.authorsRevealed, true);
+  assert.equal(view.finishit.candidates.length, 4);
   assert.ok(view.finishit.candidates[0].authorId);
   s = act(s, { type: "NEXT" });
   assert.equal(s.phase, "scores");
@@ -105,6 +103,9 @@ test("finishit: host-hidden answers stay hidden on the TV at vote and reveal", (
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p1", text: "clean one" });
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p2", text: "clean two" });
   s = act(s, { type: "FINISH_SUBMIT", playerId: "p3", text: "clean three" });
+  assert.equal(s.phase, "finishPresent");
+  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" });
+  s = act(s, { type: "NEXT" });
   assert.equal(s.phase, "finishVote");
   const view = buildView(s, { viewer: { role: "display" } });
   const hiddenEntry = view.finishit.candidates.find((c) => c.id === "p0");
@@ -125,4 +126,50 @@ test("remember: writer cannot score on their own statement", () => {
   assert.equal(s.phase, "rememberReveal");
   assert.equal(s.players.find((p) => p.id === "p1").score, 250);
   assert.equal(s.players.find((p) => p.id === "p0").score, 0);
+});
+
+test("kick: kicking the featured Spotlight player skips their turn instead of hanging", () => {
+  let s = room("spotlight");
+  s = act(s, { type: "START" });
+  for (const id of ["p0", "p1", "p2"]) {
+    s = act(s, { type: "SUBMIT_STATEMENTS", playerId: id, statements: { texts: ["t", "l", "t2"], lieIndex: 1, dontSave: [false, false, false] } });
+  }
+  s = act(s, { type: "BEGIN_SPOTLIGHT" });
+  const featuredId = s.featuredOrder[s.featuredIdx];
+  s = act(s, { type: "KICK", playerId: featuredId });
+  assert.notEqual(s.phase, "finale");
+  assert.equal(s.phase, "spotlight");
+  assert.ok(!s.featuredOrder.includes(featuredId));
+  assert.ok(s.featuredOrder.length >= 1);
+});
+
+test("host guard inside applyHostAction rejects a stale finish step", async () => {
+  const { applyHostAction } = await import("./engine.js");
+  let s = room("finishit");
+  s = act(s, { type: "START" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p0", text: "a" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p1", text: "b" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p2", text: "c" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p3", text: "d" });
+  assert.equal(s.phase, "finishPresent");
+  const stale = applyHostAction(s, { type: "NEXT" }, NOW, {}, { phase: "finishPresent", finishStep: 3 });
+  assert.match(stale.error, /Stale screen/);
+  const fresh = applyHostAction(s, { type: "NEXT" }, NOW, {}, { phase: "finishPresent", finishStep: 0 });
+  assert.equal(fresh.state.finishRevealStep, 1);
+});
+
+test("shuffle produces a near-uniform permutation distribution", async () => {
+  const { createRoom: cr } = await import("./engine.js");
+  // indirectly exercise the PRNG through spotlight statement order over many seeds
+  const counts = new Map();
+  for (let seed = 1; seed <= 600; seed++) {
+    let s = room("spotlight");
+    s = act(s, { type: "START" }, seed * 1000);
+    s = act(s, { type: "SUBMIT_STATEMENTS", playerId: "p0", statements: { texts: ["a", "b", "c"], lieIndex: 0, dontSave: [false, false, false] } }, seed * 1000);
+    s = applyAction(s, { type: "BEGIN_SPOTLIGHT" }, seed * 1000).state;
+    const key = s.spotlightOrder.join(",");
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  assert.equal(counts.size, 6, `expected all 6 permutations, saw ${counts.size}`);
+  for (const [k, v] of counts) assert.ok(v > 50 && v < 160, `permutation ${k} biased: ${v}/600`);
 });

@@ -16,6 +16,7 @@ export function useRoom(code, { role = "display", token = "", pollToken = null }
   const [gone, setGone] = useState(false);
   const [serverOffset, setServerOffset] = useState(0);
   const versionRef = useRef(-1);
+  const answersDigestRef = useRef("");
   const lastPresenceRef = useRef(0);
   const effectivePollToken = pollToken ?? (role === "player" ? token : "");
 
@@ -25,7 +26,7 @@ export function useRoom(code, { role = "display", token = "", pollToken = null }
       const now = Date.now();
       const sendPresence = role === "player" && now - lastPresenceRef.current > 4500;
       if (sendPresence) lastPresenceRef.current = now;
-      const qs = new URLSearchParams({ v: String(versionRef.current), role });
+      const qs = new URLSearchParams({ v: String(versionRef.current), role, ad: answersDigestRef.current });
       const res = await fetch(`/api/rooms/${code}/state?${qs}`, {
         cache: "no-store",
         headers: {
@@ -45,6 +46,7 @@ export function useRoom(code, { role = "display", token = "", pollToken = null }
       }
       if (data.view) {
         versionRef.current = data.view.version;
+        answersDigestRef.current = data.view.answersDigest ?? "";
         setView(data.view);
         setError("");
         setGone(false);

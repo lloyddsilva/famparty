@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "FamParty — Emoji Decoder",
+  title: "FamParty — One big screen, everyone plays",
   description: "One big screen, everyone plays on their phone. No signup, just a room code.",
 };
 

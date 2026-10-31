@@ -215,6 +215,9 @@ export default function PlayerClient() {
             )}
           </>
         )}
+        {view.phase === "finishPresent" && view.finishit && (
+          <div className="center"><div className="big-emoji">👀</div><h3>Answers are going up on the TV…</h3><p className="sub">Read them all first — voting opens once every answer has had its moment.</p></div>
+        )}
         {view.phase === "finishVote" && view.finishit && (
           <>
             <h3 className="center">Vote for the funniest — not your own</h3>
@@ -226,7 +229,7 @@ export default function PlayerClient() {
             <p className="sub center">Answers are anonymous until the reveal.</p>
           </>
         )}
-        {view.phase === "finishReveal" && <div className="center">{view.finishit?.authorsRevealed ? <><h3>You earned +{me?.lastPoints ?? 0} pts</h3><p className="sub">Authors are on the TV now.</p></> : <><h3>Answers are being revealed…</h3><p className="sub">Watch the TV — authors stay secret until the end.</p></>}</div>}
+        {view.phase === "finishReveal" && <div className="center"><h3>You earned +{me?.lastPoints ?? 0} pts</h3><p className="sub">Authors are on the TV now.</p></div>}
 
         {/* Remember This? */}
         {view.phase === "remember" && view.remember && (

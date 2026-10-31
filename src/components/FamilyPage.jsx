@@ -65,7 +65,7 @@ export default function FamilyPage({ token }) {
         </div>
         <form onSubmit={addMember}>
           <label>Name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 16))} required placeholder="e.g. Mum" /></label>
-          <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>)}</div>
+          <div className="avatar-grid">{AVATARS.map((a) => { const taken = data.members.some((m) => m.avatar === a); return <button type="button" key={a} disabled={taken} title={taken ? "Taken on this roster" : undefined} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>; })}</div>
           <button className="btn big">Add to roster</button>
         </form>
 

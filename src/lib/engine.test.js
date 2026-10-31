@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createRoom, addPlayer, applyAction, advanceIfExpired, buildView, MIN_PLAYERS, scoreEmojiReveal, assertExpectedPhase } from "./engine.js";
+import { createRoom, addPlayer, applyAction, advanceIfExpired, buildView, MIN_PLAYERS, scoreEmojiReveal, assertExpectedPhase, QUESTION_MS } from "./engine.js";
+const QUESTION_MS_FOR_TEST = QUESTION_MS;
 
 const NOW = 1_000_000;
 function roomWithPlayers(n = 3) {
@@ -46,6 +47,14 @@ test("regression 1-2: simultaneous answers are all scored at reveal, in any orde
   assert.ok(s.players.find((p) => p.id === "p0").score > s.players.find((p) => p.id === "p1").score);
   assert.ok(s.players.find((p) => p.id === "p1").score > 0, "last-second correct answer still scores");
   assert.equal(s.players.find((p) => p.id === "p2").score, 0);
+});
+
+test("late answer at/after the deadline scores nothing", () => {
+  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const answers = { p0: { choice: 0, at: NOW + QUESTION_MS_FOR_TEST }, p1: { choice: 0, at: NOW + 100 } };
+  s = scoreEmojiReveal(s, answers, NOW + QUESTION_MS_FOR_TEST);
+  assert.equal(s.players.find((p) => p.id === "p0").score, 0);
+  assert.ok(s.players.find((p) => p.id === "p1").score > 0);
 });
 
 test("regression 4: expected-phase guard rejects stale host taps", () => {

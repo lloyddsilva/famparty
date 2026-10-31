@@ -18,12 +18,19 @@ export const ROOM_TTL_SECONDS = 2 * 60 * 60;
 export const GAMES = ["emoji", "spotlight", "spectrum", "finishit", "remember"];
 
 const shuffle = (arr, seed = 1) => {
-  // Deterministic-ish shuffle seeded by caller-provided value (keeps engine pure).
+  // Fisher-Yates with a mulberry32 PRNG (keeps the engine pure and the
+  // permutation distribution uniform — the old LCG low bits were biased).
   const a = [...arr];
-  let s = seed || 1;
+  let s = (seed >>> 0) || 1;
+  const rand = () => {
+    s = (s + 0x6D2B79F5) >>> 0;
+    let x = s;
+    x = Math.imul(x ^ (x >>> 15), x | 1);
+    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
   for (let i = a.length - 1; i > 0; i--) {
-    s = (s * 1103515245 + 12345) % 2147483648;
-    const j = s % (i + 1);
+    const j = Math.floor(rand() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -86,7 +93,7 @@ export function scoreEmojiReveal(state, answers = {}, now) {
   const q = QUESTIONS[state.qIndex];
   const players = state.players.map((p) => {
     const a = answers[p.id];
-    if (!a) return { ...p, lastCorrect: false, lastPoints: 0 };
+    if (!a || (state.deadline && a.at >= state.deadline)) return { ...p, lastCorrect: false, lastPoints: 0 };
     const correct = q.choices[a.choice] === q.answer;
     const remainingFraction = Math.max(0, ((state.deadline ?? now) - a.at) / QUESTION_MS);
     const points = emojiPoints({ correct, remainingFraction, streakBefore: p.streak });
@@ -98,6 +105,18 @@ export function scoreEmojiReveal(state, answers = {}, now) {
 export function assertExpectedPhase(state, expectedPhase) {
   if (expectedPhase && state.phase !== expectedPhase) return `Stale screen: expected ${expectedPhase}, room is in ${state.phase}.`;
   return null;
+}
+
+/** Host-action guard evaluated INSIDE the compare-and-set (item 5) and, for
+ * stepped reveals, against the exact step the host was looking at (item F). */
+export function applyHostAction(state, action, now, ctx = {}, expected = {}) {
+  const phaseError = assertExpectedPhase(state, expected.phase);
+  if (phaseError) return { state, error: phaseError };
+  if (action.type === "NEXT" && ["finishPresent", "finishReveal"].includes(state.phase)
+      && expected.finishStep !== undefined && expected.finishStep !== (state.finishRevealStep ?? 0)) {
+    return { state, error: "Stale screen: this reveal has already moved on." };
+  }
+  return applyAction(state, action, now, ctx);
 }
 function revealSpotlight(state, now) {
   const f = featured(state);
@@ -147,9 +166,12 @@ function revealSpectrum(state, now) {
 function startSpectrum(state, now) {
   return toPhase({ ...state, players: state.players.map((p) => ({ ...freshPlayerFlags(p), spectrumPos: null, spectrumPrediction: null })) }, "spectrum", now, SPECTRUM_MS);
 }
-function finishToVote(state, now) {
+function finishToPresent(state, now) {
   const ids = state.players.filter((p) => p.finishAnswer).map((p) => p.id);
-  return toPhase({ ...state, votes: {}, finishOrder: shuffle(ids, now % 100000), finishRevealStep: 0, finishAuthors: false }, "finishVote", now, VOTE_MS);
+  return toPhase({ ...state, votes: {}, finishOrder: shuffle(ids, now % 100000), finishRevealStep: 0, finishAuthors: false }, "finishPresent", now);
+}
+function finishToVote(state, now) {
+  return toPhase(state, "finishVote", now, VOTE_MS);
 }
 function revealFinish(state, now) {
   // Exact normalized duplicates pool their votes and split the points. No fuzzy matching.
@@ -169,7 +191,7 @@ function revealFinish(state, now) {
     for (const id of ids) earned[id] = each;
   }
   const players = state.players.map((p) => ({ ...p, lastPoints: earned[p.id] || 0, score: p.score + (earned[p.id] || 0), lastCorrect: (earned[p.id] || 0) > 0 }));
-  return toPhase({ ...state, players, finishVoteCount: voteCount }, "finishReveal", now);
+  return toPhase({ ...state, players, finishVoteCount: voteCount, finishAuthors: true }, "finishReveal", now);
 }
 function revealRemember(state, now) {
   const item = state.rememberItems[state.qIndex];
@@ -190,7 +212,7 @@ export function advanceIfExpired(state, now, ctx = {}) {
     case "spotlight": return revealSpotlight(state, now);
     case "story": return toPhase(state, "storySave", now);
     case "spectrum": return revealSpectrum(state, now);
-    case "finishWrite": return finishToVote(state, now);
+    case "finishWrite": return finishToPresent(state, now);
     case "finishVote": return revealFinish(state, now);
     case "remember": return revealRemember(state, now);
     default: return state;
@@ -272,7 +294,7 @@ export function applyAction(state, action, now, ctx = {}) {
     case "FINISH_SUBMIT": {
       if (state.phase !== "finishWrite" || !actor || !action.text) return fail("Not writing now.");
       const next = { ...state, players: state.players.map((p) => p.id === actor.id ? { ...p, finishAnswer: action.text } : p), updatedAt: now };
-      return { state: next.players.every((p) => p.finishAnswer) ? finishToVote(next, now) : next };
+      return { state: next.players.every((p) => p.finishAnswer) ? finishToPresent(next, now) : next };
     }
     case "STORY_SAVE": {
       const f = featured(state);
@@ -296,16 +318,14 @@ export function applyAction(state, action, now, ctx = {}) {
       }
       if (state.phase === "spectrum") return { state: revealSpectrum(state, now) };
       if (state.phase === "spectrumReveal") return { state: toPhase(state, "scores", now) };
-      if (state.phase === "finishWrite") return { state: finishToVote(state, now) };
-      if (state.phase === "finishVote") return { state: revealFinish(state, now) };
-      if (state.phase === "finishReveal") {
-        // Host-paced reveal: step through the answers one by one (anonymous),
-        // then unmask the authors, then move to scores.
+      if (state.phase === "finishWrite") return { state: finishToPresent(state, now) };
+      if (state.phase === "finishPresent") {
         const step = state.finishRevealStep ?? 0;
         if (step < state.finishOrder.length) return { state: { ...state, finishRevealStep: step + 1, updatedAt: now } };
-        if (!state.finishAuthors) return { state: { ...state, finishAuthors: true, updatedAt: now } };
-        return { state: toPhase(state, "scores", now) };
+        return { state: finishToVote(state, now) };
       }
+      if (state.phase === "finishVote") return { state: revealFinish(state, now) };
+      if (state.phase === "finishReveal") return { state: toPhase(state, "scores", now) };
       if (state.phase === "remember") return { state: revealRemember(state, now) };
       if (state.phase === "rememberReveal") {
         if (state.qIndex + 1 >= state.rememberItems.length) return { state: toPhase(state, "finale", now) };
@@ -344,8 +364,29 @@ export function applyAction(state, action, now, ctx = {}) {
       return { state: { ...state, paused: false, deadline: now + (state.pausedRemainingMs ?? QUESTION_MS), pausedRemainingMs: null, updatedAt: now } };
     }
     case "KICK": {
-      if (!findPlayer(state, action.playerId)) return fail("Player not found.");
-      return { state: { ...state, players: state.players.filter((p) => p.id !== action.playerId), updatedAt: now }, effects: { removeAnswerFor: action.playerId } };
+      const target = findPlayer(state, action.playerId);
+      if (!target) return fail("Player not found.");
+      let next = { ...state, players: state.players.filter((p) => p.id !== action.playerId), updatedAt: now };
+      const votes = { ...next.votes }; delete votes[action.playerId]; next = { ...next, votes };
+      if (next.featuredOrder?.includes(action.playerId)) {
+        const removedIdx = next.featuredOrder.indexOf(action.playerId);
+        const wasFeatured = featured(next)?.id === action.playerId || state.featuredOrder[state.featuredIdx] === action.playerId;
+        next = { ...next, featuredOrder: next.featuredOrder.filter((id) => id !== action.playerId) };
+        if (removedIdx < next.featuredIdx) next = { ...next, featuredIdx: next.featuredIdx - 1 };
+        if (wasFeatured && ["spotlight", "spotlightReveal", "story", "storySave"].includes(next.phase)) {
+          // Kicking the featured player skips their turn instead of hanging the room.
+          return { state: next.featuredOrder.length && next.featuredIdx < next.featuredOrder.length ? startSpotlightTurn(next, now) : toPhase(next, "finale", now), effects: { removeAnswerFor: action.playerId } };
+        }
+      }
+      if (next.phase === "question" && next.players.length && ctx.answers && next.players.every((p) => ctx.answers[p.id])) {
+        next = scoreEmojiReveal(next, ctx.answers, now);
+      }
+      if (next.phase === "spotlight") {
+        const f = featured(next);
+        const voters = next.players.filter((p) => p.id !== f?.id);
+        if (f && voters.length && voters.every((p) => next.votes[p.id] !== undefined)) next = revealSpotlight(next, now);
+      }
+      return { state: next, effects: { removeAnswerFor: action.playerId } };
     }
     // Note: emoji answers are NOT booked here. They live in the answers hash with
     // their timestamps and are scored once by scoreEmojiReveal at reveal time.
@@ -391,7 +432,7 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
           featuredId: f.id, ...mask(f), turn: state.featuredIdx + 1, totalTurns: state.featuredOrder.length,
           statements: f.hidden && isDisplay ? f.statements.texts.map(() => "Hidden by host") : state.spotlightOrder.map((idx) => f.statements.texts[idx]),
           ...(state.phase !== "spotlight" ? { liePosition: state.spotlightOrder.indexOf(f.statements.lieIndex) } : {}),
-          storyLine: f.storyLine,
+          storyLine: f.hidden && isDisplay ? (f.storyLine ? "Hidden by host" : null) : f.storyLine,
         }
       : null,
     spectrum: spectrumItem && ["spectrum", "spectrumReveal"].includes(state.phase)
@@ -404,19 +445,21 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
           } : {}),
         }
       : null,
-    finishit: finishItem && ["finishWrite", "finishVote", "finishReveal"].includes(state.phase)
+    finishit: finishItem && ["finishWrite", "finishPresent", "finishVote", "finishReveal"].includes(state.phase)
       ? {
           prompt: finishItem,
+          ...(state.phase === "finishPresent" ? {
+            presenting: true, totalCandidates: state.finishOrder.length,
+            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => { const p = findPlayer(state, id); return { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer }; }),
+          } : {}),
           ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer }; }) } : {}),
           ...(state.phase === "finishReveal" ? {
             authorsRevealed: !!state.finishAuthors,
             totalCandidates: state.finishOrder.length,
-            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => {
+            candidates: state.finishOrder.map((id) => {
               const p = findPlayer(state, id);
               const text = p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer;
-              return state.finishAuthors
-                ? { id, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints }
-                : { id, text };
+              return { id, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints };
             }),
           } : {}),
         }
@@ -424,8 +467,8 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
     remember: rememberItem && ["remember", "rememberReveal"].includes(state.phase)
       ? {
           text: rememberItem.text,
-          choices: state.players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, name: p.name, avatar: p.avatar })),
-          ...(state.phase === "rememberReveal" ? { writerMemberId: rememberItem.writerMemberId, writerName: rememberItem.writerName } : {}),
+          choices: players.filter((p) => p.memberId).map((p) => ({ memberId: p.memberId, name: p.name, avatar: p.avatar })),
+          ...(state.phase === "rememberReveal" ? { writerMemberId: rememberItem.writerMemberId, writerName: (() => { const w = state.players.find((p) => p.memberId === rememberItem.writerMemberId); return w?.hidden && isDisplay ? "Hidden by host" : rememberItem.writerName; })() } : {}),
         }
       : null,
     myAnswer: viewer.playerId ? (typeof answers[viewer.playerId] === "object" && answers[viewer.playerId] !== null ? answers[viewer.playerId].choice : (answers[viewer.playerId] ?? null)) : null,

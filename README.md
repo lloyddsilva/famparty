@@ -4,7 +4,7 @@
 
 FamParty is a collection of short bonding games for people who are already together — families in a living room, friends on game night, or a team that needs five warm minutes before a meeting. A host runs the show from their phone, a TV (or any shared screen) displays it, and everyone else joins on their phone by scanning a QR code or typing a 4-letter room code.
 
-> **Live demo:** https://famparty-lloyd-dsilvas-projects.vercel.app
+> **Live demo:** https://famparty.vercel.app
 > **Intended home:** famparty.com (domain/trademark checks parked — not a launch blocker)
 > **For engineering context:** see `CLAUDE.md`. This README is the product brief.
 
