@@ -145,8 +145,7 @@ export default function Page() {
               <li>🔑 Two links: one for playing, one for the owner to export or delete</li>
               <li>🤝 No accounts — the link is the key, and we say so plainly</li>
             </ul>
-            <span className="btn big lp-cta-inline lp-disabled" aria-disabled="true">Create your family link — coming soon</span>
-            <p className="lp-micro">The family link is built and being connected to its database. Until then, rooms play anonymously — which is most of the fun anyway.</p>
+            <Link className="btn primary big lp-cta-inline" href="/family">Create your family link</Link>
           </div>
           <div className="lp-album" aria-hidden="true">
             <p className="eyebrow">FROM YOUR LAST SHOW</p>
