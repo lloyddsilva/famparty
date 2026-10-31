@@ -67,11 +67,14 @@ if (mode === "--text") {
     ["finish-it-card", "Warm flat-illustration title card for a family fill-in-the-blank comedy game: speech bubbles and a pencil around a TV screen, deep purple and warm orange palette, no text, no letters."],
   ];
   for (const [name, prompt] of jobs) {
-    const out = await call("/images/generations", { model: imageModel, prompt, n: 1, output_format: "webp" });
-    const b64 = out.data?.[0]?.b64_json;
-    if (!b64) throw new Error(`No image data returned for ${name}`);
+    // Docs (dev.meta.ai/docs/image-generation): response_format "b64_json"
+    // (default) returns data[].b64_json; "url" returns a signed data[].url.
+    // output_format "webp" (default), "png" or "jpeg" is a documented field.
+    const { resolveImageBytes, assertWebp } = await import("../src/lib/imageBytes.js");
+    const out = await call("/images/generations", { model: imageModel, prompt, n: 1, output_format: "webp", response_format: "b64_json" });
+    const bytes = assertWebp(await resolveImageBytes(out.data?.[0]), name);
     const file = `content/outputs/art/${name}.webp`;
-    await writeFile(file, Buffer.from(b64, "base64"));
+    await writeFile(file, bytes);
     const record = { model: imageModel, endpoint: "/images/generations", prompt, generatedAt: new Date().toISOString(), file, usage: out.usage || null };
     await writeFile(`content/outputs/${name}.json`, JSON.stringify(record, null, 2));
     console.log(`art written: ${file} + content/outputs/${name}.json (REVIEW before use)`);

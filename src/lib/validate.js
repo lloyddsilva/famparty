@@ -8,7 +8,10 @@ export const hashToken = (token) => createHash("sha256").update(String(token || 
 const BLOCKED_WORDS = [
   "fuck", "fucking", "fucker", "motherfucker", "shit", "shitty", "shithead", "bullshit",
   "cunt", "nigger", "faggot", "bitch", "bitches", "whore", "whores",
-  "rape", "raped", "penis", "vagina", "porn", "pornstar", "hitler",
+  "rape", "raped", "rapist", "penis", "vagina", "porn", "pornstar", "hitler", "nazi",
+  "asshole", "cock", "slut", "fucked", "shits", "retard",
+  // Deliberately NOT blocked: "dick" (also a name). Host hide is the backstop;
+  // filters will always miss things, and that is accepted.
 ];
 export const cleanName = (v) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, 16);
 // Word boundaries only: "grapes", "drapes", "trapeze" and "scraped" are innocent.

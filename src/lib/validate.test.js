@@ -9,6 +9,10 @@ test("names and free text reject blocked words", () => {
   assert.equal(isCleanName(""), false);
 });
 
+test("the word dick is intentionally allowed (it is also a name)", () => {
+  assert.equal(isCleanName("Dick"), true);
+});
+
 test("word boundaries: innocent words containing blocked substrings pass", () => {
   for (const s of ["I love grapes", "We hung new drapes", "My trapeze class", "I scraped my knee"]) {
     assert.equal(isCleanText(s), true, s);
@@ -18,7 +22,8 @@ test("word boundaries: innocent words containing blocked substrings pass", () =>
 });
 
 test("variants and compounds are blocked as whole words", () => {
-  for (const s of ["fucking", "shitty", "bitches", "motherfucker", "shithead", "pornstar", "That was fucking brilliant"]) {
+  for (const s of ["fucking", "shitty", "bitches", "motherfucker", "shithead", "pornstar", "That was fucking brilliant",
+                   "asshole", "cock", "slut", "fucked", "shits", "nazi", "retard", "rapist"]) {
     assert.equal(isCleanText(s), false, s);
   }
 });

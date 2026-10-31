@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js src/lib/games.test.js src/lib/validate.test.js src/lib/kick.test.js",
+    "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js src/lib/games.test.js src/lib/validate.test.js src/lib/kick.test.js src/lib/imageBytes.test.js",
     "build": "next build",
     "check:packs": "node scripts/check-packs.mjs",
     "pre-submit": "node scripts/pre-submit.mjs",
