@@ -226,7 +226,7 @@ export default function PlayerClient() {
             <p className="sub center">Answers are anonymous until the reveal.</p>
           </>
         )}
-        {view.phase === "finishReveal" && <div className="center"><h3>You earned +{me?.lastPoints ?? 0} pts</h3><p className="sub">Authors are on the TV now.</p></div>}
+        {view.phase === "finishReveal" && <div className="center">{view.finishit?.authorsRevealed ? <><h3>You earned +{me?.lastPoints ?? 0} pts</h3><p className="sub">Authors are on the TV now.</p></> : <><h3>Answers are being revealed…</h3><p className="sub">Watch the TV — authors stay secret until the end.</p></>}</div>}
 
         {/* Remember This? */}
         {view.phase === "remember" && view.remember && (

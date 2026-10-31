@@ -105,7 +105,13 @@ export default function HostRemote() {
               </>
             )}
             {["spotlightReveal", "spectrumReveal", "finishReveal", "rememberReveal", "storySave"].includes(view.phase) && (
-              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.phase === "spotlightReveal" ? "Start story beat →" : view.phase === "storySave" ? "Next player →" : "Show scores / next →"}</button>
+              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>
+                {view.phase === "spotlightReveal" ? "Start story beat →"
+                  : view.phase === "storySave" ? "Next player →"
+                  : view.phase === "finishReveal" && !view.finishit?.authorsRevealed ? `Reveal next answer (${(view.finishit?.candidates.length ?? 0) + 1}/${view.finishit?.totalCandidates ?? 0}) →`
+                  : view.phase === "finishReveal" ? "Show scores →"
+                  : "Show scores / next →"}
+              </button>
             )}
             {view.phase === "finishVote" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Close voting →</button>}
             {view.phase === "question" && (

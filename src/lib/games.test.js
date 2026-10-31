@@ -53,6 +53,9 @@ test("spectrum: placement + majority prediction scores", () => {
   assert.equal(s.phase, "spectrumReveal");
   assert.equal(s.spectrumMajority, "right");
   assert.ok(s.players.find((p) => p.id === "p0").score >= 300);
+  const kinds = Object.fromEntries((s.spectrumAwards || []).map((a) => [a.kind, a.playerId]));
+  assert.equal(kinds["Mind Reader"], "p0"); // predicted right, closest to the median (80)
+  assert.equal(kinds["Lonely Island"], "p3"); // 10, furthest from the crowd
 });
 
 test("finishit: no self-vote, exact-normalized duplicates split points", () => {
@@ -75,6 +78,39 @@ test("finishit: no self-vote, exact-normalized duplicates split points", () => {
   assert.equal(s.players.find((p) => p.id === "p0").score, 100);
   assert.equal(s.players.find((p) => p.id === "p1").score, 100);
   assert.equal(s.players.find((p) => p.id === "p2").score, 200);
+  // Host-paced reveal: answers appear one by one, authors only at the end.
+  let view = buildView(s, { viewer: { role: "display" } });
+  assert.equal(view.finishit.candidates.length, 0);
+  assert.equal(view.finishit.authorsRevealed, false);
+  s = act(s, { type: "NEXT" });
+  view = buildView(s, { viewer: { role: "display" } });
+  assert.equal(view.finishit.candidates.length, 1);
+  assert.equal(view.finishit.candidates[0].authorId, undefined);
+  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" });
+  view = buildView(s, { viewer: { role: "display" } });
+  assert.equal(view.finishit.candidates.length, 4);
+  s = act(s, { type: "NEXT" });
+  view = buildView(s, { viewer: { role: "display" } });
+  assert.equal(view.finishit.authorsRevealed, true);
+  assert.ok(view.finishit.candidates[0].authorId);
+  s = act(s, { type: "NEXT" });
+  assert.equal(s.phase, "scores");
+});
+
+test("finishit: host-hidden answers stay hidden on the TV at vote and reveal", () => {
+  let s = room("finishit");
+  s = act(s, { type: "START" });
+  s = act(s, { type: "HIDE", targetId: "p0", hidden: true });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p0", text: "something rude" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p1", text: "clean one" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p2", text: "clean two" });
+  s = act(s, { type: "FINISH_SUBMIT", playerId: "p3", text: "clean three" });
+  assert.equal(s.phase, "finishVote");
+  const view = buildView(s, { viewer: { role: "display" } });
+  const hiddenEntry = view.finishit.candidates.find((c) => c.id === "p0");
+  assert.equal(hiddenEntry.text, "Hidden by host");
+  const hostView = buildView(s, { viewer: { role: "host" } });
+  assert.equal(hostView.finishit.candidates.find((c) => c.id === "p0").text, "something rude");
 });
 
 test("remember: writer cannot score on their own statement", () => {

@@ -77,7 +77,7 @@ skip / reveal         leaderboard, podium            write — privately
 - **Session length:** one game ≈ 10 minutes; a typical show is 2–3 games.
 - **Players:** 3–12 per room (two players breaks voting games; the UI and copy assume a crowd).
 - **One room, one show.** Rooms lock when a game starts (latecomers wait for the next show) and expire when idle. A fresh QR scan always beats a stale saved room.
-- **Reconnects are invisible.** Phones lock, wake, lose Wi-Fi, refresh. Players rejoin as themselves without the group noticing. Design should never punish or dramatise a disconnect; an "away" dot is enough.
+- **Reconnects should be invisible (goal — not yet proven on real devices).** Phones lock, wake, lose Wi-Fi, refresh. The design intent is that players rejoin as themselves without the group noticing, and that design never punishes or dramatises a disconnect; an "away" dot is enough. This has only been tested in browser/API simulation so far; the physical-device pass (lock/wake, cellular) is outstanding.
 
 ## 6. The games
 
@@ -96,7 +96,7 @@ Each player privately writes two true statements and one lie about themselves (p
 
 ### 🎚️ Spectrum — *the conversation starter*
 A pair of opposites ("Cook at home ↔ Order takeaway"). Each player places themselves on a slider, and also predicts where the crowd will land. The TV then reveals everyone's avatar dots scattered along the spectrum at once.
-- **Feels like:** "Wait — YOU put yourself *there*?!" Outliers and lone wolves get celebrated, not just winners (awards like *Lonely Island* and *Mind Reader*).
+- **Feels like:** "Wait — YOU put yourself *there*?!" Outliers and lone wolves get celebrated, not just winners (awards — *Lonely Island* (furthest from the crowd), *Mind Reader* (predicted the majority, closest to its centre), *Dead Center* (closest to the middle) — computed at reveal and shown on the TV).
 - **Design moment:** the simultaneous avatar reveal on the big spectrum. This visual is the game's identity; it must be readable at a glance from a couch, for up to 12 avatars.
 - **Care points:** prompts stay light and preference-based — never politics, identity, health, or beliefs.
 
@@ -116,7 +116,7 @@ True statements saved from earlier Spotlight sessions resurface: "I once met a p
 Any group can play anonymously tonight. A **family link** is for groups who come back:
 
 - An unguessable permanent link for one family — like an unlisted video. **The link is the key**: whoever has it can get in. We say this plainly in the UI, in friendly language, because it's the truth of the model.
-- The link holds a **roster**: the family's actual people (Mum 🦊, Grandpa 🐢…). Joining through the link means picking *your* roster member, so scores, authorship, and history attach to the person — not to whatever name they typed tonight.
+- The link holds a **roster**: the family's actual people (Mum 🦊, Grandpa 🦄…). Joining through the link means picking *your* roster member, so scores, authorship, and history attach to the person — not to whatever name they typed tonight.
 - Two links per family: a **member link** (play + view) and an **owner link** (everything, plus export and delete). Deleting a family requires typing a confirmation, and it's permanent.
 - **What gets saved** (and only this): true statements from Spotlight (each with a per-statement "don't save this" opt-out), saved one-line stories, and game scores per member. Players are told at join when a room is family-linked. Room play itself is never recorded.
 - **Why it matters:** it's the difference between "a fun website we used once" and "our family's game." Remember This? only exists because the link does.
@@ -160,7 +160,7 @@ There are exactly four surfaces. A redesign should treat them as one system with
 
 ### 📱 Player phone (`/join`) — *thumb-first, one hand, mid-conversation*
 - Join is one form: code (pre-filled by QR), name, avatar grid, one button. Big tap targets; nothing important below a scroll fold during play.
-- During rounds: one decision per screen, enormous targets, instant "locked in" confirmation, then a relaxed waiting state that encourages looking up at the TV.
+- During rounds: one decision per screen, enormous targets, a clear "locked in" confirmation once the server accepts the answer (answers are stored with their timestamps and scored at reveal, so a confirmed answer cannot lose its points to a race), then a relaxed waiting state that encourages looking up at the TV.
 - Rejoining (refresh, lock/wake, new QR) must feel like nothing happened. No error modals for recoverable states — resume silently, message only when the room is truly gone or the host removed them.
 - Free-text moments (Spotlight statements, Finish It answers) need honest character counts and a genuinely private feel: this screen is the only place a player's lie exists before the reveal.
 
@@ -186,8 +186,8 @@ Lobby filling up · waiting on host · mid-round (answered / not yet) · paused 
 
 ## 10. Content
 
-- Games run on **content packs** (emoji rounds, spectrum pairs, prompts, statement starters) — short, original, family-safe, reviewed by a human before shipping. Quantity matters less than hit rate: a pack of duds kills a room.
-- Pack art (title cards) is the only illustrated surface. Players' own words are never illustrated or decorated — their statements appear as clean text, credited by avatar.
+- Games run on **content packs** (emoji rounds, spectrum pairs, prompts, statement starters) — short, original, family-safe. **Current status: the packs in the repo are hand-written starter placeholders. They have not yet been generated by the Muse Spark content run, and they have not had Lloyd's human review (`reviewed: false` in `src/lib/packs.js`; the pack gate in `scripts/check-packs.mjs` correctly fails until then). They must not ship in a submission in this state.** Quantity matters less than hit rate: a pack of duds kills a room.
+- Pack art (title cards, from Muse Image) is planned as the only illustrated surface, and does not exist yet. Players' own words are never illustrated or decorated — their statements appear as clean text, credited by avatar.
 - New packs and new games are the long-term content engine; the chassis (rooms, scoring, family memory) doesn't change when content does.
 
 ## 11. What success looks like
@@ -206,9 +206,9 @@ Not optimised for: time-on-site, accounts created, anything involving ads or pay
 ## 12. Constraints a redesign must respect
 
 - **Everything is server-driven and polled (~1s).** Screens render discrete phases, and a phase can change under the user between polls. Design transitions that tolerate a beat of latency; never fake realtime, and never block input waiting for the server during a round.
-- **Four routes are the whole product:** `/host`, `/tv/[code]`, `/join`, `/f/[token]` (+ `/family` to create a link). No new top-level concepts without asking.
+- **Five routes are the whole product:** `/host`, `/tv/[code]`, `/join`, `/f/[token]`, and `/family` (to create a link). No new top-level concepts without asking.
 - **No third-party scripts, fonts, or trackers on family pages.** Self-hosted/system assets only there; keep the rest of the site as close to that as practical.
-- **No accounts, payments, chat, or live AI generation** may sneak in via design. (Content is pre-generated offline and human-reviewed.)
+- **No accounts, payments, chat, or live AI generation** may sneak in via design. (Content is intended to be pre-generated offline and human-reviewed (see the status note in section 10 — that run has not happened yet).)
 - Game names, looks, and copy must stay original and generic — no resemblance to existing games or TV shows.
 
 ## 13. Open design questions (designer's call, PM will react)
@@ -218,9 +218,19 @@ Not optimised for: time-on-site, accounts created, anything involving ads or pay
 - Avatar system: emoji grid today. Is there a more ownable identity (generated characters, colour + creature) that stays instant for a grandparent to pick?
 - What does the podium look like when the real prize is teasing rights until next time?
 
-## 14. Current state & honest gaps
+## 14. Built with Meta models
 
-- All five games, the family link, roster, and Remember This? are built and playable on the live URL; the full test suite (unit + 13-client Playwright + family/Spotlight end-to-end) passes. See `CLAUDE.md` for architecture, review history, and verification commands.
+FamParty is a Meta hackathon entry. Accurate status:
+
+- **Building the app:** the code in this repo was written with Meta's Muse models in the coding environment (Muse Code / OpenCode session), which is also how the content-pack scripts and tests were produced.
+- **Planned, not yet done:** the offline content run — Muse Spark for pack text and Muse Image for pack title-card art, via the committed scripts in `scripts/generate-content.mjs` (API key from the environment only). **This run has not happened yet.** When it does, the models used, the prompts, and the raw outputs will be recorded here and committed alongside the packs, and each pack will flip to `reviewed: true` only after Lloyd's human review.
+- **Runtime:** the running app makes **no live model calls** and holds no model API keys. Everything it serves is committed files and player input.
+
+## 15. Current state & honest gaps
+
+- All five games, the family link, roster, and Remember This? are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
+- **Known gaps on production:** family features and Remember This? **fail on the live URL today** — production has no Postgres yet (a Neon database under the lloyddsilva Vercel account still needs provisioning; the family flow passes locally on PGLite). Games that don't need the database (Emoji Decoder, Spotlight, Spectrum, Finish It in unlinked rooms) work live.
+- The Spectrum awards (*Lonely Island*, *Mind Reader*, *Dead Center*) and the host-paced Finish It reveal are implemented in the engine and TV view; the earlier README described them before they existed.
 - The current visual design is a functional placeholder (dark purple/orange cards, emoji identity) built to prove the engine. **A full visual redesign is wanted — that's the brief this README supports.** Keep routes, phases, and control inventories; everything visual is on the table.
 - Known non-design gaps: production family data awaits a Neon database provision (local works today); the famparty.com domain is unregistered at time of writing; the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.
 

@@ -132,14 +132,24 @@ function revealSpectrum(state, now) {
     const pts = spectrumPoints({ majorityCorrect: p.spectrumPrediction === majoritySide, distanceFromCrowd: Math.abs(p.spectrumPos - median) / 100 });
     return { ...p, score: p.score + pts, lastPoints: pts, lastCorrect: p.spectrumPrediction === majoritySide };
   });
-  return toPhase({ ...state, players, spectrumMedian: median, spectrumMajority: majoritySide }, "spectrumReveal", now);
+  // Awards: Lonely Island = furthest from the crowd; Mind Reader = predicted the
+  // majority and landed closest to its centre; Dead Center = closest to 50.
+  const byDist = [...placed].sort((a, b) => Math.abs(b.spectrumPos - median) - Math.abs(a.spectrumPos - median));
+  const readers = placed.filter((p) => p.spectrumPrediction === majoritySide)
+    .sort((a, b) => Math.abs(a.spectrumPos - median) - Math.abs(b.spectrumPos - median));
+  const centered = [...placed].sort((a, b) => Math.abs(a.spectrumPos - 50) - Math.abs(b.spectrumPos - 50));
+  const spectrumAwards = [];
+  if (byDist[0] && Math.abs(byDist[0].spectrumPos - median) > 0) spectrumAwards.push({ kind: "Lonely Island", playerId: byDist[0].id });
+  if (readers[0]) spectrumAwards.push({ kind: "Mind Reader", playerId: readers[0].id });
+  if (centered[0] && centered[0].spectrumPos !== null) spectrumAwards.push({ kind: "Dead Center", playerId: centered[0].id });
+  return toPhase({ ...state, players, spectrumMedian: median, spectrumMajority: majoritySide, spectrumAwards }, "spectrumReveal", now);
 }
 function startSpectrum(state, now) {
   return toPhase({ ...state, players: state.players.map((p) => ({ ...freshPlayerFlags(p), spectrumPos: null, spectrumPrediction: null })) }, "spectrum", now, SPECTRUM_MS);
 }
 function finishToVote(state, now) {
   const ids = state.players.filter((p) => p.finishAnswer).map((p) => p.id);
-  return toPhase({ ...state, votes: {}, finishOrder: shuffle(ids, now % 100000) }, "finishVote", now, VOTE_MS);
+  return toPhase({ ...state, votes: {}, finishOrder: shuffle(ids, now % 100000), finishRevealStep: 0, finishAuthors: false }, "finishVote", now, VOTE_MS);
 }
 function revealFinish(state, now) {
   // Exact normalized duplicates pool their votes and split the points. No fuzzy matching.
@@ -288,7 +298,14 @@ export function applyAction(state, action, now, ctx = {}) {
       if (state.phase === "spectrumReveal") return { state: toPhase(state, "scores", now) };
       if (state.phase === "finishWrite") return { state: finishToVote(state, now) };
       if (state.phase === "finishVote") return { state: revealFinish(state, now) };
-      if (state.phase === "finishReveal") return { state: toPhase(state, "scores", now) };
+      if (state.phase === "finishReveal") {
+        // Host-paced reveal: step through the answers one by one (anonymous),
+        // then unmask the authors, then move to scores.
+        const step = state.finishRevealStep ?? 0;
+        if (step < state.finishOrder.length) return { state: { ...state, finishRevealStep: step + 1, updatedAt: now } };
+        if (!state.finishAuthors) return { state: { ...state, finishAuthors: true, updatedAt: now } };
+        return { state: toPhase(state, "scores", now) };
+      }
       if (state.phase === "remember") return { state: revealRemember(state, now) };
       if (state.phase === "rememberReveal") {
         if (state.qIndex + 1 >= state.rememberItems.length) return { state: toPhase(state, "finale", now) };
@@ -382,6 +399,7 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
           left: spectrumItem.left, right: spectrumItem.right,
           ...(state.phase === "spectrumReveal" ? {
             median: state.spectrumMedian, majority: state.spectrumMajority,
+            awards: state.spectrumAwards || [],
             placements: state.players.filter((p) => p.spectrumPos !== null).map((p) => ({ id: p.id, pos: p.spectrumPos })),
           } : {}),
         }
@@ -390,7 +408,17 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
       ? {
           prompt: finishItem,
           ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer }; }) } : {}),
-          ...(state.phase === "finishReveal" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return { id, text: p.finishAnswer, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints }; }) } : {}),
+          ...(state.phase === "finishReveal" ? {
+            authorsRevealed: !!state.finishAuthors,
+            totalCandidates: state.finishOrder.length,
+            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => {
+              const p = findPlayer(state, id);
+              const text = p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer;
+              return state.finishAuthors
+                ? { id, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints }
+                : { id, text };
+            }),
+          } : {}),
         }
       : null,
     remember: rememberItem && ["remember", "rememberReveal"].includes(state.phase)

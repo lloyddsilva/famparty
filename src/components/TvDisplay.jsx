@@ -109,6 +109,11 @@ export default function TvDisplay({ code }) {
             <span className="spectrum-end">{view.spectrum.right}</span>
           </div>
           {view.phase === "spectrum" ? <p className="sub">Place yourself on your phone — and predict where the crowd lands.</p> : <p className="sub">The crowd leans <strong>{view.spectrum.majority}</strong>. Who read the room best?</p>}
+          {view.phase === "spectrumReveal" && view.spectrum.awards?.length > 0 && (
+            <div className="player-grid tv-grid">
+              {view.spectrum.awards.map((a) => { const p = view.players.find((x) => x.id === a.playerId); return <div key={a.kind} className="player-chip">{a.kind === "Lonely Island" ? "🏝️" : a.kind === "Mind Reader" ? "🔮" : "🎯"} {a.kind}: {p?.avatar} {p?.name}</div>; })}
+            </div>
+          )}
         </div>
       )}
 
@@ -118,7 +123,13 @@ export default function TvDisplay({ code }) {
           <h2>{view.finishit.prompt.replace("___", "________")}</h2>
           {view.phase === "finishWrite" && <p className="sub">{view.players.filter((p) => p.hasAnswer).length}/{view.players.length} answers in — write yours on your phone.</p>}
           {view.phase === "finishVote" && <div className="choices">{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>}
-          {view.phase === "finishReveal" && <div className="choices">{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
+          {view.phase === "finishReveal" && !view.finishit.authorsRevealed && (
+            <>
+              <div className="choices">{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
+              <p className="sub">{view.finishit.candidates.length} of {view.finishit.totalCandidates} answers revealed — the host is dealing them out…</p>
+            </>
+          )}
+          {view.phase === "finishReveal" && view.finishit.authorsRevealed && <div className="choices">{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
         </div>
       )}
 

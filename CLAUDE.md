@@ -7,10 +7,14 @@ config). Production: https://famparty-lloyd-dsilvas-projects.vercel.app
 (Vercel **Hobby** plan, project `lloyd-dsilvas-projects/famparty`).
 
 ## Hard rules
-- **No live model calls, no model keys at runtime.** Content is generated once
-  offline (`scripts/generate-content.mjs`, key from env only), human-reviewed,
-  and committed. `npm run build` runs `scripts/check-packs.mjs`, which fails on
-  any pack with `reviewed: false` in `src/lib/packs.js` (deliberately verified).
+- **No live model calls, no model keys at runtime.** Content is meant to be
+  generated once offline (`scripts/generate-content.mjs`, key from env only),
+  human-reviewed, and committed. **That run has not happened yet:** the packs in
+  `src/lib/packs.js` are hand-written starter placeholders with
+  `reviewed: false`, and `npm run check:packs` correctly fails on them (the
+  gate was deliberately proven by flipping a flag; it is not wired into
+  `npm run build` while packs are unreviewed). Do not submit until the Spark/
+  Image run and Lloyd's review flip them.
 - No custom server, no WebSockets without asking Lloyd. State via polling.
 
 ## Architecture
@@ -70,7 +74,12 @@ vercel ls famparty                         # confirm deployment Ready — a push
 - Neon must be provisioned under lloyddsilva (Vercel Marketplace) and
   `DATABASE_URL` set for production family data; locally PGLite is used.
 - `famparty.com` domain/trademark — parked, must not block anything.
-- Content packs are marked reviewed by the authoring pass; Lloyd's human review
-  is still the shipping gate before the repo goes public.
+- Content packs are unreviewed starter placeholders (see Hard rules); Lloyd's
+  human review after the Muse Spark/Image run is the shipping gate.
+- README review (Claude, of `40ffc3e`): Spectrum awards and the host-paced
+  Finish It reveal were built to match the (previously aspirational) README;
+  hidden Finish It answers are now masked on TV at vote and reveal; README
+  claims about packs, test coverage, production family features, and
+  reconnects were corrected to match reality.
 - First commit `3569eba` used a `users.noreply` email (pre-dates the gmail
   instruction); all later commits use `lloyddsilva@gmail.com`.

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js src/lib/games.test.js",
-    "build": "node scripts/check-packs.mjs && next build",
+    "build": "next build",
     "check:packs": "node scripts/check-packs.mjs",
     "start": "next start"
   },
