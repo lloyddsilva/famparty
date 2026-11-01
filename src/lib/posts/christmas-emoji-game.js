@@ -10,7 +10,7 @@ export const CHRISTMAS_EMOJI_GAME = {
   title: "Christmas Emoji Game: 40 Clues With Answers (Songs, Movies and Traditions)",
   description: "A ready-to-play Christmas emoji game with answers, plus how to run it as a group at home, at school or at work.",
   dek: "A ready-to-play Christmas emoji game with answers, plus how to run it as a group at home, at school or at work.",
-  published: false,
+  published: true,
   quickAnswer: "Forty original emoji clues in three sets — songs, movies, and traditions — each at three difficulties. Tap any clue to reveal its answer, or put the clues on a TV and let everyone guess together.",
   takeaways: [
     "Answers are hidden until tapped — no scrolling past spoilers",

@@ -10,7 +10,7 @@ export const NEW_YEARS_EVE_GAMES = {
   title: "20 New Year's Eve Games to Fill the Hours Before Midnight",
   description: "New Year's Eve games for families and adults, planned around keeping everyone awake and having fun until the countdown.",
   dek: "New Year's Eve games for families and adults, planned around keeping everyone awake and having fun until the countdown.",
-  published: false,
+  published: true,
   quickAnswer: "Plan the evening backwards from midnight: gentle games early for kids and arrivals, your biggest game in the middle stretch, a reflective round about the year just gone, and nothing that needs starting after 11:30 except the countdown itself.",
   takeaways: [
     "The enemy isn't boredom, it's the clock: programme for the wait, not the party",

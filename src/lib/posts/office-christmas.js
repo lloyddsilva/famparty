@@ -10,7 +10,7 @@ export const OFFICE_CHRISTMAS = {
   title: "20 Office Christmas Party Games That Won't Make Anyone Groan",
   description: "Work-safe holiday party games for small teams and big rooms, including ideas that take five minutes and no budget.",
   dek: "Work-safe holiday party games for small teams and big rooms, including ideas that take five minutes and no budget.",
-  published: false,
+  published: true,
   quickAnswer: "Office games work when they're optional, short, and about preferences rather than people: nothing personal, nothing embarrassing, nothing that needs drinking to be fun. Sort by how much time and room you actually have, and let anyone watch instead.",
   takeaways: [
     "Optional is a feature: a watching role keeps it voluntary in practice, not just in the invite",
