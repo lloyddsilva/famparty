@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+test.slow();
 
 // Real browsers, real polling, separate storage per device — the closest
 // automated stand-in for 1 TV + host phone + 3 player phones.
@@ -37,7 +38,8 @@ test("TV + host + 3 phones play a round by polling", async ({ browser, baseURL }
   // players appear on the TV by polling alone
   for (let i = 0; i < 3; i++) await expect(tv.getByText(`Phone${i + 1}`)).toBeVisible();
 
-  await host.getByRole("button", { name: /Start Emoji Decoder/ }).click();
+  await host.getByRole("button", { name: /Start .*Emoji Decoder/ }).click();
+  await host.getByRole("button", { name: /Skip intro/ }).click();
   for (const { page } of phones) {
     await expect(page.locator(".btn-choice").first()).toBeVisible();
   }

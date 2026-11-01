@@ -4,6 +4,10 @@ import { createRoom, addPlayer, applyAction, advanceIfExpired, buildView, MIN_PL
 const QUESTION_MS_FOR_TEST = QUESTION_MS;
 
 const NOW = 1_000_000;
+function started(s, now = NOW) {
+  const out = applyAction(s, { type: "START" }, now);
+  return applyAction(out.state, { type: "NEXT" }, now).state;
+}
 function roomWithPlayers(n = 3) {
   let s = createRoom({ code: "TEST", hostTokenHash: "host", now: NOW });
   for (let i = 0; i < n; i++) {
@@ -13,13 +17,13 @@ function roomWithPlayers(n = 3) {
   return s;
 }
 
-test("start requires minimum players", () => {
-  const s = roomWithPlayers(2);
-  assert.equal(applyAction(s, { type: "START" }, NOW).error, `Need at least ${MIN_PLAYERS} players.`);
+test("start requires the per-game minimum (emoji works with 2)", () => {
+  assert.equal(applyAction(roomWithPlayers(1), { type: "START" }, NOW).error, "Need at least 2 players for this game.");
+  assert.ok(!applyAction(roomWithPlayers(2), { type: "START" }, NOW).error);
 });
 
 test("timer expiry advances question -> reveal via advanceIfExpired", () => {
-  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  let s = started(roomWithPlayers(3));
   assert.equal(s.phase, "question");
   s = advanceIfExpired(s, NOW + 999999);
   assert.equal(s.phase, "reveal");
@@ -28,13 +32,13 @@ test("timer expiry advances question -> reveal via advanceIfExpired", () => {
 });
 
 test("answer is hidden from the view during question phase", () => {
-  const s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const s = started(roomWithPlayers(3));
   const view = buildView(s, {});
   assert.equal(view.question.answer, undefined);
 });
 
 test("regression 1-2: simultaneous answers are all scored at reveal, in any order", () => {
-  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  let s = started(roomWithPlayers(3));
   // p1 and p2 answer "together"; the reveal is triggered by whichever lands —
   // both must score. Answer entries carry their own timestamps.
   const answers = {
@@ -50,7 +54,7 @@ test("regression 1-2: simultaneous answers are all scored at reveal, in any orde
 });
 
 test("late answer at/after the deadline scores nothing", () => {
-  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  let s = started(roomWithPlayers(3));
   const answers = { p0: { choice: 0, at: NOW + QUESTION_MS_FOR_TEST }, p1: { choice: 0, at: NOW + 100 } };
   s = scoreEmojiReveal(s, answers, NOW + QUESTION_MS_FOR_TEST);
   assert.equal(s.players.find((p) => p.id === "p0").score, 0);
@@ -58,13 +62,13 @@ test("late answer at/after the deadline scores nothing", () => {
 });
 
 test("regression 4: expected-phase guard rejects stale host taps", () => {
-  const s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const s = started(roomWithPlayers(3));
   assert.equal(assertExpectedPhase(s, "question"), null);
   assert.match(assertExpectedPhase(s, "reveal"), /Stale screen/);
 });
 
 test("regression 5: every question gets a fresh roundId", () => {
-  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  let s = started(roomWithPlayers(3));
   const first = s.roundId;
   s = applyAction(s, { type: "NEXT" }, NOW).state; // reveal
   s = applyAction(s, { type: "NEXT" }, NOW).state; // scores
@@ -73,14 +77,14 @@ test("regression 5: every question gets a fresh roundId", () => {
 });
 
 test("host NEXT reveals immediately regardless of deadline", () => {
-  const s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  const s = started(roomWithPlayers(3));
   const out = applyAction(s, { type: "NEXT" }, NOW + 1000);
   assert.equal(out.state.phase, "reveal");
   assert.equal(out.state.deadline, null);
 });
 
 test("pause/resume preserves remaining time", () => {
-  let s = applyAction(roomWithPlayers(3), { type: "START" }, NOW).state;
+  let s = started(roomWithPlayers(3));
   s = applyAction(s, { type: "PAUSE" }, NOW + 5000).state;
   assert.equal(s.paused, true);
   s = applyAction(s, { type: "RESUME" }, NOW + 60000).state;

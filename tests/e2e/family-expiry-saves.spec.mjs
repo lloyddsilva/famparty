@@ -26,6 +26,7 @@ test("concurrent expiry pollers save truths exactly once", async ({ baseURL }) =
 
   await post(`/api/rooms/${code}/actions`, { type: "SELECT_GAME", game: "spotlight", token: hostToken, expectedPhase: "lobby" });
   await post(`/api/rooms/${code}/actions`, { type: "START", token: hostToken, expectedPhase: "lobby" });
+  await post(`/api/rooms/${code}/actions`, { type: "NEXT", token: hostToken, expectedPhase: "howto" });
   for (let i = 0; i < 3; i++) {
     await post(`/api/rooms/${code}/actions`, {
       type: "SUBMIT_STATEMENTS", token: players[i].playerToken,

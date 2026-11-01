@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const noStore = { "Cache-Control": "no-store" };
 const bad = (error, status = 400) => NextResponse.json({ ok: false, error }, { status, headers: noStore });
 
-const HOST_ACTIONS = new Set(["START", "NEXT", "PLAY_AGAIN", "LOCK", "PAUSE", "RESUME", "KICK", "SELECT_GAME", "BEGIN_SPOTLIGHT", "HIDE"]);
+const HOST_ACTIONS = new Set(["START", "NEXT", "PLAY_AGAIN", "LOCK", "PAUSE", "RESUME", "KICK", "SELECT_GAME", "BEGIN_SPOTLIGHT", "HIDE", "NEXT_GAME", "SET_RELAXED"]);
 const PLAYER_ACTIONS = new Set(["SUBMIT_STATEMENTS", "SET_WATCH", "VOTE", "PLACE", "FINISH_SUBMIT", "STORY_SAVE"]);
 const cleanText = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
@@ -30,6 +30,7 @@ export async function POST(req, { params }) {
       const me = state0.players.find((p) => p.tokenHash === tokenHash);
       if (!me) return bad("Unknown player.", 403);
       if (!(await rateLimit(`act:${me.id}`, 120, 60))) return bad("Too many actions.", 429);
+      if (me.waiting) return bad("You're in — you'll play from the next round.");
       if (state0.phase !== "question" || state0.paused) return bad("Not accepting answers right now.");
       if (state0.deadline && now > state0.deadline) return bad("Time is up for this round.");
       if (!isChoice(body.choice, QUESTIONS[state0.qIndex].choices.length)) return bad("Invalid choice.");
@@ -58,6 +59,7 @@ export async function POST(req, { params }) {
       if (phaseError) return bad(phaseError, 409);
       action = { type: body.type };
       if (body.type === "LOCK") action.locked = !!body.locked;
+      if (body.type === "SET_RELAXED") action.relaxed = !!body.relaxed;
       if (body.type === "SELECT_GAME") action.game = String(body.game || "");
       if (body.type === "KICK") {
         if (!state0.players.some((p) => p.id === body.playerId)) return bad("Player not found.");

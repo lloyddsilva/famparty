@@ -106,7 +106,7 @@ Everyone privately completes the same sentence ("The secret to surviving a famil
 - **Design moments:** the one-at-a-time anonymous reveal (comic timing matters — the host controls the pace) and the author unmasking.
 - **Care points:** 80-character answers, exact-duplicate answers pool their votes, answers are moderated by host hide before anyone knows whose they are.
 
-### 🧠 Remember This? — *the memory game (family album only)*
+### 🧠 the memory game (currently unavailable) — *the memory game (family album only)*
 True statements saved from earlier Spotlight sessions resurface: "I once met a penguin." Whose was it? Everyone guesses; the writer can't score on their own.
 - **Feels like:** proof the family has a history. It rewards returning and turns last month's game into tonight's content.
 - **Design moment:** the "from a previous show" framing — this should feel like opening a family album, not a quiz rerun.
@@ -119,7 +119,7 @@ Any group can play anonymously tonight. A **family album** is for groups who com
 - The link holds a **roster**: the family's actual people (Mum 🦊, Grandpa 🦄…). Joining through the link means picking *your* roster member, so scores, authorship, and history attach to the person — not to whatever name they typed tonight.
 - Two links per family: a **member link** (play + view) and an **owner link** (everything, plus export and delete). Deleting a family requires typing a confirmation, and it's permanent.
 - **What gets saved** (and only this): true statements from Spotlight (each with a per-statement "don't save this" opt-out), saved one-line stories, and game scores per member. Players are told at join when a room is album-linked. Room play itself is never recorded.
-- **Why it matters:** it's the difference between "a fun website we used once" and "our family's game." Remember This? only exists because the link does.
+- **Why it matters:** it's the difference between "a fun website we used once" and "our family's game." the memory game (currently unavailable) only exists because the link does.
 
 Family pages are quiet, private-feeling pages — no marketing, no trackers or third-party scripts, `noindex` headers, `Referrer-Policy: no-referrer`. Design them like a private album, not like the show.
 
@@ -228,8 +228,8 @@ FamParty is a Meta hackathon entry. Accurate status:
 
 ## 15. Current state & honest gaps
 
-- All five games, the family album, roster, and Remember This? are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
-- **Production status:** family features and Remember This? work on the live URL. The whole app runs on two services — Vercel and Upstash Redis (rooms and albums in one store; albums expire automatically 60 days after last activity). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
+- All four games, the family album, roster, and the memory game (currently unavailable) are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
+- **Production status:** family features and the memory game (currently unavailable) work on the live URL. The whole app runs on two services — Vercel and Upstash Redis (rooms and albums in one store; albums expire automatically 60 days after last activity). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
 - The Spectrum awards (*Lonely Island*, *Mind Reader*, *Dead Center*) and the host-paced Finish It reveal are implemented in the engine and TV view; the earlier README described them before they existed.
 - The visual design is the light "poster" redesign (design handoff turn 4, implemented Oct 31): lavender-white background, Gelasio/Outfit self-hosted type, pastel game cards, dark-framed TV. Keep routes, phases, and control inventories; visual details live in `src/app/globals.css` and the marketing IA in section 6 of this README's sibling files (`src/lib/siteContent.js`).
 - Known non-design gaps: the famparty.com domain is unregistered at time of writing; the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.

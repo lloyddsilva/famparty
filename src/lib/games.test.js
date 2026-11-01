@@ -10,7 +10,11 @@ function room(game, n = 4) {
   s = applyAction(s, { type: "SELECT_GAME", game }, NOW).state;
   return s;
 }
-const act = (s, a, now = NOW) => applyAction(s, a, now).state;
+const act = (s, a, now = NOW) => {
+  let out = applyAction(s, a, now);
+  if (a.type === "START" && out.state.phase === "howto") out = applyAction(out.state, { type: "NEXT" }, now);
+  return out.state;
+};
 
 test("spotlight: prep -> start anyway makes unfinished just-watch; lie vote scores both sides", () => {
   let s = room("spotlight");
@@ -122,19 +126,7 @@ test("finishit: host-hidden answers stay hidden on the TV at vote and reveal", (
   assert.equal(hostView.finishit.candidates[s.finishOrder.indexOf("p0")].text, "something rude");
 });
 
-test("remember: writer cannot score on their own statement", () => {
-  let s = room("remember");
-  const items = [{ id: "st1", text: "I once met a penguin", writerMemberId: "m0", writerName: "P0" }];
-  s = act(s, { type: "START", items });
-  assert.equal(s.phase, "remember");
-  s = act(s, { type: "VOTE", playerId: "p1", choice: "m0" });
-  s = act(s, { type: "VOTE", playerId: "p2", choice: "m1" });
-  s = act(s, { type: "VOTE", playerId: "p3", choice: "m0" });
-  // p0 is the writer and does not guess; all guessers are in -> reveal
-  assert.equal(s.phase, "rememberReveal");
-  assert.equal(s.players.find((p) => p.id === "p1").score, 250);
-  assert.equal(s.players.find((p) => p.id === "p0").score, 0);
-});
+
 
 test("kick: kicking the featured Spotlight player skips their turn instead of hanging", () => {
   let s = room("spotlight");

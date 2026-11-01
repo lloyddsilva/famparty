@@ -1,81 +1,50 @@
 # FamParty — 3-minute demo script
 
 **URL on screen:** https://famparty.vercel.app
-**Setup before recording:** laptop on the TV (HDMI or cast tab), host phone, 3 player phones, plus extra browser sessions as players for the montage (step 0). The recorded room is a **family-linked room started from the family page**, with players joining as roster members. All people and statements in this demo are invented.
+**Setup:** TV or laptop on the big screen, host phone, 3 player phones. Everyone and everything in this demo is invented. Timings are targets — rehearse once with a stopwatch.
 
 ---
 
-### 0:00–0:15 — Theme and value, up front
-*TV shows the landing page. Host phone in hand.*
+### 0:00–0:20 — What it is
+*TV shows the landing page.*
 
-> [LLOYD — PLACEHOLDER: one honest sentence about your own family and why you built this. Do not script this for him.]
+> [LLOYD — PLACEHOLDER: one honest sentence about your own family and why you built this.]
 >
-> "It's a party game that remembers your family, so it gets better every time you play."
+> "It's a party game show that runs on your TV and everyone's phones. No accounts, no app. Watch how fast this room fills."
 
-### 0:15–0:40 — Start from the family, join as yourselves
-*Host phone shows the family page (The River Family, seeded in step 0).*
+### 0:20–0:45 — TV-first start (the whole setup)
+- On the TV, tap **Start on this screen**. The big QR code and room code appear.
+- Three players scan, type a name, tap **I'm in**. The first scanner gets a "You're the host" message — their phone now runs the show *and* plays.
+- Avatars land on the TV lobby. Point at it: "That's the setup. Under a minute, and nobody installed anything."
 
-> "We start from our family page — these are our people, on the roster. I tap Start a family show…"
+### 0:45–1:30 — Emoji Decoder + Spotlight (two games, one room)
+- Host taps **Start**. A 5-second "How to play" card is on the TV; let it run once so the room hears the one-sentence rules.
+- Play two Emoji Decoder rounds: big emoji, four choices per phone, leaderboard on TV.
+- Between games, the host taps **Next: Spotlight** on the podium screen. Scores carry over; nobody rejoins.
+- Spotlight: statements were written in prep (write these off-camera if time is tight). One vote, one reveal, and the 30-second story beat — the featured player talks.
 
-- Host taps **Start a family show** on the family page. This device becomes the host remote; the TV opens the display link: big QR code + room code.
-- Three players scan the QR code and tap **Join as Ana / Ben / Cleo** — no typed names, they're roster members. Avatars pop onto the TV lobby.
-- Point at the TV: "Scores and stories attach to *us*, not to a name typed tonight."
+### 1:30–2:15 — Spectrum and Finish It (the other two)
+- **Next: Spectrum.** Everyone places themselves, predicts the crowd, and the dots land at once. Call out the Lonely Island.
+- **Next: Finish It.** One prompt, anonymous answers dealt onto the TV one by one, voting, authors unmasked.
+- Podium. Someone points at the TV. That's the shot.
 
-### 0:40–1:25 — Spotlight, with the story beat (the heart)
-*Host picks Spotlight on the host phone.*
+### 2:15–2:45 — Built with Muse
+*Editor on screen.*
 
-> "Spotlight is two truths and a lie. Everyone writes theirs privately — the host can start without waiting, and anyone unfinished just watches."
+> "Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — the whole app, engine, tests and content pipeline. Content is generated once, offline, with Muse Spark and Muse Image, then a person reads every line before it ships."
 
-- Cut to: statements already written (prep off-camera). Spotlight opens on Ana; the three statements are on TV, the lie shuffled in.
-- Other players vote on their phones. Reveal: who was fooled, who spotted it; Ana scores for every person she fooled.
-- **Story beat:** the TV hands her the microphone for 30 seconds. She *talks* — "You should be talking, not typing."
-- Afterward: the optional one-line save appears ("Save a line for the family album?"). Show it saving to the family album.
+- Show `scripts/generate-content.mjs`, the committed outputs, one pack, and `npm run pre-submit` passing.
+- "The running app makes **no live model calls** and holds **no model API keys**."
 
-### 1:25–1:55 — Remember This? (from a previous show)
-*Same room, back to the lobby. Host picks Remember This?*
+### 2:45–3:00 — Close
+*Landing page.*
 
-> "This statement isn't from tonight. It's from a **previous show** — the family album saved it, and now it's tonight's game."
-
-- A true statement seeded in step 0 (from the earlier session, not the round just played) is on TV.
-- Players guess who wrote it. The writer can't score on their own — then the reveal.
-- Quick cut to the family page: roster, cumulative scores, the saved statements list.
-
-### 1:55–2:35 — The room at full stretch (montage, ~40s)
-Fast cuts, 3–4 seconds each. The montage room has **6+ players**: the 3 phones plus extra browser sessions joined as players (step 0).
-- Emoji Decoder round with 6+ avatars on the TV and phones tapping.
-- Spectrum reveal — make sure the placements visibly **spread**: players deliberately choose spread-out positions in rehearsal so the dots scatter, and the *Lonely Island* and *Mind Reader* awards land.
-- Finish It: answers dealt onto the TV one by one, voting opens, author unmasked.
-- The podium. Someone points at the TV and laughs. End on the leaderboard.
-
-### 2:35–3:00 — How it was built (OpenCode + content scripts)
-*Editor on screen. Record this segment only once the content run and Lloyd's pack review are done.*
-
-> "Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — the whole app, engine, tests and this content pipeline. The games run on content packs generated once, offline, with Muse Spark for text and Muse Image for the title-card art…"
-
-- Show `scripts/generate-content.mjs` and `content/outputs/` (prompts and raw outputs are committed).
-- Show one pack in `src/lib/packs.js` with `reviewed: true`, then `npm run pre-submit` **passing** on screen.
-
-> "…and the packs in this build were reviewed by a person before they shipped — that's me, reading every line. The running app makes **no live model calls** and holds **no model API keys** — it runs on database and Redis credentials, and the games serve committed content plus whatever your room types in."
-
-*Final frame: landing page.*
-
-> "FamParty. One big screen — everyone plays."
+> "Four games, one room, zero signup. FamParty — party with the fam."
 
 ---
 
-## Pre-recording checklist
-
-**Step 0 — seed the family and the earlier session (before recording):**
-1. On the **live site**, open `/family`, create "The River Family" (invented name). Keep the **owner link** somewhere safe.
-2. Add 4 roster members (invented): Ana 🦊, Ben 🐼, Cleo 🦄, Dan 🐸.
-3. From the family page, start a family show and play **one full Spotlight game** on a TV + phones. This is the *previous show*: its saved true statements are what Remember This? deals in the recording. Confirm on the family page that statements and scores stuck.
-4. For the montage, prepare extra browser sessions (separate browser profiles/windows) that can join as additional players to reach 6+; in the Spectrum rehearsal, agree spread-out placements in advance.
-5. Rehearse the exact recorded sequence once, end to end, on the live URL.
-
-**On the day:**
-- [ ] TV on the live URL (**not** localhost), phones on Wi-Fi and one on cellular
-- [ ] No redeploy during recording
-- [ ] `npm run pre-submit` passes (packs reviewed by Lloyd, model outputs committed, live build == HEAD, production DB healthy) before claiming anything is submission-ready
-- [ ] Nobody uses a real family member's name or a true personal statement on camera — Lloyd's one personal sentence in the opening is his choice, and his only real-data moment
-
-**Claims to avoid on camera:** "playing in under a minute" (untimed on real devices), any real family's data, anything comparing us to an existing game or TV show by name.
+## Before recording
+- [ ] Rehearse this exact sequence once on the live URL with the stopwatch running
+- [ ] TV on the live URL (not localhost); one phone on cellular; nobody redeploys mid-show
+- [ ] `npm run pre-submit` passes (packs reviewed by Lloyd, outputs committed, live build == HEAD)
+- [ ] No real family names or true personal statements on camera — the placeholder line is Lloyd's only real-data moment

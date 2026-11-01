@@ -68,6 +68,7 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
   {
     const r = await newRoom("emoji");
     await act(r.code, r.hostToken, "START", {}, "lobby");
+    await act(r.code, r.hostToken, "NEXT", {}, "howto");
     for (let round = 0; round < 10; round++) {
       for (const p of r.players) await post(`/api/rooms/${r.code}/actions`, { type: "ANSWER", token: p.playerToken, choice: 0 });
       if (round === 0) {
@@ -90,6 +91,7 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
   {
     const r = await newRoom("spotlight");
     await act(r.code, r.hostToken, "START", {}, "lobby");
+    await act(r.code, r.hostToken, "NEXT", {}, "howto");
     for (const p of r.players.slice(0, 4)) {
       await post(`/api/rooms/${r.code}/actions`, { type: "SUBMIT_STATEMENTS", token: p.playerToken, texts: [LONG_STATEMENT.slice(0, 120), LONG_STATEMENT.slice(0, 119) + "!", LONG_STATEMENT.slice(0, 118) + "!!"], lieIndex: 1, dontSave: [false, false, false] });
     }
@@ -108,6 +110,7 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
   {
     const r = await newRoom("finishit");
     await act(r.code, r.hostToken, "START", {}, "lobby");
+    await act(r.code, r.hostToken, "NEXT", {}, "howto");
     for (const p of r.players) await post(`/api/rooms/${r.code}/actions`, { type: "FINISH_SUBMIT", token: p.playerToken, text: LONG_ANSWER.slice(0, 80) });
     expect((await state(r.code)).phase).toBe("finishPresent");
     for (let i = 0; i < 12; i++) await act(r.code, r.hostToken, "NEXT", {}, "finishPresent");
@@ -122,34 +125,6 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
     }
     expect((await state(r.code)).phase).toBe("finishReveal");
     await measure(r.code, "finishReveal (12 max answers)");
-  }
-
-  // ---- Remember This?
-  {
-    const fam = await post("/api/families", { name: "Phase Test Family" });
-    const members = [];
-    for (let i = 0; i < 4; i++) members.push((await post(`/api/families/${fam.memberToken}`, { action: "addMember", name: `Mem${i + 1}`, avatar: AV[i] })).member);
-    const seed = await post("/api/rooms", { familyToken: fam.memberToken });
-    const seedPlayers = [];
-    for (const m of members) seedPlayers.push(await post(`/api/rooms/${seed.code}/join`, { memberId: m.id, familyToken: fam.memberToken }));
-    await act(seed.code, seed.hostToken, "SELECT_GAME", { game: "spotlight" }, "lobby");
-    await act(seed.code, seed.hostToken, "START", {}, "lobby");
-    for (const p of seedPlayers) await post(`/api/rooms/${seed.code}/actions`, { type: "SUBMIT_STATEMENTS", token: p.playerToken, texts: [LONG_STATEMENT.slice(0, 120), "truth two", "a lie"], lieIndex: 2, dontSave: [false, false, false] });
-    await act(seed.code, seed.hostToken, "BEGIN_SPOTLIGHT", {}, "prep");
-    for (let turn = 0; turn < 4; turn++) {
-      const st = await state(seed.code);
-      for (const p of seedPlayers) if (p.playerId !== st.spotlight.featuredId) await post(`/api/rooms/${seed.code}/actions`, { type: "VOTE", token: p.playerToken, choice: 0 });
-      await act(seed.code, seed.hostToken, "NEXT", {}, "spotlightReveal");
-      await act(seed.code, seed.hostToken, "NEXT", {}, "story");
-      await act(seed.code, seed.hostToken, "NEXT", {}, "storySave");
-    }
-    await new Promise((r) => setTimeout(r, 1500));
-    const r2 = await post("/api/rooms", { familyToken: fam.memberToken });
-    for (const m of members) await post(`/api/rooms/${r2.code}/join`, { memberId: m.id, familyToken: fam.memberToken });
-    await act(r2.code, r2.hostToken, "SELECT_GAME", { game: "remember" }, "lobby");
-    const started = await act(r2.code, r2.hostToken, "START", {}, "lobby");
-    expect(started.ok, JSON.stringify(started)).toBeTruthy();
-    await measure(r2.code, "remember");
   }
 
   for (const r of results) console.log(`PHASE ${r.phase} @ ${r.viewport}: contentOverflow=${r.maxOverflow}px frameH=${r.frameH} fits=${r.fits}`);

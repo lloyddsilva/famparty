@@ -1,24 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogoMark } from "./Logo";
 import { useRoom, useCountdown } from "./useRoom";
+import PlayerGame from "./PlayerGame";
+import HostBar from "./HostBar";
 import { Leaderboard } from "./SharedViews";
+import { LogoMark } from "./Logo";
+import { AVATARS } from "../lib/questions";
+
+const GAME_OPTIONS = [
+  ["emoji", "🧩 Emoji Decoder", "Guess the phrase from the emojis"],
+  ["spotlight", "🎤 Spotlight", "Two truths and a lie"],
+  ["spectrum", "🎚️ Spectrum", "Place yourself, predict the crowd"],
+  ["finishit", "✍️ Finish It", "Funniest ending wins"],
+];
+const GAME_MIN = { emoji: 2, spectrum: 2, spotlight: 3, finishit: 3 };
 
 export default function HostRemote() {
   const [room, setRoom] = useState(null); // {code, hostToken}
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [setupName, setSetupName] = useState("");
+  const [setupAvatar, setSetupAvatar] = useState(AVATARS[0]);
+  const [playerCreds, setPlayerCreds] = useState(null);
+  const [changeGame, setChangeGame] = useState(false);
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    // host handover link: /host?code=XXXX&token=...
+    if (params.get("code") && params.get("token")) {
+      localStorage.setItem("famparty:hostCode", params.get("code").toUpperCase());
+      localStorage.setItem("famparty:hostToken", params.get("token"));
+      setRoom({ code: params.get("code").toUpperCase(), hostToken: params.get("token") });
+      return;
+    }
     const code = localStorage.getItem("famparty:hostCode");
     const hostToken = localStorage.getItem("famparty:hostToken");
     if (code && hostToken) setRoom({ code, hostToken });
+    const pc = localStorage.getItem("famparty:playerCode");
+    const pt = localStorage.getItem("famparty:playerToken");
+    if (pc && pt && pc === code) setPlayerCreds({ code: pc, playerToken: pt });
   }, []);
 
   const { view, act, gone, serverNow } = useRoom(room?.code, { role: "host", token: room?.hostToken || "" });
   const seconds = useCountdown(view, serverNow);
-  // Host actions carry the phase on screen so stale taps are rejected server-side (item 4).
+  const { view: playerView, act: playerAct } = useRoom(playerCreds?.code, { role: "player", token: playerCreds?.playerToken || "" });
+  const me = playerView?.me;
+
   const hostAct = async (a) => {
     const data = await act({ ...a, expectedPhase: view?.phase, expectedStep: view?.finishit?.candidates.length ?? 0 });
     if (data && data.ok === false) setError(data.error || "That action did not go through — your screen may be out of date.");
@@ -46,133 +75,113 @@ export default function HostRemote() {
     setRoom({ code: data.code, hostToken: data.hostToken });
   }
 
+  async function playAsHost() {
+    setBusy(true); setError("");
+    const savedToken = localStorage.getItem("famparty:playerToken") || undefined;
+    const res = await fetch(`/api/rooms/${room.code}/join`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: setupName || "Host", avatar: setupAvatar, playerToken: savedToken }),
+    });
+    const data = await res.json();
+    setBusy(false);
+    if (!data.ok) return setError(data.error || "Could not join as a player.");
+    localStorage.setItem("famparty:playerCode", data.code);
+    localStorage.setItem("famparty:playerToken", data.playerToken);
+    setPlayerCreds({ code: data.code, playerToken: data.playerToken });
+  }
+
   if (!room) {
     return (
       <main className="shell">
         <div className="card center">
-          <p className="eyebrow">HOST REMOTE · ON YOUR PHONE</p>
-          <h2>Create the room here</h2>
-          <p className="sub">You run the show from this phone. The TV only displays — open the TV link shown after you create the room.</p>
+          <span style={{ display: "block", marginBottom: 10, textAlign: "left" }}><LogoMark size={32} /></span>
+          <span className="sticker">Host remote</span>
+          <h2 style={{ marginTop: 14 }}>Create the room here</h2>
+          <p className="sub">You run the show from this phone. Put the show on the TV with the code shown next.</p>
           {error && <p className="error">{error}</p>}
           <button className="btn primary big" disabled={busy} onClick={create}>{busy ? "Creating…" : "Create room"}</button>
           <p className="sub" style={{ fontSize: ".85rem", textAlign: "center" }}>By playing you agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
-
         </div>
       </main>
     );
   }
 
-  const tvUrl = typeof window !== "undefined" ? `${window.location.origin}/tv/${room.code}` : "";
-  const canStart = (view?.players.length ?? 0) >= 3;
+  const tvShort = typeof window !== "undefined" ? `${window.location.host}/tv` : "/tv";
+  const canStart = view && view.players.length >= (GAME_MIN[view.game] ?? 3);
+  const missing = view ? Math.max(0, (GAME_MIN[view.game] ?? 3) - view.players.length) : 0;
+  const shareTv = async () => {
+    const text = `Put this on the TV: ${tvShort} — then type the code ${room.code}`;
+    try {
+      if (navigator.share) { await navigator.share({ text }); setCopied("Shared"); return; }
+      throw new Error("no share");
+    } catch {
+      try { await navigator.clipboard.writeText(`${tvShort} (code ${room.code})`); setCopied("Copied"); }
+      catch { setCopied(`${tvShort} · code ${room.code}`); }
+    }
+  };
 
   return (
     <main className="shell">
       <div className="card">
         <span style={{ display: "block", marginBottom: 10 }}><LogoMark size={32} /></span>
         <span className="sticker">Host remote</span>
-        <h2 style={{ fontSize: "1.9rem", marginTop: 12 }}>Room {room.code} {view ? <span className="player-chip" style={{ fontSize: ".85rem", verticalAlign: "middle" }}>{view.players.length} in{view.locked ? " · 🔒" : ""}</span> : null}</h2>
+        <h2 style={{ fontSize: "1.9rem", marginTop: 12 }}>Room {room.code}</h2>
+
+        <div style={{ background: "var(--dark)", color: "#fff", borderRadius: 24, padding: "18px 20px", margin: "14px 0" }}>
+          <p style={{ margin: 0, color: "var(--yellow)", textTransform: "uppercase", letterSpacing: ".08em", fontSize: ".75rem", fontWeight: 700 }}>Show on TV</p>
+          <p style={{ margin: "8px 0 2px", fontSize: "1.35rem", fontWeight: 800 }}>{tvShort}</p>
+          <p style={{ margin: 0, color: "#c9c2f2" }}>then type the code <strong style={{ color: "#fff", letterSpacing: ".2em" }}>{room.code}</strong></p>
+          <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <button className="btn" onClick={shareTv}>📤 Share</button>
+            <button className="btn" onClick={async () => { try { await navigator.clipboard.writeText(`${tvShort} (code ${room.code})`); setCopied("Copied"); } catch { setCopied(`${tvShort} · ${room.code}`); } }}>📋 Copy</button>
+            {copied && <span style={{ alignSelf: "center" }}>{copied}</span>}
+          </div>
+        </div>
+
+        {error && <p className="error">{error}</p>}
         {!view && <p className="sub">Connecting…</p>}
-        {error && view && <p className="error">{error}</p>}
+
+        {view && !playerCreds && view.phase === "lobby" && (
+          <div style={{ border: "1.5px solid var(--divider)", borderRadius: 18, padding: 16, marginBottom: 14 }}>
+            <b>Play along on this phone?</b>
+            <label>Your name<input value={setupName} onChange={(e) => setSetupName(e.target.value.slice(0, 16))} placeholder="e.g. Alex" /></label>
+            <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} className={`avatar ${setupAvatar === a ? "selected" : ""}`} onClick={() => setSetupAvatar(a)}>{a}</button>)}</div>
+            <button className="btn primary big" disabled={busy} onClick={playAsHost}>{busy ? "Joining…" : "▶ Play & host"}</button>
+            <p className="center" style={{ margin: "8px 0 0" }}><button type="button" className="link" onClick={() => setPlayerCreds({ skipped: true })}>I'm just running it</button></p>
+          </div>
+        )}
+        {playerCreds?.skipped && view.phase === "lobby" && <p className="sub center">You're just running it — you won't play. <button type="button" className="link" onClick={() => setPlayerCreds(null)}>Play instead</button></p>}
+
         {view && (
           <>
-            <div style={{ background: "var(--dark)", color: "#fff", borderRadius: 24, padding: "18px 20px", marginBottom: 16 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}>
-                <p style={{ margin: 0, color: "var(--yellow)", textTransform: "uppercase", letterSpacing: ".08em", fontSize: ".72rem", fontWeight: 700 }}>
-                  {{ emoji: "Emoji Decoder", spotlight: "Spotlight", spectrum: "Spectrum", finishit: "Finish It", remember: "Remember This?" }[view.game] || view.game}
-                  {view.phase === "question" || view.phase === "reveal" || view.phase === "scores" ? ` · Round ${view.qIndex + 1}/${view.totalQuestions}` : ""}
-                </p>
-                {(view.deadline || view.paused) && <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem", whiteSpace: "nowrap" }}>{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? ""}s`}</p>}
-              </div>
-              <p style={{ margin: "8px 0 0", fontFamily: "Gelasio, Georgia, serif", fontWeight: 700, fontSize: "2rem" }}>
-                {view.phase === "question" ? `${view.answeredCount} of ${view.players.length} answered`
-                  : view.phase === "prep" ? `${view.players.filter((p) => p.ready).length} of ${view.players.length} ready`
-                  : view.phase === "lobby" ? `${view.players.length} in the room`
-                  : view.phase === "finale" ? "Final results"
-                  : `${view.players.length} in the room`}
-              </p>
-              {view.phase === "question" && (
-                <div style={{ height: 8, background: "rgba(255,255,255,.18)", borderRadius: 99, overflow: "hidden", marginTop: 10 }}>
-                  <div style={{ height: "100%", width: `${view.players.length ? (view.answeredCount / view.players.length) * 100 : 0}%`, background: "var(--yellow)" }} />
-                </div>
-              )}
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 12, fontSize: "1.25rem" }}>
-                {view.players.map((p) => (
-                  <span key={p.id} title={p.name} style={{ opacity: view.phase === "question" ? (p.answered ? 1 : .35) : (p.connected ? 1 : .35) }}>{p.avatar}</span>
-                ))}
-              </div>
-              <p style={{ margin: "12px 0 0", color: "#c9c2f2", fontSize: ".9rem" }}>TV: <strong style={{ color: "#fff" }}>{tvUrl.replace(/^https?:\/\//, "")}</strong></p>
-            </div>
+            <HostBar view={view} hostAct={hostAct} />
+
             {view.phase === "lobby" && (
               <>
-                <div className="choices">
-                  {[["emoji", "🧩 Emoji Decoder", "Guess the phrase from emojis"], ["spotlight", "🎤 Spotlight", "Two truths and a lie"], ["spectrum", "🎚️ Spectrum", "Place yourself, predict the crowd"], ["finishit", "✍️ Finish It", "Funniest ending wins"], ["remember", "🧠 Remember This?", "Whose true statement is this?"]].map(([g, label, desc]) => (
-                    <button key={g} className={`choice btn-choice ${view.game === g ? "correct" : ""}`} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}><b>{label}</b><br /><small>{desc}</small></button>
-                  ))}
-                </div>
                 <button className="btn primary big" disabled={!canStart} onClick={() => hostAct({ type: "START" })}>
-                  ▶ Start {view.game === "emoji" ? "Emoji Decoder" : view.game === "spotlight" ? "Spotlight — writing time" : view.game === "spectrum" ? "Spectrum" : view.game === "finishit" ? "Finish It" : "Remember This?"}
+                  ▶ Start {GAME_OPTIONS.find(([g]) => g === view.game)?.[1] || "Emoji Decoder"}
                 </button>
-                {!canStart && <p className="sub center">Need at least 3 players ({view.players.length}/3).</p>}
-                {view.game === "remember" && !view.familyLinked && <p className="error">Remember This? needs a family-linked room with saved statements. Create the room from your family page.</p>}
-                <button className="btn big" onClick={() => hostAct({ type: "LOCK", locked: !view.locked })}>{view.locked ? "🔓 Unlock room" : "🔒 Lock room"}</button>
+                {!canStart && <p className="sub center">Waiting for {missing} more player{missing === 1 ? "" : "s"} — show the QR on the TV so people can scan in.</p>}
+                <button className="btn big" onClick={() => setChangeGame((c) => !c)}>Change game</button>
+                {changeGame && (
+                  <div className="choices">
+                    {GAME_OPTIONS.map(([g, label, desc]) => (
+                      <button key={g} className={`choice btn-choice ${view.game === g ? "correct" : ""}`} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}><b>{label}</b><br /><small>{desc}</small></button>
+                    ))}
+                  </div>
+                )}
               </>
             )}
-            {view.phase === "prep" && (
-              <>
-                <p className="sub center">{view.players.filter((p) => p.ready).length} ready · {view.players.filter((p) => p.watching).length} just watching · {view.players.filter((p) => !p.ready && !p.watching).length} still writing</p>
-                <button className="btn primary big" onClick={() => hostAct({ type: "BEGIN_SPOTLIGHT" })}>▶ Start anyway — unfinished players just watch</button>
-              </>
-            )}
-            {["spotlight", "story", "spectrum", "finishWrite", "remember"].includes(view.phase) && (
-              <>
-                <p className="sub center">{view.phase === "spotlight" ? `${view.votedCount} ${view.votedCount === 1 ? "vote" : "votes"} in` : view.phase === "story" ? "Story beat — featured player is talking" : "Round in progress"}</p>
-                <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
-                <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.phase === "story" ? "End story beat →" : "Skip / reveal now →"}</button>
-              </>
-            )}
-            {["spotlightReveal", "spectrumReveal", "finishReveal", "rememberReveal", "storySave"].includes(view.phase) && (
-              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>
-                {view.phase === "spotlightReveal" ? "Start story beat →"
-                  : view.phase === "storySave" ? "Next player →"
-                  : view.phase === "finishReveal" ? "Show scores →"
-                  : "Show scores / next →"}
-              </button>
-            )}
-            {view.phase === "finishPresent" && (
-              <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>
-                {(view.finishit?.candidates.length ?? 0) < (view.finishit?.totalCandidates ?? 0)
-                  ? `Reveal answer ${(view.finishit?.candidates.length ?? 0) + 1}/${view.finishit?.totalCandidates ?? 0} →`
-                  : "Open voting →"}
-              </button>
-            )}
-            {view.phase === "finishVote" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Close voting →</button>}
-            {view.phase === "question" && (
-              <>
-                <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
-                <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Reveal answer now →</button>
-              </>
-            )}
-            {view.phase === "reveal" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Show scores →</button>}
-            {view.phase === "scores" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.qIndex + 1 >= view.totalQuestions ? "Final results →" : "Next round →"}</button>}
-            {view.phase === "finale" && <button className="btn primary big" onClick={() => hostAct({ type: "PLAY_AGAIN" })}>↺ Back to lobby</button>}
-            {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} />}
-
-            <div>
-              <p className="sub" style={{ margin: "18px 0 4px", fontWeight: 700 }}>Players · 🙈 hide on TV · ✕ remove (every phase)</p>
-              <div className="player-grid" style={{ justifyContent: "flex-start", margin: "8px 0" }}>
-              {view.players.map((p) => (
-                <div key={p.id} className="player-chip">{p.avatar} {p.name}
-                  <button className="kick" title={p.hidden ? "Unhide name/text on TV" : "Hide name/text on TV"} onClick={() => hostAct({ type: "HIDE", targetId: p.id, hidden: !p.hidden })}>{p.hidden ? "👁" : "🙈"}</button>
-                  <button className="kick" title="Kick" onClick={() => hostAct({ type: "KICK", playerId: p.id })}>✕</button>
-                </div>
-              ))}
-              {view.players.length === 0 && <p className="sub">Waiting for players…</p>}
-            </div>
-            </div>
-
+            {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} meId={me?.id} />}
           </>
         )}
       </div>
+
+      {playerCreds && !playerCreds.skipped && playerView && (
+        <div className="card">
+          <PlayerGame view={playerView} act={playerAct} me={me} seconds={seconds} />
+        </div>
+      )}
     </main>
   );
 }

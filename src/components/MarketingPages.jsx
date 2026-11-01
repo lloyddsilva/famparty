@@ -135,45 +135,42 @@ export function OccasionDetail({ slug }) {
 }
 
 const FAQS = [
-  ["What do my guests need?", "Just a phone with a browser. They scan the QR code on the TV, pick a name and an animal, and they're in. No app, no account, no password."],
-  ["What do I need as the host?", "Two screens you already own: a TV (or laptop or tablet) for the show, and your phone to run it. Screen-sharing the display on a video call is the idea for remote groups — we haven't finished testing that flow yet. You control the pace — start, pause, skip, and reveal — from your phone."],
-  ["How many people can play?", "3 to 12 players per room. Games are built for a crowd: voting, fooling, and crowd-reading don't work with two."],
+  ["What do my guests need?", "Just a phone with a browser. They scan the QR code on the TV, type a name, pick an animal, and they're in. No app, no account, no password."],
+  ["Who is the host?", "The first person to scan the QR code becomes the host and runs the show from their phone. If you start on your phone instead, you're the host from the beginning. Either way, hosting and playing can happen on the same phone."],
+  ["What do I need?", "A TV or laptop for the big screen, and a phone each. That's it — no accounts, nothing to install, nothing to print."],
+  ["How many people can play?", "2 to 12 players, depending on the game. Story and comedy games need at least 3; guessing games work with 2. If the room is full, play in pairs and share a phone."],
   ["Does it cost anything?", "No. There are no payments, no subscriptions, and no accounts. Create a room and play — that's the whole deal."],
-  ["What is the family album?", "An optional private link for your family. It keeps a roster of your people, saves true stories from Spotlight (each person can opt out per statement), remembers scores, and unlocks Remember This?. It is kept for 60 days after your last show, then deleted. The link itself is the key — anyone who has it can get in, so share it only with family."],
-  ["Is it suitable for kids and grandparents?", "Yes — that's who it's designed for. Content is written to be family-friendly, answers are big tap targets, the host can pause any timer, and nobody has to perform: every game has a low-pressure way to join in, including just watching and voting."],
-  ["What if someone writes something rude?", "Nobody pre-reads answers — the game would stall. Instead, the host can hide any player's name or words from the TV at any moment, or remove them from the room entirely. Names and written answers also pass a word filter, but filters can miss things; the host's hide button is the real safety net."],
-  ["Does it work on a video call?", "The idea: share the TV screen on Zoom, Meet, or Teams and everyone plays on their own phone wherever they are, in a browser tab with nothing to install. We haven't finished testing this flow yet, so try it with a quick game before the real night."],
+  ["What if someone writes something rude?", "Nobody reads answers before they appear — the game would stall. Instead, the host can hide any player's words from the TV at any moment, or remove them from the room. Names and answers also pass a word filter, but filters can miss things; the host's hide button is the safety net."],
+  ["Can someone join late?", "Yes. Scan the QR code at any point: you'll watch the current round and play from the next one. Nothing is disturbed."],
+  ["Does it work on a video call?", "That's the idea — share the big screen in the call and everyone plays on their own phone. We are still testing this properly, so try one quick game first."],
 ];
 
 export function HowItWorks() {
+  const screens = [
+    ["📺 Smart TV", "Open the TV's browser and go to the site, then tap Start on this screen.", "Scan the QR code with your phone. Smart TV browsers are hit and miss — if the page looks wrong, use a laptop instead."],
+    ["💻 Laptop + HDMI", "Plug the laptop into the TV with an HDMI cable and pick the right input.", "Open the site on the laptop and tap Start on this screen. This is the most reliable setup."],
+    ["📡 Chromecast / AirPlay", "Cast this browser tab to the TV from Chrome or Safari.", "Then tap Start on this screen. Keep the laptop awake and nearby."],
+    ["📽️ Projector", "Connect a laptop to the projector the way you would for slides.", "Make the room a bit darker and put the sound through any speaker you have."],
+    ["📞 Zoom (still being tested)", "Share your screen in the call, then open the site in the shared tab.", "Everyone joins on their own phone. We are still testing this properly — try one quick game first."],
+  ];
   return (
     <>
       <SiteHeader />
       <main className="mkt">
         <p className="eyebrow">How it works</p>
-        <h1>Set up in the time it takes to find the remote.</h1>
+        <h1>Three steps. No explaining.</h1>
         <div className="lp-steps">
-          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--yellow)" }}>📱</span><h3>The host's phone is the remote</h3><p>Create the room, pick the game, and run the night — start, pause, skip, reveal — from the couch. Your phone is the only screen with buttons that matter.</p></div>
-          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--pink-pastel)" }}>📺</span><h3>The TV only shows the show</h3><p>Open the display link on a TV, laptop, or tablet — or share it on a video call. It shows the QR code, the questions, the reveals and the podium. Never a form, never controls.</p></div>
-          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--lav)" }}>🎮</span><h3>Phones are private controllers</h3><p>Players scan, pick a name and an animal, and answer privately. Nobody sees a vote, a lie, or an ending until the TV reveals it.</p></div>
+          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--yellow)" }}>1</span><h3>Put the show on a big screen</h3><p>On the TV or laptop, tap <b>Start on this screen</b>. A big QR code appears. (Or start on your phone with Host a show.)</p></div>
+          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--pink-pastel)" }}>2</span><h3>Everyone scans and picks an animal</h3><p>Point a phone camera at the QR code, type a name, tap I'm in. The first person to scan becomes the host. That's the whole signup.</p></div>
+          <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--lav)" }}>3</span><h3>Play on your phones, watch the TV</h3><p>Questions and scores are on the big screen. Answers happen privately on phones. The host taps one button to move the show along.</p></div>
         </div>
 
         <section className="lp-section">
-          <h2 className="lp-h2" style={{ fontSize: "2.2rem" }}>Three ways to gather</h2>
-          <div className="lp-occasions">
-            <div className="lp-occ"><span>🛋️</span><span><b>On the TV</b><small>HDMI from a laptop, a cast tab, or the TV's own browser. The display tries to keep the screen on (best effort — many TV browsers ignore it, so turning off the TV's sleep setting helps).</small></span></div>
-            <div className="lp-occ"><span>💻</span><span><b>On a laptop</b><small>A kitchen-table screen works fine for small rooms. Prop it where everyone can see it.</small></span></div>
-            <div className="lp-occ"><span>📞</span><span><b>On a video call</b><small>Share the display screen; everyone else plays on their own phone. Still being tested — run one quick game first.</small></span></div>
-          </div>
-        </section>
-
-        <section className="lp-section">
-          <h2 className="lp-h2" style={{ fontSize: "2.2rem" }}>Safe on a family TV</h2>
-          <div className="how-list" style={{ maxWidth: 760, margin: "22px auto 0" }}>
-            <div className="how-item"><span style={{ fontSize: 26 }}>🙈</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>Hide anything, instantly.</b> The host can hide any player's name or words from the TV at any moment — or remove them from the room. It works at every phase, not just the lobby.</p></div>
-            <div className="how-item"><span style={{ fontSize: 26 }}>🧹</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>A word filter as the first net.</b> Names, statements, answers and stories pass an open-source word list. It will miss things; that's why the hide button exists.</p></div>
-            <div className="how-item"><span style={{ fontSize: 26 }}>👀</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>Just watch is a real role.</b> Nobody is forced into the spotlight. Shy players and young kids can watch and vote until they demand a turn.</p></div>
-            <div className="how-item"><span style={{ fontSize: 26 }}>🔑</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>No accounts, honest security.</b> A room code gets you into a room; a family album link is the only key to an album. We say that plainly rather than dress it up.</p></div>
+          <h2 className="lp-h2" style={{ fontSize: "2.2rem" }}>What's your screen?</h2>
+          <div className="how-list" style={{ maxWidth: 820, margin: "22px auto 0" }}>
+            {screens.map(([name, s1, s2]) => (
+              <div key={name} className="how-item"><span style={{ fontSize: 28 }}>{name.split(" ")[0]}</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>{name.replace(/^\S+ /, "")}</b><br />1. {s1}<br />2. {s2}</p></div>
+            ))}
           </div>
         </section>
 
@@ -182,14 +179,13 @@ export function HowItWorks() {
           <div style={{ maxWidth: 760, margin: "22px auto 0", display: "grid", gap: 10 }}>
             {FAQS.map(([q, a]) => <details key={q} className="faq-item"><summary>{q}</summary><p>{a}</p></details>)}
           </div>
-          <div className="center"><Link className="btn primary" href="/host" style={{ marginTop: 26, padding: "16px 30px" }}>Host a show</Link></div>
+          <div className="center"><Link className="btn primary" href="/tv" style={{ marginTop: 26, padding: "16px 30px" }}>Start on this screen</Link></div>
         </section>
       </main>
       <SiteFooter />
     </>
   );
 }
-
 export function BlogIndex({ active = "All" }) {
   const cats = ["All", ...new Set(BLOG_POSTS.filter((p) => p.published).map((p) => p.cat))];
   const shown = (active === "All" ? BLOG_POSTS.filter((p) => p.published) : BLOG_POSTS.filter((p) => p.published && p.cat === active));

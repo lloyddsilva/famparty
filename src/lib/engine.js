@@ -15,7 +15,14 @@ export const SPECTRUM_MS = 20000;
 export const WRITE_MS = 60000;
 export const VOTE_MS = 30000;
 export const ROOM_TTL_SECONDS = 2 * 60 * 60;
-export const GAMES = ["emoji", "spotlight", "spectrum", "finishit", "remember"];
+export const GAMES = ["emoji", "spotlight", "spectrum", "finishit"];
+export const GAME_MIN_PLAYERS = { emoji: 2, spectrum: 2, spotlight: 3, finishit: 3 };
+export const HOWTO_TEXT = {
+  emoji: "Guess the phrase from the emojis. Fastest right answer scores most.",
+  spotlight: "Two truths and a lie. Guess the lie, then hear the real story.",
+  spectrum: "Place yourself between the two ends, then guess where the crowd lands.",
+  finishit: "Finish the sentence. Funniest ending wins — voting is anonymous.",
+};
 
 const shuffle = (arr, seed = 1) => {
   // Fisher-Yates with a mulberry32 PRNG (keeps the engine pure and the
@@ -37,9 +44,9 @@ const shuffle = (arr, seed = 1) => {
 };
 export const normalizeText = (t) => String(t || "").toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/\s+/g, " ").trim();
 
-export function createRoom({ code, hostTokenHash, now, familyId = null }) {
+export function createRoom({ code, hostTokenHash, now, familyId = null, hostPending = false }) {
   return {
-    code, hostTokenHash, familyId, version: 0, game: "emoji", phase: "lobby",
+    code, hostTokenHash, familyId, hostPending, relaxed: false, version: 0, game: "emoji", phase: "lobby",
     players: [], qIndex: 0, deadline: null, paused: false, pausedRemainingMs: null,
     locked: false, createdAt: now, updatedAt: now,
     featuredOrder: [], featuredIdx: 0, spotlightOrder: [0, 1, 2], votes: {},
@@ -58,11 +65,12 @@ export function addPlayer(state, { id, tokenHash, name, avatar, memberId = null 
     const p = state.players.find((x) => x.memberId === memberId);
     return { state: { ...state, players: state.players.map((x) => x.id === p.id ? { ...x, tokenHash } : x), updatedAt: now }, playerId: p.id, rejoined: true };
   }
-  if (state.phase !== "lobby" || state.locked) return { error: "This game has already started. Wait for the next show." };
+  if (state.locked) return { error: "This room is locked by the host." };
   if (state.players.length >= MAX_PLAYERS) return { error: `Room is full (${MAX_PLAYERS} players).` };
   if (state.players.some((p) => p.avatar === avatar)) return { error: "That avatar is taken. Pick another." };
   const player = {
     id, tokenHash, memberId, name, avatar, score: 0, streak: 0, lastCorrect: null, lastPoints: 0,
+    waiting: state.phase !== "lobby",
     statements: null, watching: false, storyLine: null, hidden: false,
     spectrumPos: null, spectrumPrediction: null, finishAnswer: null,
   };
@@ -73,12 +81,15 @@ export function addPlayer(state, { id, tokenHash, name, avatar, memberId = null 
 function toPhase(state, phase, now, ms = null, extra = {}) {
   return { ...state, phase, deadline: ms ? now + ms : null, paused: false, pausedRemainingMs: null, updatedAt: now, ...extra };
 }
+const clearWaiting = (players) => players.map((p) => ({ ...p, waiting: false }));
 function startQuestion(state, now) {
   // A fresh roundId per question: answers are keyed by it, so a replay can never
   // surface stale answers from a previous game (regression: review item 5).
-  return toPhase(state, "question", now, QUESTION_MS, {
-    players: state.players.map(freshPlayerFlags),
+  const duration = QUESTION_MS * (state.relaxed ? 2 : 1);
+  return toPhase(state, "question", now, duration, {
+    players: clearWaiting(state.players.map(freshPlayerFlags)),
     roundId: `emoji-${state.qIndex}-${now}`,
+    roundDuration: duration,
   });
 }
 
@@ -95,7 +106,7 @@ export function scoreEmojiReveal(state, answers = {}, now) {
     const a = answers[p.id];
     if (!a || (state.deadline && a.at >= state.deadline)) return { ...p, lastCorrect: false, lastPoints: 0 };
     const correct = q.choices[a.choice] === q.answer;
-    const remainingFraction = Math.max(0, ((state.deadline ?? now) - a.at) / QUESTION_MS);
+    const remainingFraction = Math.max(0, ((state.deadline ?? now) - a.at) / (state.roundDuration || QUESTION_MS));
     const points = emojiPoints({ correct, remainingFraction, streakBefore: p.streak });
     return { ...p, score: p.score + points, streak: correct ? p.streak + 1 : 0, lastCorrect: correct, lastPoints: points };
   });
@@ -141,7 +152,7 @@ function revealSpotlight(state, now) {
 function startSpotlightTurn(state, now) {
   const f = featured(state);
   if (!f) return toPhase(state, "finale", now);
-  return toPhase({ ...state, votes: {}, players: state.players.map(freshPlayerFlags), spotlightOrder: shuffle([0, 1, 2], now % 100000) }, "spotlight", now, SPOTLIGHT_MS);
+  return toPhase({ ...state, votes: {}, players: clearWaiting(state.players.map((p) => ({ ...freshPlayerFlags(p), watching: p.watching || !p.statements }))), spotlightOrder: shuffle([0, 1, 2], now % 100000) }, "spotlight", now, SPOTLIGHT_MS * (state.relaxed ? 2 : 1));
 }
 function revealSpectrum(state, now) {
   const placed = state.players.filter((p) => p.spectrumPos !== null);
@@ -167,7 +178,7 @@ function revealSpectrum(state, now) {
   return toPhase({ ...state, players, spectrumMedian: median, spectrumMajority: majoritySide, spectrumAwards }, "spectrumReveal", now);
 }
 function startSpectrum(state, now) {
-  return toPhase({ ...state, players: state.players.map((p) => ({ ...freshPlayerFlags(p), spectrumPos: null, spectrumPrediction: null })) }, "spectrum", now, SPECTRUM_MS);
+  return toPhase({ ...state, players: clearWaiting(state.players.map((p) => ({ ...freshPlayerFlags(p), spectrumPos: null, spectrumPrediction: null }))) }, "spectrum", now, SPECTRUM_MS * (state.relaxed ? 2 : 1));
 }
 function finishToPresent(state, now) {
   const ids = state.players.filter((p) => p.finishAnswer).map((p) => p.id);
@@ -213,9 +224,17 @@ function revealRemember(state, now) {
   return toPhase({ ...state, players }, "rememberReveal", now);
 }
 
+function beginGame(state, now) {
+  if (state.game === "spotlight") return toPhase(state, "prep", now);
+  if (state.game === "spectrum") return startSpectrum(state, now);
+  if (state.game === "finishit") return toPhase({ ...state, players: state.players.map((p) => ({ ...p, finishAnswer: null })) }, "finishWrite", now, WRITE_MS);
+  return startQuestion(state, now);
+}
+
 export function advanceIfExpired(state, now, ctx = {}) {
   if (!state.deadline || state.paused || now < state.deadline) return state;
   switch (state.phase) {
+    case "howto": return beginGame({ ...state, deadline: null }, now);
     case "question": return scoreEmojiReveal(state, ctx.answers, now);
     case "spotlight": return revealSpotlight(state, now);
     case "story": return toPhase(state, "storySave", now);
@@ -230,6 +249,9 @@ export function advanceIfExpired(state, now, ctx = {}) {
 export function applyAction(state, action, now, ctx = {}) {
   const fail = (error) => ({ state, error });
   const actor = action.playerId ? findPlayer(state, action.playerId) : null;
+  if (actor?.waiting && ["VOTE", "PLACE", "FINISH_SUBMIT"].includes(action.type)) {
+    return fail("You're in — you'll play from the next round.");
+  }
 
   switch (action.type) {
     case "SELECT_GAME": {
@@ -238,20 +260,30 @@ export function applyAction(state, action, now, ctx = {}) {
     }
     case "START": {
       if (!["lobby", "finale"].includes(state.phase)) return fail("Game already started.");
-      if (state.players.length < MIN_PLAYERS) return fail(`Need at least ${MIN_PLAYERS} players.`);
+      const min = GAME_MIN_PLAYERS[state.game] ?? MIN_PLAYERS;
+      if (state.players.length < min) return fail(`Need at least ${min} players for this game.`);
       state = { ...state, gameId: `g-${now}-${state.version}` };
       const base = state.phase === "finale"
         ? { ...state, qIndex: 0, players: state.players.map((p) => ({ ...p, score: 0, streak: 0, statements: null, watching: false, storyLine: null, finishAnswer: null })) }
         : { ...state, qIndex: 0 };
-      if (state.game === "spotlight") return { state: toPhase(base, "prep", now) };
-      if (state.game === "spectrum") return { state: startSpectrum(base, now) };
-      if (state.game === "finishit") return { state: toPhase({ ...base, players: base.players.map((p) => ({ ...p, finishAnswer: null })) }, "finishWrite", now, WRITE_MS) };
-      if (state.game === "remember") {
-        const items = Array.isArray(action.items) ? action.items.slice(0, 10) : [];
-        if (!items.length) return fail("No saved true statements yet. Play Spotlight first.");
-        return { state: toPhase({ ...base, rememberItems: items, votes: {} }, "remember", now, SPOTLIGHT_MS) };
-      }
-      return { state: startQuestion(base, now) };
+      return { state: toPhase(base, "howto", now, 5000) };
+    }
+    case "NEXT_GAME": {
+      if (state.phase !== "finale") return fail("Finish this game first.");
+      const order = ["emoji", "spotlight", "spectrum", "finishit"];
+      const nextGame = order[(order.indexOf(state.game) + 1) % order.length];
+      const next = {
+        ...state, game: nextGame, qIndex: 0, votes: {}, featuredOrder: [], featuredIdx: 0, gameId: `g-${now}-${state.version}`,
+        players: state.players.map((p) => ({ ...p, statements: null, watching: false, storyLine: null, finishAnswer: null, spectrumPos: null })),
+      };
+      return { state: toPhase(next, "howto", now, 5000) };
+    }
+    case "SET_RELAXED": {
+      return { state: { ...state, relaxed: !!action.relaxed, updatedAt: now } };
+    }
+    case "CLAIM_HOST": {
+      if (!state.hostPending) return fail("This room already has a host.");
+      return { state: { ...state, hostPending: false, hostTokenHash: action.hostTokenHash, updatedAt: now } };
     }
     case "SUBMIT_STATEMENTS": {
       if (state.phase !== "prep" || !actor) return fail("Not in prep.");
@@ -317,6 +349,7 @@ export function applyAction(state, action, now, ctx = {}) {
       return { state: { ...state, players: state.players.map((p) => p.id === action.targetId ? { ...p, hidden: !!action.hidden } : p), updatedAt: now } };
     }
     case "NEXT": {
+      if (state.phase === "howto") return { state: beginGame(state, now) };
       if (state.phase === "question") return { state: scoreEmojiReveal(state, ctx.answers, now) };
       if (state.phase === "reveal") return { state: toPhase(state, "scores", now) };
       if (state.phase === "spotlight") return { state: revealSpotlight(state, now) };
@@ -349,7 +382,7 @@ export function applyAction(state, action, now, ctx = {}) {
         }
         if (state.game === "finishit") {
           if (state.qIndex + 1 >= FINISHIT_PACK.items.length) return { state: toPhase(state, "finale", now) };
-          return { state: toPhase({ ...state, qIndex: state.qIndex + 1, players: state.players.map((p) => ({ ...freshPlayerFlags(p), finishAnswer: null })) }, "finishWrite", now, WRITE_MS) };
+          return { state: toPhase({ ...state, qIndex: state.qIndex + 1, players: clearWaiting(state.players.map((p) => ({ ...freshPlayerFlags(p), finishAnswer: null }))) }, "finishWrite", now, WRITE_MS) };
         }
         if (state.qIndex + 1 >= QUESTIONS.length) return { state: toPhase(state, "finale", now) };
         return { state: startQuestion({ ...state, qIndex: state.qIndex + 1 }, now) };
@@ -430,7 +463,7 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
       answered: answers[p.id] !== undefined, voted: state.votes[p.id] !== undefined,
       // answers entries are {choice, at}; legacy numeric entries are tolerated
       lastCorrect: p.lastCorrect, lastPoints: p.lastPoints, hidden: p.hidden,
-      ready: !!p.statements, watching: p.watching, hasAnswer: !!p.finishAnswer,
+      ready: !!p.statements, watching: p.watching, waiting: !!p.waiting, hasAnswer: !!p.finishAnswer,
       connected: presence[p.id] ? Date.now() - presence[p.id] < 6000 : false,
     }))
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
@@ -443,7 +476,8 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
 
   return {
     code: state.code, game: state.game, phase: state.phase, version: state.version,
-    familyLinked: !!state.familyId,
+    familyLinked: !!state.familyId, hostPending: !!state.hostPending, relaxed: !!state.relaxed,
+    suggestedNext: ["emoji", "spotlight", "spectrum", "finishit"][(["emoji", "spotlight", "spectrum", "finishit"].indexOf(state.game) + 1) % 4],
     players, answeredCount: Object.keys(answers).length, votedCount: Object.keys(state.votes || {}).length,
     qIndex: state.qIndex,
     totalQuestions: state.game === "spectrum" ? SPECTRUM_PACK.items.length : state.game === "finishit" ? FINISHIT_PACK.items.length : state.game === "remember" ? state.rememberItems.length : QUESTIONS.length,

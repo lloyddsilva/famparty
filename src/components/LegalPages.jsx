@@ -45,12 +45,11 @@ export function PrivacyPage() {
       <H>Live rooms (kept 2 hours)</H>
       <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that, unless the room belongs to a family album (below).</P>
 
-      <H>Family albums (kept 60 days after last activity)</H>
-      <P>If you create a family album, our database (Upstash Redis) stores the album name, member names and avatars, saved statements and story lines, game results, and hashed versions of the album's links (we cannot read the links themselves). Album keys expire automatically 60 days after last activity — every album key carries that expiry, so the whole album goes together. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>
-      <P>Exactly what saves, so there are no surprises: in an album room, Spotlight <strong>true statements save by default</strong> — each statement has a "don't save this" option, and ticking it keeps that statement out. The featured player's story line only saves if they choose to type and save one. <strong>Scores from album-room games save automatically</strong> against roster members. Players are told at join when a room belongs to an album.</P>
+      <H>Nothing is saved beyond the game</H>
+      <P>There are currently no accounts and no saved stories or scores. When a room ends or expires, its names, answers, statements and scores are gone. (An earlier version of FamParty offered an optional family album that kept saved statements for 60 days; that feature is currently switched off, and no new albums can be created.)</P>
 
-      <H>The album link is the only key</H>
-      <P>Anyone who has an album link can get in — that's the design, and the album page says so. We can't recover a lost link and we can't look one up for you. Share it only with your family.</P>
+      <H>Room codes and host links</H>
+      <P>A room code lets anyone who has it join that room while it's live, and a host link lets its holder run that room. Both stop working when the room expires. Share them the way you'd share a meeting link.</P>
 
       <H>IP addresses and hosting logs</H>
       <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processor: Upstash (rooms and albums).</P>
@@ -59,10 +58,10 @@ export function PrivacyPage() {
       <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs are currently hand-written starters, awaiting the offline generation run and human review described on the About page.</P>
 
       <H>Your rights</H>
-      <P>Because there are no accounts, the owner link is how you prove control of an album: with it you can see, export, and permanently delete everything in it. For anything else — including requests from California or EEA/UK residents to access or delete personal data — use the contact email below and we'll respond. We don't sell or share personal data. After deletion, our providers' backups may retain data briefly before it's overwritten; we don't control those schedules.</P>
+      <P>Because there are no accounts and rooms delete themselves within 2 hours, there is usually nothing left to access or delete by the time you'd ask. For anything else — including requests from California or EEA/UK residents — use the contact email below and we'll respond. We don't sell or share personal data.</P>
 
       <H>Children</H>
-      <P>FamParty is meant to be run by an adult host, and it isn't directed at children using it alone. Children play with a parent or guardian in the room and should use a nickname, not personal details. We don't verify ages. A parent or guardian can delete an album with the owner link, or ask us to delete data via the contact email.</P>
+      <P>FamParty is meant to be run by an adult host, and it isn't directed at children using it alone. Children play with a parent or guardian in the room and should use a nickname, not personal details. We don't verify ages. A parent or guardian can ask us about data via the contact email; live-room data deletes itself within 2 hours regardless.</P>
     </Shell>
   );
 }
@@ -84,8 +83,8 @@ export function TermsPage() {
       <H>Don't abuse the service</H>
       <P>Don't scrape, overload, or try to get around rate limits or room codes, and don't use FamParty to bother people.</P>
 
-      <H>Albums and availability</H>
-      <P>Family albums are deleted after 60 days of inactivity. We don't guarantee the service or your album will be available, so export anything you want to keep (the owner link can download a JSON export at any time).</P>
+      <H>Rooms and availability</H>
+      <P>Rooms are temporary: they expire after about 2 hours, and scores and statements go with them. We don't guarantee the service will always be available.</P>
 
       <H>Game content</H>
       <P>Game questions and prompts in the current build are hand-written starter packs. They will be regenerated with AI assistance offline and human-reviewed before any release that claims otherwise. Third-party material (fonts, the word list) is credited in our third-party notices.</P>

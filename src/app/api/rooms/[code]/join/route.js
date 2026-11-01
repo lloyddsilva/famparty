@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { addPlayer } from "../../../../../lib/engine.js";
+import { addPlayer, applyAction } from "../../../../../lib/engine.js";
+import { hashToken as hashTok } from "../../../../../lib/validate.js";
+function applyClaim(s, plainToken) {
+  const out = applyAction(s, { type: "CLAIM_HOST", hostTokenHash: hashTok(plainToken) }, Date.now());
+  return out.error ? out : { state: out.state };
+}
 import { casUpdate, rateLimit } from "../../../../../lib/roomStore.js";
 import { cleanCode, cleanName, isCleanName, isAvatar, newId, newToken, hashToken, parseJsonBody, clientIp, rateLimitFor } from "../../../../../lib/validate.js";
 import { familyByToken, getMember } from "../../../../../lib/db.js";
@@ -43,7 +48,14 @@ export async function POST(req, { params }) {
     const { state, error } = await casUpdate(code, (s) => addPlayer(s, { id: playerId, tokenHash, name, avatar, memberId }, Date.now()));
     if (error) return bad(error, 404);
     const me = state.players.find((p) => p.tokenHash === tokenHash);
-    return NextResponse.json({ ok: true, code, playerId: me.id, playerToken }, { headers: noStore });
+    let claimedHostToken = null;
+    if (body.claimHost && state.hostPending) {
+      claimedHostToken = newToken();
+      const claim = await casUpdate(code, (s) => applyClaim(s, claimedHostToken));
+      if (!claim.state?.hostPending === false) claimedHostToken = claimedHostToken;
+      if (claim.error) claimedHostToken = null;
+    }
+    return NextResponse.json({ ok: true, code, playerId: me.id, playerToken, hostToken: claimedHostToken }, { headers: noStore });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: e.code === "NO_REDIS" ? 503 : 500, headers: noStore });
   }

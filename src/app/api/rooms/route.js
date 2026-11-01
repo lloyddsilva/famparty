@@ -3,6 +3,7 @@ import { createRoom } from "../../../lib/engine.js";
 import { createRoom as storeRoom } from "../../../lib/roomStore.js";
 import { makeRoomCode, newToken, hashToken, parseJsonBody, clientIp, rateLimitFor } from "../../../lib/validate.js";
 import { familyByToken, touchFamily } from "../../../lib/db.js";
+import { ALBUMS_ENABLED } from "../../../lib/flags.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +18,9 @@ export async function POST(req) {
     }
     const body = await parseJsonBody(req).catch(() => null);
     let familyId = null;
+    if (body?.familyToken && !ALBUMS_ENABLED) {
+      return NextResponse.json({ ok: false, error: "Family albums are not available right now." }, { status: 410, headers: noStore });
+    }
     if (body?.familyToken) {
       const found = await familyByToken(body.familyToken);
       if (!found) return NextResponse.json({ ok: false, error: "Family album not recognised." }, { status: 404, headers: noStore });
@@ -25,9 +29,14 @@ export async function POST(req) {
     }
     for (let attempt = 0; attempt < 8; attempt++) {
       const hostToken = newToken();
-      const state = createRoom({ code: makeRoomCode(), hostTokenHash: hashToken(hostToken), now: Date.now(), familyId });
+      const tvCreated = !!body?.tvCreated;
+      const state = createRoom({
+        code: makeRoomCode(),
+        hostTokenHash: tvCreated ? null : hashToken(hostToken),
+        now: Date.now(), familyId, hostPending: tvCreated,
+      });
       if (await storeRoom(state)) {
-        return NextResponse.json({ ok: true, code: state.code, hostToken }, { headers: noStore });
+        return NextResponse.json({ ok: true, code: state.code, hostToken: tvCreated ? null : hostToken, hostPending: tvCreated }, { headers: noStore });
       }
     }
     return NextResponse.json({ ok: false, error: "Could not create a room. Try again." }, { status: 503, headers: noStore });

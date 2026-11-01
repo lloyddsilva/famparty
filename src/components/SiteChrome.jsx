@@ -60,13 +60,11 @@ export function SiteHeader() {
               </Link>
             ))}
           </Dropdown>
-          <Link href="/family">Family album</Link>
           <Link href="/how-it-works">How it works</Link>
-          <Link href="/blog">Blog</Link>
         </nav>
         <button className="hamburger" aria-label="Menu" onClick={() => setMenu((m) => !m)}>☰</button>
         <span className="header-ctas">
-          <Link className="btn outline" href="/join">Join with a code</Link>
+          <Link className="btn outline" href="/join">Join a game</Link>
           <Link className="btn primary" href="/host">Host a show</Link>
         </span>
       </div>
@@ -77,9 +75,7 @@ export function SiteHeader() {
           <Link href="/games">All games</Link>
           <b>Occasions</b>
           {OCCASIONS.map((o) => <Link key={o.slug} className="mm-sub" href={`/for/${o.slug}`}>{o.icon} {o.name}</Link>)}
-          <Link href="/family">Family album</Link>
           <Link href="/how-it-works">How it works</Link>
-          <Link href="/blog">Blog</Link>
           <Link href="/join">Join with a code</Link>
         </nav>
       )}
@@ -95,9 +91,9 @@ export function SiteFooter() {
         <nav>
           <Link href="/games">Games</Link>
           <Link href="/for/family-night">Occasions</Link>
-          <Link href="/family">Family album</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/blog">Blog</Link>
+          <Link href="/for/family-night">Occasions</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/about">About</Link>

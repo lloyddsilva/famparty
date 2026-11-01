@@ -83,6 +83,6 @@ export const HOSTING_GUIDE = {
     { q: "What do we do with a child who wants every turn?", a: "Give them jobs between turns: reading the question aloud, announcing the leaderboard, choosing which game comes next. Spotlight turns still rotate fairly." },
     { q: "How do we stop one person dominating?", a: "Change the shape, not the person: simultaneous answers, anonymous answers, or pairing them with the youngest player." },
   ],
-  related: ["spotlight-stories-that-worked", "your-family-album-explained"],
+  related: ["spotlight-stories-that-worked", "spectrum-questions-for-any-room"],
   gameSlug: "emoji-decoder",
 };

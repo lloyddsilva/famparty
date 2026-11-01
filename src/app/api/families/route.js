@@ -7,6 +7,10 @@ export const dynamic = "force-dynamic";
 const noStore = { "Cache-Control": "no-store" };
 
 export async function POST(req) {
+  const { ALBUMS_ENABLED } = await import("../../../lib/flags.js");
+  if (!ALBUMS_ENABLED) {
+    return NextResponse.json({ ok: false, error: "Family albums are not available right now." }, { status: 410, headers: noStore });
+  }
   try {
     const ip = clientIp(req);
     if (!(await rateLimit(`familycreate:${ip}`, rateLimitFor(10), 3600))) {

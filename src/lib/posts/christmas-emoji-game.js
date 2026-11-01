@@ -20,12 +20,12 @@ export const CHRISTMAS_EMOJI_GAME = {
   ],
   blocks: [
     P("An emoji game lives on its clues, so the clues come first: forty of them, sorted by category and difficulty, with every answer hidden until you tap it. All of them were written for this page, for paper or read-aloud play. (FamParty's Emoji Decoder, mentioned later, runs the same shape on TV with its own general pack — none of these forty are in the app.) After the clues, there's a short guide to running the game, and to writing your own clues that are hard for the right reasons."),
-    CALL("How difficulty works here", "Easy clues picture the thing itself (🎅 is doing heavy lifting). Medium clues add a second idea. Hard clues work by sound — reading the emoji names aloud gets you the phrase — so give hard rounds more time and expect groaning.", "tip"),
+    CALL("How difficulty works here", "Easy clues picture the thing itself (🎅 is doing heavy lifting). Medium clues add a second idea. Hard clues need a leap: they mix literal pictures with wordplay, so give hard rounds more time and expect groaning.", "tip"),
 
     H("Christmas songs"),
     REVEAL("Easy songs", [
       ["🎄 🪨", "Rockin' Around the Christmas Tree"],
-      ["🔔 🛷", "Jingle Bells "],
+      ["🔔 🛷", "Jingle Bells"],
       ["❄️ ⛄", "Frosty the Snowman"],
       ["🔴 👃 🦌", "Rudolph the Red-Nosed Reindeer"],
       ["🎅 🏙️", "Santa Claus Is Comin' to Town"],
@@ -33,12 +33,12 @@ export const CHRISTMAS_EMOJI_GAME = {
     REVEAL("Medium songs", [
       ["🌟 🌃", "O Holy Night (starry night)"],
       ["👼 📣", "Hark! The Herald Angels Sing"],
-      ["🐑 🐑 👶", "Away in a Manger "],
+      ["🐑 🐑 👶", "Away in a Manger"],
       ["❄️ 🎩 💃", "Walking in a Winter Wonderland"],
       ["🔕 🌃", "Silent Night"],
     ]),
-    REVEAL("Hard songs (read the emoji names aloud)", [
-      ["👁️ 🎅 💋", "I Saw Mommy Kissing Santa Claus (eye + Santa + kiss)"],
+    REVEAL("Hard songs (take your time)", [
+      ["👁️ 🎅 💋", "I Saw Mommy Kissing Santa Claus"],
       ["🌰 🍬 🧚", "Dance of the Sugar Plum Fairy (nut + sweet + fairy)"],
       ["🎉 🌍", "Joy to the World"],
       ["🎄 🔟 ✌️", "The Twelve Days of Christmas (tree + ten + two)"],

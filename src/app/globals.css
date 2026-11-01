@@ -281,7 +281,7 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
 .tv-panel .choices { margin-top: 12px; gap: 10px; }
 .tv-panel .choice { padding: 14px 18px; font-size: 24px; }
 .tv-panel h2.tv-lobby-h { font-size: 50px; margin: 14px 0 8px; }
-.tv-lobby { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; text-align: left; min-height: 560px; }
+.tv-lobby { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; text-align: left; min-height: 500px; }
 .tv-lobby-left { text-align: center; }
 .tv-lobby-left .qr { width: 230px; height: 230px; margin: 0 auto 8px; }
 .tv-lobby-left .room-code { font-size: 64px; }
@@ -394,3 +394,13 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
   .blog-post h1 { font-size: 2.2rem; }
   .blog-cover { height: 140px; font-size: 60px; }
 }
+
+/* host bar + manage menu */
+.host-bar { position: sticky; top: 8px; z-index: 30; background: var(--dark); color: #fff; border-radius: 20px; padding: 10px 12px; margin-bottom: 14px; box-shadow: 0 14px 34px rgba(34,34,59,.25); }
+.host-bar-main { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.host-bar-label { font-weight: 700; font-size: .92rem; margin-right: auto; }
+.host-bar-btn { min-height: 44px; padding: 9px 16px; }
+.host-manage { display: grid; gap: 8px; margin-top: 10px; background: rgba(255,255,255,.06); border-radius: 14px; padding: 12px; }
+.host-relaxed { display: flex; gap: 9px; align-items: center; font-weight: 600; margin: 0; }
+.host-relaxed input { width: auto; min-height: 0; margin: 0; }
+.reconnecting { position: sticky; top: 8px; z-index: 40; background: var(--yellow); color: var(--yellow-ink); font-weight: 700; border-radius: 999px; padding: 10px 18px; text-align: center; margin-bottom: 12px; }

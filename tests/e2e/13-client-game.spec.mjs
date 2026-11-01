@@ -35,6 +35,8 @@ test("13-client full Emoji Decoder game", async ({ baseURL }) => {
 
   let r = await call(host, "POST", `/api/rooms/${code}/actions`, { body: { type: "START", token: hostToken, expectedPhase: "lobby" } });
   expect(r.data.ok).toBeTruthy();
+  r = await call(host, "POST", `/api/rooms/${code}/actions`, { body: { type: "NEXT", token: hostToken, expectedPhase: "howto" } });
+  expect(r.data.ok).toBeTruthy();
 
   // regression 4: a stale duplicate NEXT (same expectedPhase) must be rejected
   for (let round = 0; round < 10; round++) {

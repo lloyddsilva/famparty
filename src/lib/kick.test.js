@@ -11,8 +11,12 @@ function base(game) {
   return s;
 }
 const act = (s, a, now = NOW) => {
-  const out = applyAction(s, a, now);
+  let out = applyAction(s, a, now);
   assert.ok(!out.error, `action ${a.type} should not error: ${out.error}`);
+  if (a.type === "START" && out.state.phase === "howto") {
+    out = applyAction(out.state, { type: "NEXT" }, now);
+    assert.ok(!out.error, `begin after START should not error: ${out.error}`);
+  }
   return out.state;
 };
 function viewsOk(s) {

@@ -24,7 +24,7 @@ export const NEW_YEARS_EVE_GAMES = {
       "11:55 — Everyone in one room, drinks charged, phones away. The countdown needs no game and resents competition.",
       "11:15 — The reflective round (games 17–19): short, warm, and finished before the anticipation takes over.",
       "10:00 — The big game (from games 11–16): teams, noise, the night's peak while energy is highest.",
-      "8:30 — Arrivals and early games (1–10): kids still awake, rounds short, joining invisible.",
+      "8:30 — Arrivals and early games (1–10): kids still awake, rounds short, and joining takes ten seconds.",
       "Before 8:30 — Nothing scheduled. Music, food, and the prediction wall going up.",
     ] },
 
@@ -69,8 +69,8 @@ export const NEW_YEARS_EVE_GAMES = {
     P("Somewhere after eleven, the night changes key. People start saying \"this time last year\". A short reflective game gives that mood a shape instead of letting it leak into everyone's separate thoughts — keep it warm, keep it optional, and keep it finished before the countdown machinery starts."),
     GC("17. One True Story: The Year Just Gone", "4–12 players", "10 min", "Nothing",
       "Thirty seconds each: the best small true story of your year. No scoring, no lying, no competing. It's Spotlight without the game around it, and it is reliably the round people mention afterwards."),
-    GC("18. Remember This Year", "4–12 players", "10 min", "Statements saved or noted earlier in the night",
-      "Moments from earlier — predictions, statements, stories — dealt back as questions: who said it, whose was it? In a FamParty album room, Remember This? does this with saved statements automatically."),
+    GC("18. Remember This Year (paper only)", "4–12 players", "10 min", "Notes the host jots down during the evening",
+      "Paper only: the host quietly notes two or three statements, predictions and stories from earlier in the evening. Deal them back as questions: who said it, whose was it? Nothing is saved by any app — the host's notebook is the whole archive."),
     GC("19. Next Year's Headlines", "3–16 players", "8 min", "Paper and pens, or phones",
       "Everyone writes one headline they'd like to read next December — about themselves, the family, or the world, in ascending order of ambition. Read anonymously, vote for the one the room most wants to be true."),
 

@@ -8,7 +8,7 @@ export const ALBUM_GUIDE = {
   title: "The family album: what it keeps, and for how long",
   description: "Exactly how the FamParty family album works: what's saved, what isn't, opt-outs, the 60-day expiry, member vs owner links, export and delete.",
   dek: "Sixty days, your roster, your stories — and a delete button that means it.",
-  published: true,
+  published: false,
   quickAnswer: "A family album is one private link holding your roster, the true statements saved from Spotlight (they save by default; anyone can opt out per statement), story lines a player chooses to save, and scores from album-room games (those save automatically). Everything is kept for 60 days after your last activity, then deleted.",
   takeaways: [
     "True statements save by default in album rooms — the opt-out is per statement",
@@ -65,5 +65,5 @@ export const ALBUM_GUIDE = {
     { q: "Does deleting mid-show cause problems?", a: "The show in progress keeps playing from the live room. Saves attempted after deletion simply don't land — there's nothing left to save into." },
   ],
   related: ["spotlight-stories-that-worked", "hosting-grandparents-and-kids"],
-  gameSlug: "remember-this",
+  gameSlug: "spotlight",
 };

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { BlogPost } from "../../../components/MarketingPages";
 import { POSTS } from "../../../lib/siteContent";
 
@@ -9,5 +10,6 @@ export async function generateMetadata({ params }) {
 }
 export default async function Page({ params }) {
   const { slug } = await params;
+  if (slug === "your-family-album-explained") redirect("/blog");
   return <BlogPost slug={slug} />;
 }

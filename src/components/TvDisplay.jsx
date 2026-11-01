@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, Podium, CHOICE_LABELS } from "./SharedViews";
 import { spectrumLayout } from "../lib/spectrumLayout";
-import { LogoReversed } from "./Logo";
+import { LogoPrimary } from "./Logo";
 
 export default function TvDisplay({ code }) {
   const joinHost = typeof window !== "undefined" ? `${window.location.host}/join` : "this site /join";
   const { view, error, serverNow } = useRoom(code, { role: "display" });
+  useEffect(() => {
+    if (!code) return;
+    QRCode.toDataURL(`${window.location.origin}/join?code=${code}${view?.hostPending ? "&claim=1" : ""}`, { width: 260, margin: 1 })
+      .then(setQr).catch(() => {});
+  }, [code, view?.hostPending]);
   const seconds = useCountdown(view, serverNow);
   const [qr, setQr] = useState("");
   const [scale, setScale] = useState(1);
@@ -20,11 +25,13 @@ export default function TvDisplay({ code }) {
     return () => window.removeEventListener("resize", update);
   }, []);
 
+  const hostPendingRef = useRef(false);
+  hostPendingRef.current = !!view?.hostPending;
   useEffect(() => {
     // Keep the TV awake where the platform allows it.
     navigator.wakeLock?.request("screen").catch(() => {});
     if (code) {
-      QRCode.toDataURL(`${window.location.origin}/join?code=${code}`, { width: 260, margin: 1 })
+      QRCode.toDataURL(`${window.location.origin}/join?code=${code}${hostPendingRef.current ? "&claim=1" : ""}`, { width: 260, margin: 1 })
         .then(setQr).catch(() => {});
     }
   }, [code]);
@@ -38,7 +45,7 @@ export default function TvDisplay({ code }) {
      <div className="tv-frame-big"><div className={`tv-panel ${["question", "reveal"].includes(view.phase) ? "yellow" : "white"}`}>
       {view.phase === "lobby" && (
         <div>
-        <div style={{ marginBottom: 14 }}><span style={{ display: "inline-block", background: "var(--dark)", borderRadius: 16, padding: "10px 14px" }}><LogoReversed width={150} /></span></div>
+        <div style={{ marginBottom: 8 }}><LogoPrimary width={96} /></div>
         <div className="tv-lobby">
           <div className="tv-lobby-left">
             {qr && <img className="qr" src={qr} alt="QR code to join this room" />}
@@ -48,13 +55,27 @@ export default function TvDisplay({ code }) {
           <div className="tv-lobby-right">
             <span className="sticker">Lobby</span>
             <h2 className="tv-lobby-h">{view.players.length} of 12 are in.</h2>
-            <p className="tv-sub">The host starts the show from their phone.</p>
+            <p className="tv-sub">{view.hostPending ? "First person to scan becomes the host." : "The host starts the show from their phone."}</p>
             <div className="player-grid tv-grid" style={{ justifyContent: "flex-start", margin: "14px 0 0" }}>
               {view.players.map((p) => <div key={p.id} className="player-chip"><span>{p.avatar}</span>{p.name}</div>)}
               {view.players.length === 0 && <p className="tv-sub">Waiting for players…</p>}
             </div>
           </div>
         </div>
+        </div>
+      )}
+
+      {view.phase === "howto" && (
+        <div className="card center">
+          <p className="eyebrow">{view.game === "emoji" ? "Emoji Decoder" : view.game === "spotlight" ? "Spotlight" : view.game === "spectrum" ? "Spectrum" : "Finish It"} · How to play</p>
+          <div className="big-emoji">{view.game === "emoji" ? "🧩" : view.game === "spotlight" ? "🎤" : view.game === "spectrum" ? "🎚️" : "✍️"}</div>
+          <p className="tv-question" style={{ maxWidth: 760, margin: "10px auto" }}>
+            {view.game === "emoji" ? "Guess the phrase from the emojis. Fastest right answer scores most."
+              : view.game === "spotlight" ? "Two truths and a lie. Guess the lie, then hear the real story."
+              : view.game === "spectrum" ? "Place yourself between the two ends, then guess where the crowd lands."
+              : "Finish the sentence. Funniest ending wins — voting is anonymous."}
+          </p>
+          <p className="tv-sub">Starting in {seconds ?? 5}s — the host can skip this.</p>
         </div>
       )}
 
@@ -183,6 +204,7 @@ export default function TvDisplay({ code }) {
 
       {view.phase === "finale" && (
         <div className="card center">
+          {qr && <img src={qr} alt="Join the next game" style={{ width: 92, height: 92, borderRadius: 14, float: "right" }} />}
           <h2>🎉 Final Results</h2>
           <Podium players={view.players} />
           <Leaderboard players={view.players} />

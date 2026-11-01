@@ -17,9 +17,7 @@ export default function Page() {
       <main className="lp">
         <section className="lp-hero">
           <div className="lp-stickers">
-            <span className="sticker">Free</span>
-            <span className="sticker pink">No signup</span>
-            <span className="sticker lav">3–12 players</span>
+            <span className="sticker">Free · No signup</span>
           </div>
           <h1 className="lp-h1">
             Party with<br />
@@ -28,10 +26,11 @@ export default function Page() {
           <div className="lp-callouts-mobile">
             <span className="sticker">family</span><span className="sticker pink">friends</span><span className="sticker lav">coworkers</span><span className="sticker white">community</span>
           </div>
-          <p className="lp-lede">The party game show that runs on your TV and everyone's phones. Whoever your fam is tonight, scan, pick an animal, and start fooling them.</p>
+          <p className="lp-lede">The party game show that runs on your TV and everyone's phones. All you need: a TV or laptop, and a phone each.</p>
           <div className="lp-cta-row">
             <Link className="btn primary lp-cta-main" href="/host">Host a show</Link>
-            <Link className="btn lp-cta-ghost" href="/games">See the games</Link>
+            <Link className="btn lp-cta-ghost" href="/join">Join a game</Link>
+            <Link className="btn lp-cta-ghost" href="/tv">Start on this screen</Link>
           </div>
 
           <div className="lp-devices" aria-hidden="true">
@@ -53,7 +52,7 @@ export default function Page() {
         <div className="lp-strip"><span>📺 TV shows the game</span><span>📱 Phones answer privately</span><span>🎛️ Host runs it from the couch</span><span>🚫 Nothing to install</span></div>
 
         <section className="lp-section">
-          <h2 className="lp-h2">Five games. One room.</h2>
+          <h2 className="lp-h2">Four games. One room.</h2>
           <p className="lp-sub">Learn one, you've learned them all. A show is two or three back to back.</p>
           <div className="lp-games">
             {GAMES.map((g) => (
@@ -62,7 +61,7 @@ export default function Page() {
                 <span className="lp-game-tag">{g.tag}</span>
                 <h3>{g.name}</h3>
                 <p>{g.blurb}</p>
-                <span className="lp-game-mins">{g.length} · {g.players}</span>
+                <span className="lp-game-mins">{g.length} · {g.players}{g.slug === "emoji-decoder" ? " · ★ Start with this" : ""}</span>
               </Link>
             ))}
           </div>
@@ -73,46 +72,6 @@ export default function Page() {
             <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--yellow)" }}>1</span><h3>Host taps “Host a show”</h3><p>Your phone becomes the remote. Start, pause, skip, reveal — all from the couch.</p></div>
             <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--pink-pastel)" }}>2</span><h3>TV shows a giant QR</h3><p>Any screen with a browser. Everyone scans, picks a name and an animal.</p></div>
             <div className="lp-step"><span className="lp-step-num" style={{ background: "var(--lav)" }}>3</span><h3>Play. Argue. Reveal.</h3><p>Answers on phones, drama on the TV, podium at the end.</p></div>
-          </div>
-        </section>
-
-        <section className="lp-section">
-          <h2 className="lp-h2">Wherever people gather</h2>
-          <div className="lp-occasions">
-            {OCCASIONS.map((o) => (
-              <Link key={o.slug} className="lp-occ" href={`/for/${o.slug}`}><span>{o.icon}</span><span><b>{o.name}</b><small>{o.sub}</small></span></Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="lp-section">
-          <div className="lp-family">
-            <div>
-              <p className="eyebrow">The family album</p>
-              <h2>Last month's truths are tonight's quiz.</h2>
-              <p>One private link for your family, no accounts. It remembers who's who, keeps the true stories people don't opt out of saving for 60 days after your last show, and deals them back as Remember This?. Anyone with the link can get in, so share it only with family.</p>
-              <Link className="lp-btn-dark" href="/family">Start your family album</Link>
-            </div>
-            <div aria-hidden="true">
-              <div className="lp-memory" style={{ transform: "rotate(-1.5deg)" }}><span>🦊</span><p><q>I once met a penguin.</q><small>Mum · true statement</small></p></div>
-              <div className="lp-memory" style={{ transform: "rotate(1deg)" }}><span>🐸</span><p><q>Locked myself out in my pyjamas. Twice.</q><small>Grandpa · story line he chose to save</small></p></div>
-              <div className="lp-memory" style={{ transform: "rotate(-.5deg)" }}><span>🦄</span><p><q>I can juggle three balls.</q><small>Zara · true statement</small></p></div>
-            </div>
-          </div>
-        </section>
-
-        <section className="lp-section">
-          <div className="lp-blog-head">
-            <div><p className="eyebrow">From the blog</p><h2 className="lp-h2 left" style={{ fontSize: "2.3rem" }}>Ideas for your next get-together</h2></div>
-            <Link href="/blog" style={{ fontWeight: 600 }}>All posts →</Link>
-          </div>
-          <div className="lp-blog">
-            {POSTS.slice(0, 3).map((post) => (
-              <Link key={post.slug} className="lp-post" href={`/blog/${post.slug}`}>
-                <span className="lp-post-art" style={{ background: post.soft }}>{post.icon}</span>
-                <span className="lp-post-body"><span className="lp-post-meta">{post.cat} · {post.read}</span><h3>{post.title}</h3><p>{post.dek}</p></span>
-              </Link>
-            ))}
           </div>
         </section>
 
