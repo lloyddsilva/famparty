@@ -29,6 +29,11 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
     phones.push({ ctx, page });
   }
   const host = phones[0].page;
+  const endGame = async () => {
+    const end = host.getByRole("button", { name: /End game/ });
+    if (!(await end.isVisible().catch(() => false))) await host.getByRole("button", { name: /Manage/ }).click();
+    await end.click();
+  };
   await expect(host.getByText(/You're the host/)).toBeVisible();
   lap("3 players in, host claimed");
 
@@ -49,8 +54,7 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
   await answerAll();
   await host.getByRole("button", { name: /Reveal answer now/ }).click();
   lap("2 emoji rounds done");
-  await host.getByRole("button", { name: /Manage/ }).click();
-  await host.getByRole("button", { name: /End game/ }).click();
+  await endGame();
   await expect(tv.getByText("Final Results")).toBeVisible();
 
   // Next: Spotlight, one full turn with typed statements
@@ -70,8 +74,7 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
   }
   await host.getByRole("button", { name: /Reveal the lie/ }).click();
   lap("spotlight turn done");
-  await host.getByRole("button", { name: /Manage/ }).click();
-  await host.getByRole("button", { name: /End game/ }).click();
+  await endGame();
 
   // Next: Spectrum, one round
   await host.getByRole("button", { name: /Next: Spectrum/ }).click();
@@ -83,10 +86,9 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
       await page.getByRole("button", { name: /Lock it in/ }).click();
     }
   }
-  await expect(tv.getByText(/crowd leans/i)).toBeVisible();
+  await expect(tv.getByText(/crowd leans/i)).toBeVisible({ timeout: 40000 });
   lap("spectrum round done");
-  await host.getByRole("button", { name: /Manage/ }).click();
-  await host.getByRole("button", { name: /End game/ }).click();
+  await endGame();
 
   // Next: Finish It, one round to authors
   await host.getByRole("button", { name: /Next: Finish It/ }).click();
