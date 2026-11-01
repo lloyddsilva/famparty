@@ -2,7 +2,7 @@
 // All phase advances — including timer expiry — go through applyAction/advanceIfExpired
 // so the Redis compare-and-set in roomStore.js guarantees only one caller wins.
 
-import { QUESTIONS } from "./questions.js";
+import { QUESTIONS, AVATARS } from "./questions.js";
 import { SPECTRUM_PACK, FINISHIT_PACK } from "./packs.js";
 import { emojiPoints, spotlightPoints, rememberThisPoints, spectrumPoints } from "./scoring.js";
 
@@ -17,12 +17,7 @@ export const VOTE_MS = 30000;
 export const ROOM_TTL_SECONDS = 2 * 60 * 60;
 export const GAMES = ["emoji", "spotlight", "spectrum", "finishit"];
 export const GAME_MIN_PLAYERS = { emoji: 2, spectrum: 2, spotlight: 3, finishit: 3 };
-export const HOWTO_TEXT = {
-  emoji: "Guess the phrase from the emojis. Fastest right answer scores most.",
-  spotlight: "Two truths and a lie. Guess the lie, then hear the real story.",
-  spectrum: "Place yourself between the two ends, then guess where the crowd lands.",
-  finishit: "Finish the sentence. Funniest ending wins — voting is anonymous.",
-};
+export { HOWTO_TEXT } from "./howto.js";
 
 const shuffle = (arr, seed = 1) => {
   // Fisher-Yates with a mulberry32 PRNG (keeps the engine pure and the
@@ -46,7 +41,7 @@ export const normalizeText = (t) => String(t || "").toLowerCase().replace(/[^a-z
 
 export function createRoom({ code, hostTokenHash, now, familyId = null, hostPending = false }) {
   return {
-    code, hostTokenHash, familyId, hostPending, relaxed: false, version: 0, game: "emoji", phase: "lobby",
+    code, hostTokenHash, familyId, hostPending, relaxed: false, totalRounds: 5, nextGamePicked: false, version: 0, game: "emoji", phase: "lobby",
     players: [], qIndex: 0, deadline: null, paused: false, pausedRemainingMs: null,
     locked: false, createdAt: now, updatedAt: now,
     featuredOrder: [], featuredIdx: 0, spotlightOrder: [0, 1, 2], votes: {},
@@ -67,14 +62,18 @@ export function addPlayer(state, { id, tokenHash, name, avatar, memberId = null 
   }
   if (state.locked) return { error: "This room is locked by the host." };
   if (state.players.length >= MAX_PLAYERS) return { error: `Room is full (${MAX_PLAYERS} players).` };
-  if (state.players.some((p) => p.avatar === avatar)) return { error: "That avatar is taken. Pick another." };
+  // The server assigns the animal in the same atomic update as the join:
+  // a taken request is given the first free animal, never an error.
+  const taken = new Set(state.players.map((p) => p.avatar));
+  const assignedAvatar = taken.has(avatar) ? AVATARS.find((a) => !taken.has(a)) : avatar;
+  if (!assignedAvatar) return { error: `Room is full (${MAX_PLAYERS} players).` };
   const player = {
-    id, tokenHash, memberId, name, avatar, score: 0, streak: 0, lastCorrect: null, lastPoints: 0,
+    id, tokenHash, memberId, name, avatar: assignedAvatar, score: 0, streak: 0, lastCorrect: null, lastPoints: 0,
     waiting: state.phase !== "lobby",
     statements: null, watching: false, storyLine: null, hidden: false,
     spectrumPos: null, spectrumPrediction: null, finishAnswer: null,
   };
-  return { state: { ...state, players: [...state.players, player], updatedAt: now }, playerId: id, rejoined: false };
+  return { state: { ...state, players: [...state.players, player], updatedAt: now }, playerId: id, rejoined: false, avatar: assignedAvatar };
 }
 
 /* ---------- shared transitions ---------- */
@@ -190,7 +189,7 @@ function finishToPresent(state, now) {
   return toPhase({ ...state, votes: {}, finishOrder: order, finishCandidateIds: candidateIds, finishRevealStep: 0, finishAuthors: false }, "finishPresent", now);
 }
 function finishToVote(state, now) {
-  return toPhase(state, "finishVote", now, VOTE_MS);
+  return toPhase(state, "finishVote", now, VOTE_MS * (state.relaxed ? 2 : 1));
 }
 function revealFinish(state, now) {
   // Exact normalized duplicates pool their votes and split the points. No fuzzy matching.
@@ -227,7 +226,7 @@ function revealRemember(state, now) {
 function beginGame(state, now) {
   if (state.game === "spotlight") return toPhase(state, "prep", now);
   if (state.game === "spectrum") return startSpectrum(state, now);
-  if (state.game === "finishit") return toPhase({ ...state, players: state.players.map((p) => ({ ...p, finishAnswer: null })) }, "finishWrite", now, WRITE_MS);
+  if (state.game === "finishit") return toPhase({ ...state, players: clearWaiting(state.players.map((p) => ({ ...p, finishAnswer: null }))) }, "finishWrite", now, WRITE_MS * (state.relaxed ? 2 : 1));
   return startQuestion(state, now);
 }
 
@@ -255,8 +254,8 @@ export function applyAction(state, action, now, ctx = {}) {
 
   switch (action.type) {
     case "SELECT_GAME": {
-      if (state.phase !== "lobby" || !GAMES.includes(action.game)) return fail("Cannot pick a game now.");
-      return { state: { ...state, game: action.game, updatedAt: now } };
+      if (!["lobby", "finale"].includes(state.phase) || !GAMES.includes(action.game)) return fail("Cannot pick a game now.");
+      return { state: { ...state, game: action.game, nextGamePicked: state.phase === "finale" ? true : state.nextGamePicked, updatedAt: now } };
     }
     case "START": {
       if (!["lobby", "finale"].includes(state.phase)) return fail("Game already started.");
@@ -271,12 +270,28 @@ export function applyAction(state, action, now, ctx = {}) {
     case "NEXT_GAME": {
       if (state.phase !== "finale") return fail("Finish this game first.");
       const order = ["emoji", "spotlight", "spectrum", "finishit"];
-      const nextGame = order[(order.indexOf(state.game) + 1) % order.length];
+      let nextGame = state.nextGamePicked ? state.game : null;
+      if (!nextGame) {
+        for (let step = 1; step <= order.length; step++) {
+          const cand = order[(order.indexOf(state.game) + step) % order.length];
+          if (state.players.length >= (GAME_MIN_PLAYERS[cand] ?? 3)) { nextGame = cand; break; }
+        }
+      }
+      nextGame = nextGame || "emoji";
       const next = {
-        ...state, game: nextGame, qIndex: 0, votes: {}, featuredOrder: [], featuredIdx: 0, gameId: `g-${now}-${state.version}`,
+        ...state, game: nextGame, nextGamePicked: false, qIndex: 0, votes: {}, featuredOrder: [], featuredIdx: 0, gameId: `g-${now}-${state.version}`,
         players: state.players.map((p) => ({ ...p, statements: null, watching: false, storyLine: null, finishAnswer: null, spectrumPos: null })),
       };
       return { state: toPhase(next, "howto", now, 5000) };
+    }
+    case "END_GAME": {
+      if (["lobby", "finale"].includes(state.phase)) return fail("No game running.");
+      return { state: toPhase(state, "finale", now) };
+    }
+    case "SET_ROUNDS": {
+      if (state.phase !== "lobby") return fail("Set rounds before starting.");
+      if (![3, 5, 10].includes(action.rounds)) return fail("Rounds must be 3, 5 or 10.");
+      return { state: { ...state, totalRounds: action.rounds, updatedAt: now } };
     }
     case "SET_RELAXED": {
       return { state: { ...state, relaxed: !!action.relaxed, updatedAt: now } };
@@ -307,23 +322,24 @@ export function applyAction(state, action, now, ctx = {}) {
         const f = featured(state);
         if (!f || actor.id === f.id || ![0, 1, 2].includes(action.choice)) return fail("Invalid vote.");
         const next = { ...state, votes: { ...state.votes, [actor.id]: action.choice }, updatedAt: now };
-        const voters = state.players.filter((p) => p.connected !== false && p.id !== f.id);
-        return { state: voters.every((p) => next.votes[p.id] !== undefined) ? revealSpotlight(next, now) : next };
+        const voters = state.players.filter((p) => p.connected !== false && p.id !== f.id && !p.waiting);
+        return { state: voters.length && voters.every((p) => next.votes[p.id] !== undefined) ? revealSpotlight(next, now) : next };
       }
       if (state.phase === "remember") {
         const cur = state.rememberItems[state.qIndex];
         if (actor.memberId && cur && actor.memberId === cur.writerMemberId) return fail("The writer cannot guess their own statement.");
         const next = { ...state, votes: { ...state.votes, [actor.id]: String(action.choice) }, updatedAt: now };
         const item = state.rememberItems[state.qIndex];
-        const guessers = state.players.filter((p) => !(p.memberId && p.memberId === item?.writerMemberId));
-        return { state: guessers.every((p) => next.votes[p.id] !== undefined) ? revealRemember(next, now) : next };
+        const guessers = state.players.filter((p) => !p.waiting && !(p.memberId && p.memberId === item?.writerMemberId));
+        return { state: guessers.length && guessers.every((p) => next.votes[p.id] !== undefined) ? revealRemember(next, now) : next };
       }
       if (state.phase === "finishVote") {
         const candIdx = (state.finishCandidateIds || []).indexOf(String(action.choice));
         const targetId = candIdx >= 0 ? state.finishOrder[candIdx] : null;
         if (!targetId || actor.id === targetId) return fail("Invalid vote.");
         const next = { ...state, votes: { ...state.votes, [actor.id]: targetId }, updatedAt: now };
-        return { state: state.players.every((p) => next.votes[p.id] !== undefined) ? revealFinish(next, now) : next };
+        const voters = state.players.filter((p) => !p.waiting);
+        return { state: voters.length && voters.every((p) => next.votes[p.id] !== undefined) ? revealFinish(next, now) : next };
       }
       return fail("Not voting now.");
     }
@@ -332,12 +348,14 @@ export function applyAction(state, action, now, ctx = {}) {
       const pos = Math.max(0, Math.min(100, Math.round(Number(action.pos))));
       if (Number.isNaN(pos) || !["left", "right"].includes(action.prediction)) return fail("Invalid placement.");
       const next = { ...state, players: state.players.map((p) => p.id === actor.id ? { ...p, spectrumPos: pos, spectrumPrediction: action.prediction } : p), updatedAt: now };
-      return { state: next.players.every((p) => p.spectrumPos !== null) ? revealSpectrum(next, now) : next };
+      const active = next.players.filter((p) => !p.waiting);
+      return { state: active.length && active.every((p) => p.spectrumPos !== null) ? revealSpectrum(next, now) : next };
     }
     case "FINISH_SUBMIT": {
       if (state.phase !== "finishWrite" || !actor || !action.text) return fail("Not writing now.");
       const next = { ...state, players: state.players.map((p) => p.id === actor.id ? { ...p, finishAnswer: action.text } : p), updatedAt: now };
-      return { state: next.players.every((p) => p.finishAnswer) ? finishToPresent(next, now) : next };
+      const active = next.players.filter((p) => !p.waiting);
+      return { state: active.length && active.every((p) => p.finishAnswer) ? finishToPresent(next, now) : next };
     }
     case "STORY_SAVE": {
       const f = featured(state);
@@ -353,7 +371,15 @@ export function applyAction(state, action, now, ctx = {}) {
       if (state.phase === "question") return { state: scoreEmojiReveal(state, ctx.answers, now) };
       if (state.phase === "reveal") return { state: toPhase(state, "scores", now) };
       if (state.phase === "spotlight") return { state: revealSpotlight(state, now) };
-      if (state.phase === "spotlightReveal") return { state: toPhase(state, "story", now, STORY_MS) };
+      if (state.phase === "spotlightReveal") {
+        if (!state.familyId) {
+          // No album: no story to save, so skip storySave and go to the next turn.
+          const idx = state.featuredIdx + 1;
+          if (idx >= state.featuredOrder.length) return { state: toPhase(state, "finale", now) };
+          return { state: startSpotlightTurn({ ...state, featuredIdx: idx }, now) };
+        }
+        return { state: toPhase(state, "story", now, STORY_MS) };
+      }
       if (state.phase === "story") return { state: toPhase(state, "storySave", now) };
       if (state.phase === "storySave") {
         const idx = state.featuredIdx + 1;
@@ -377,14 +403,14 @@ export function applyAction(state, action, now, ctx = {}) {
       }
       if (state.phase === "scores") {
         if (state.game === "spectrum") {
-          if (state.qIndex + 1 >= SPECTRUM_PACK.items.length) return { state: toPhase(state, "finale", now) };
+          if (state.qIndex + 1 >= Math.min(state.totalRounds || 5, SPECTRUM_PACK.items.length)) return { state: toPhase(state, "finale", now) };
           return { state: startSpectrum({ ...state, qIndex: state.qIndex + 1 }, now) };
         }
         if (state.game === "finishit") {
-          if (state.qIndex + 1 >= FINISHIT_PACK.items.length) return { state: toPhase(state, "finale", now) };
-          return { state: toPhase({ ...state, qIndex: state.qIndex + 1, players: clearWaiting(state.players.map((p) => ({ ...freshPlayerFlags(p), finishAnswer: null }))) }, "finishWrite", now, WRITE_MS) };
+          if (state.qIndex + 1 >= Math.min(state.totalRounds || 5, FINISHIT_PACK.items.length)) return { state: toPhase(state, "finale", now) };
+          return { state: toPhase({ ...state, qIndex: state.qIndex + 1, players: clearWaiting(state.players.map((p) => ({ ...freshPlayerFlags(p), finishAnswer: null }))) }, "finishWrite", now, WRITE_MS * (state.relaxed ? 2 : 1)) };
         }
-        if (state.qIndex + 1 >= QUESTIONS.length) return { state: toPhase(state, "finale", now) };
+        if (state.qIndex + 1 >= Math.min(state.totalRounds || 5, QUESTIONS.length)) return { state: toPhase(state, "finale", now) };
         return { state: startQuestion({ ...state, qIndex: state.qIndex + 1 }, now) };
       }
       return fail("Nothing to advance.");
@@ -477,10 +503,20 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
   return {
     code: state.code, game: state.game, phase: state.phase, version: state.version,
     familyLinked: !!state.familyId, hostPending: !!state.hostPending, relaxed: !!state.relaxed,
-    suggestedNext: ["emoji", "spotlight", "spectrum", "finishit"][(["emoji", "spotlight", "spectrum", "finishit"].indexOf(state.game) + 1) % 4],
+    totalRounds: state.totalRounds || 5,
+    suggestedNext: (() => {
+      if (state.nextGamePicked) return state.game;
+      const order = ["emoji", "spotlight", "spectrum", "finishit"];
+      for (let step = 1; step <= order.length; step++) {
+        const cand = order[(order.indexOf(state.game) + step) % order.length];
+        if (state.players.length >= (GAME_MIN_PLAYERS[cand] ?? 3)) return cand;
+      }
+      return "emoji";
+    })(),
     players, answeredCount: Object.keys(answers).length, votedCount: Object.keys(state.votes || {}).length,
+    activeCount: state.players.filter((p) => !p.waiting).length,
     qIndex: state.qIndex,
-    totalQuestions: state.game === "spectrum" ? SPECTRUM_PACK.items.length : state.game === "finishit" ? FINISHIT_PACK.items.length : state.game === "remember" ? state.rememberItems.length : QUESTIONS.length,
+    totalQuestions: state.game === "spectrum" ? Math.min(state.totalRounds || 5, SPECTRUM_PACK.items.length) : state.game === "finishit" ? Math.min(state.totalRounds || 5, FINISHIT_PACK.items.length) : state.game === "remember" ? state.rememberItems.length : Math.min(state.totalRounds || 5, QUESTIONS.length),
     deadline: state.deadline, paused: state.paused, locked: state.locked,
     question: ["question", "reveal"].includes(state.phase) && q
       ? { emoji: q.emoji, choices: q.choices, ...(state.phase === "reveal" ? { answer: q.answer, answerIndex: q.choices.indexOf(q.answer) } : {}) }

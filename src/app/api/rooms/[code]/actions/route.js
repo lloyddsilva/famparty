@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 const noStore = { "Cache-Control": "no-store" };
 const bad = (error, status = 400) => NextResponse.json({ ok: false, error }, { status, headers: noStore });
 
-const HOST_ACTIONS = new Set(["START", "NEXT", "PLAY_AGAIN", "LOCK", "PAUSE", "RESUME", "KICK", "SELECT_GAME", "BEGIN_SPOTLIGHT", "HIDE", "NEXT_GAME", "SET_RELAXED"]);
+const HOST_ACTIONS = new Set(["START", "NEXT", "PLAY_AGAIN", "LOCK", "PAUSE", "RESUME", "KICK", "SELECT_GAME", "BEGIN_SPOTLIGHT", "HIDE", "NEXT_GAME", "SET_RELAXED", "END_GAME", "SET_ROUNDS"]);
 const PLAYER_ACTIONS = new Set(["SUBMIT_STATEMENTS", "SET_WATCH", "VOTE", "PLACE", "FINISH_SUBMIT", "STORY_SAVE"]);
 const cleanText = (v, max) => String(v ?? "").replace(/\s+/g, " ").trim().slice(0, max);
 
@@ -41,7 +41,7 @@ export async function POST(req, { params }) {
       const added = await recordAnswer(code, round, me.id, body.choice, now);
       if (!added) return NextResponse.json({ ok: true, alreadyAnswered: true }, { headers: noStore });
       const answers = await loadAnswers(code, round);
-      if (Object.keys(answers).length < state0.players.length) {
+      if (Object.keys(answers).length < state0.players.filter((p) => !p.waiting).length) {
         return NextResponse.json({ ok: true, version: state0.version }, { headers: noStore });
       }
       // Everyone is in: move to reveal through the CAS, scoring from the hash.
@@ -60,6 +60,7 @@ export async function POST(req, { params }) {
       action = { type: body.type };
       if (body.type === "LOCK") action.locked = !!body.locked;
       if (body.type === "SET_RELAXED") action.relaxed = !!body.relaxed;
+      if (body.type === "SET_ROUNDS") action.rounds = Number(body.rounds);
       if (body.type === "SELECT_GAME") action.game = String(body.game || "");
       if (body.type === "KICK") {
         if (!state0.players.some((p) => p.id === body.playerId)) return bad("Player not found.");

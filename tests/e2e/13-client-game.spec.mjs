@@ -39,7 +39,7 @@ test("13-client full Emoji Decoder game", async ({ baseURL }) => {
   expect(r.data.ok).toBeTruthy();
 
   // regression 4: a stale duplicate NEXT (same expectedPhase) must be rejected
-  for (let round = 0; round < 10; round++) {
+  for (let round = 0; round < 5; round++) {
     state = await call(host, "GET", `/api/rooms/${code}/state?role=display`);
     expect(state.data.view.phase).toBe(round === 0 ? "question" : "question");
     // all 12 answer at once — simultaneous answers must all score at reveal (items 1-2)
@@ -52,7 +52,7 @@ test("13-client full Emoji Decoder game", async ({ baseURL }) => {
     expect(stale.status).toBe(409);
     r = await call(host, "POST", `/api/rooms/${code}/actions`, { body: { type: "NEXT", token: hostToken, expectedPhase: "reveal" } });
     expect(r.data.ok).toBeTruthy();
-    if (round < 9) {
+    if (round < 4) {
       r = await call(host, "POST", `/api/rooms/${code}/actions`, { body: { type: "NEXT", token: hostToken, expectedPhase: "scores" } });
       expect(r.data.ok).toBeTruthy();
     }

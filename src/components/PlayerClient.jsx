@@ -12,7 +12,7 @@ export default function PlayerClient() {
   const [fromQr, setFromQr] = useState(false);
   const [claimHost, setClaimHost] = useState(false);
   const [name, setName] = useState("");
-  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [avatar, setAvatar] = useState(() => AVATARS[Math.floor(Math.random() * AVATARS.length)]);
   const [creds, setCreds] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -53,7 +53,9 @@ export default function PlayerClient() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: hostToken, expectedPhase: view?.phase, expectedStep: view?.finishit?.candidates.length ?? 0, ...a }),
     });
-    return res.json().catch(() => ({}));
+    const data = await res.json().catch(() => ({}));
+    if (data && data.ok === false) setError(data.error || "That host action did not go through.");
+    return data;
   };
 
   useEffect(() => {
@@ -103,6 +105,7 @@ export default function PlayerClient() {
     }
     setBusy(false);
     if (!data.ok) { refreshTaken(code); return setError(data.error || "Could not join."); }
+    if (data.avatar) setAvatar(data.avatar);
     localStorage.setItem("famparty:playerCode", data.code);
     localStorage.setItem("famparty:playerToken", data.playerToken);
     if (data.hostToken) {

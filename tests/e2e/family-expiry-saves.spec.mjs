@@ -3,6 +3,13 @@ import { test, expect, request } from "@playwright/test";
 // Review item 2: many pollers race the Spotlight timer expiry. Exactly one
 // CAS winner may schedule the family save, and the DB dedupe key is the
 // backstop — the featured player's truths must be inserted exactly once.
+test.beforeAll(async ({ baseURL }) => {
+  const probe = await fetch(`${baseURL}/api/families`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Flag Probe" }) });
+  if (probe.status === 410) {
+    test.skip(true, "Family albums are disabled on this server (start it with FAMPARTY_ALBUMS=1 to run album suites).");
+  }
+});
+
 test("concurrent expiry pollers save truths exactly once", async ({ baseURL }) => {
   const ctx = await request.newContext({ baseURL });
   const post = async (path, body, token) => {

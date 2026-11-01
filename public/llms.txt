@@ -1,15 +1,14 @@
 # FamParty
 
-> A party game show for one big screen and everyone's phones. A host runs the show from their phone, a TV (or shared screen) only displays, and 3–12 players join with a QR code or 4-letter room code. No accounts, no app installs, no payments.
+> A party game show for one big screen and everyone's phones. A host runs the show from their phone (or the first person to scan becomes host), a TV or shared screen only displays, and 2-12 players join with a QR code or 4-letter room code. No accounts, no app installs, no payments.
 
-FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji Decoder (guess the phrase from emojis), Spotlight (two truths and a lie with a story beat), Spectrum (place yourself between opposites and predict the crowd), Finish It (anonymous sentence completions, voted), and the memory game (currently unavailable) (guess who wrote a saved true statement). An optional family album link keeps a roster, saved true statements and scores in Redis; album keys expire automatically 60 days after last activity.
+FamParty is run by Hilly Shore Inc. (California, United States). Four games: Emoji Decoder (guess the phrase from emojis), Spotlight (two truths and a lie with a story beat), Spectrum (place yourself between opposites and predict the crowd), and Finish It (anonymous sentence completions, voted). Rooms are temporary and expire after about 2 hours; nothing is saved afterwards.
 
 ## Key pages
 
 - [Home](/) — what FamParty is and how a show starts
 - [Games](/games) — the four games and how a show flows
 - [How it works](/how-it-works) — TV, host phone and player phones; safety; FAQ
-- [Family album](/family) — the roster, saved stories and 60-day retention
 - [Blog](/blog) — ideas and hosting tips
 - [Privacy](/privacy) — what is stored and for how long
 - [Terms](/terms) — short, plain terms of service
@@ -17,6 +16,6 @@ FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji De
 
 ## Notes for agents
 
-- Live rooms expire after 2 hours. Family albums expire 60 days after last activity.
-- The running app makes no AI model calls. Content packs are currently hand-written starters awaiting the offline Muse generation run and human review.
-- App surfaces (/host, /join, /tv) and family album pages (/f/...) are not for indexing.
+- Live rooms expire after about 2 hours. There are currently no saved stories, scores or accounts.
+- The running app makes no AI model calls; content was generated offline and human-reviewed.
+- App surfaces (/host, /join, /tv) are not for indexing.

@@ -1,7 +1,7 @@
 // Marketing content: games, occasions, blog. Blog art is a pastel tile + emoji until pack title cards exist.
 
 export const GAMES = [
-  { slug: "emoji-decoder", icon: "🧩", name: "Emoji Decoder", tag: "The warm-up", length: "10 rounds", players: "3–12 players", soft: "#fff3cc",
+  { slug: "emoji-decoder", icon: "🧩", name: "Emoji Decoder", tag: "The warm-up", length: "10 rounds", players: "2–12 players", soft: "#fff3cc",
     blurb: "Guess the phrase from the emojis before the clock runs out. Fast fingers score more — shouting at the TV is encouraged.",
     feels: "Like shouting answers at a game show. Zero learning curve; grandparents and kids play as equals, and the fastest finger in the room earns its bragging rights.",
     how: ["An emoji clue appears on the TV: 🍕🎉", "Four choices on every phone — tap one before the timer ends", "Faster correct answers score more; streaks build bonus points", "The reveal lands big on TV, then the leaderboard shuffles"] },
@@ -9,7 +9,7 @@ export const GAMES = [
     blurb: "Two truths and a lie, written privately on your phone. Fool the room, then take 30 seconds in the spotlight to tell the real story.",
     feels: "The best part of a family dinner, structured. Someone at every table has a story nobody has heard — Spotlight is how it finally gets told, with a scoreboard cheering it on.",
     how: ["Everyone privately writes two truths and one lie (prompt starters help)", "One player at a time is in the spotlight; the statements are shuffled so the lie has no tell", "Everyone else votes for the lie — guessers score, the featured player scores per person fooled", "Then 30 seconds with the microphone: tell the real story out loud"] },
-  { slug: "spectrum", icon: "🎚️", name: "Spectrum", tag: "The conversation starter", length: "10 rounds", players: "3–12 players", soft: "#ffffff",
+  { slug: "spectrum", icon: "🎚️", name: "Spectrum", tag: "The conversation starter", length: "10 rounds", players: "2–12 players", soft: "#ffffff",
     blurb: "Cook at home or order in? Place yourself, predict the crowd, then watch everyone's avatars land on the big spectrum at once.",
     feels: "\"Wait — YOU put yourself there?!\" Outliers get celebrated, not just winners: Lonely Island for the furthest from the crowd, Mind Reader for whoever predicted it best.",
     how: ["A pair of opposites appears: Cook at home ↔ Order takeaway", "Place yourself on the slider, then predict where the crowd will land", "Every avatar dot lands on the TV spectrum at once", "Awards for the outlier, the mind reader, and the dead centre"] },

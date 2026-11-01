@@ -30,7 +30,7 @@ export default function Page() {
           <div className="lp-cta-row">
             <Link className="btn primary lp-cta-main" href="/host">Host a show</Link>
             <Link className="btn lp-cta-ghost" href="/join">Join a game</Link>
-            <Link className="btn lp-cta-ghost" href="/tv">Start on this screen</Link>
+            <Link className="btn lp-cta-ghost tv-only-cta" href="/tv">Start on this screen</Link>
           </div>
 
           <div className="lp-devices" aria-hidden="true">

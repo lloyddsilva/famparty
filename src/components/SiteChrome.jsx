@@ -76,7 +76,7 @@ export function SiteHeader() {
           <b>Occasions</b>
           {OCCASIONS.map((o) => <Link key={o.slug} className="mm-sub" href={`/for/${o.slug}`}>{o.icon} {o.name}</Link>)}
           <Link href="/how-it-works">How it works</Link>
-          <Link href="/join">Join with a code</Link>
+          <Link href="/join">Join a game</Link>
         </nav>
       )}
     </header>
@@ -93,7 +93,6 @@ export function SiteFooter() {
           <Link href="/for/family-night">Occasions</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/blog">Blog</Link>
-          <Link href="/for/family-night">Occasions</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/about">About</Link>

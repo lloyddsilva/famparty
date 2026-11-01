@@ -213,3 +213,34 @@ test("finishit: after voting, myVote and finishit fields contain no player ids b
   }
   assert.ok(String(view.myVote).startsWith("cand-"), `myVote is a candidate id, got ${view.myVote}`);
 });
+
+test("end game jumps to the podium from any in-game phase", () => {
+  let s = room("emoji");
+  s = act(s, { type: "START" });
+  const out = applyAction(s, { type: "END_GAME" }, NOW);
+  assert.equal(out.state.phase, "finale");
+});
+
+test("next game skips games that don't fit the player count", () => {
+  let s = room("emoji", 2);
+  s = act(s, { type: "START" });
+  s = applyAction(s, { type: "END_GAME" }, NOW).state;
+  assert.equal(s.phase, "finale");
+  const view = buildView(s, {});
+  assert.equal(view.suggestedNext, "spectrum"); // spotlight/finishit need 3
+  const out = applyAction(s, { type: "NEXT_GAME" }, NOW);
+  assert.equal(out.state.game, "spectrum");
+});
+
+test("waiting players don't hold up the round (spectrum early finish)", () => {
+  let s = room("spectrum", 3);
+  s = act(s, { type: "START" });
+  // a late joiner arrives mid-round
+  const joined = addPlayer(s, { id: "late", tokenHash: "tlate", name: "Late", avatar: "🦉" }, NOW);
+  s = joined.state;
+  assert.equal(s.players.find((p) => p.id === "late").waiting, true);
+  s = act(s, { type: "PLACE", playerId: "p0", pos: 10, prediction: "left" });
+  s = act(s, { type: "PLACE", playerId: "p1", pos: 20, prediction: "left" });
+  s = act(s, { type: "PLACE", playerId: "p2", pos: 30, prediction: "left" });
+  assert.equal(s.phase, "spectrumReveal"); // revealed without the waiting player
+});

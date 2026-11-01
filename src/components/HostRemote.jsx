@@ -127,6 +127,7 @@ export default function HostRemote() {
         <span className="sticker">Host remote</span>
         <h2 style={{ fontSize: "1.9rem", marginTop: 12 }}>Room {room.code}</h2>
 
+        {view?.phase === "lobby" || !view ? (
         <div style={{ background: "var(--dark)", color: "#fff", borderRadius: 24, padding: "18px 20px", margin: "14px 0" }}>
           <p style={{ margin: 0, color: "var(--yellow)", textTransform: "uppercase", letterSpacing: ".08em", fontSize: ".75rem", fontWeight: 700 }}>Show on TV</p>
           <p style={{ margin: "8px 0 2px", fontSize: "1.35rem", fontWeight: 800 }}>{tvShort}</p>
@@ -137,6 +138,9 @@ export default function HostRemote() {
             {copied && <span style={{ alignSelf: "center" }}>{copied}</span>}
           </div>
         </div>
+        ) : (
+          <p className="sub" style={{ margin: "8px 0 0" }}>Room <strong>{room.code}</strong> · TV: {tvShort}</p>
+        )}
 
         {error && <p className="error">{error}</p>}
         {!view && <p className="sub">Connecting…</p>}
@@ -145,7 +149,7 @@ export default function HostRemote() {
           <div style={{ border: "1.5px solid var(--divider)", borderRadius: 18, padding: 16, marginBottom: 14 }}>
             <b>Play along on this phone?</b>
             <label>Your name<input value={setupName} onChange={(e) => setSetupName(e.target.value.slice(0, 16))} placeholder="e.g. Alex" /></label>
-            <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} className={`avatar ${setupAvatar === a ? "selected" : ""}`} onClick={() => setSetupAvatar(a)}>{a}</button>)}</div>
+            <div className="avatar-grid">{AVATARS.map((a) => { const taken = (view?.players || []).some((p) => p.avatar === a); return <button type="button" key={a} disabled={taken} title={taken ? "Taken in this room" : undefined} className={`avatar ${setupAvatar === a ? "selected" : ""}`} onClick={() => setSetupAvatar(a)}>{a}</button>; })}</div>
             <button className="btn primary big" disabled={busy} onClick={playAsHost}>{busy ? "Joining…" : "▶ Play & host"}</button>
             <p className="center" style={{ margin: "8px 0 0" }}><button type="button" className="link" onClick={() => setPlayerCreds({ skipped: true })}>I'm just running it</button></p>
           </div>
@@ -154,7 +158,7 @@ export default function HostRemote() {
 
         {view && (
           <>
-            <HostBar view={view} hostAct={hostAct} />
+            {(!playerCreds || playerCreds.skipped || view.phase === "lobby") && <HostBar view={view} hostAct={hostAct} />}
 
             {view.phase === "lobby" && (
               <>
@@ -177,9 +181,12 @@ export default function HostRemote() {
         )}
       </div>
 
-      {playerCreds && !playerCreds.skipped && playerView && (
-        <div className="card">
+      {playerCreds && !playerCreds.skipped && playerView && view?.phase !== "lobby" && (
+        <div className="card" style={{ marginTop: 14 }}>
           <PlayerGame view={playerView} act={playerAct} me={me} seconds={seconds} />
+          <div style={{ marginTop: 14 }}>
+            {(!playerCreds || playerCreds.skipped || view.phase === "lobby") && <HostBar view={view} hostAct={hostAct} />}
+          </div>
         </div>
       )}
     </main>

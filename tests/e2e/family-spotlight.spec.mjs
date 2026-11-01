@@ -3,6 +3,13 @@ import { test, expect, request } from "@playwright/test";
 // Family link -> roster -> linked room -> Spotlight saves truths -> Remember This?
 const NAMES = [["Ana", "🦊"], ["Ben", "🐼"], ["Cleo", "🦄"], ["Dan", "🐸"]];
 
+test.beforeAll(async ({ baseURL }) => {
+  const probe = await fetch(`${baseURL}/api/families`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: "Flag Probe" }) });
+  if (probe.status === 410) {
+    test.skip(true, "Family albums are disabled on this server (start it with FAMPARTY_ALBUMS=1 to run album suites).");
+  }
+});
+
 test("family roster, Spotlight save, and Remember This?", async ({ baseURL }) => {
   const ctx = await request.newContext({ baseURL });
   const post = async (path, body, token) => {

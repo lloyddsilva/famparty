@@ -31,7 +31,7 @@ export const CHRISTMAS_EMOJI_GAME = {
       ["🎅 🏙️", "Santa Claus Is Comin' to Town"],
     ]),
     REVEAL("Medium songs", [
-      ["🌟 🌃", "O Holy Night (starry night)"],
+      ["🌟 🌃", "O Holy Night"],
       ["👼 📣", "Hark! The Herald Angels Sing"],
       ["🐑 🐑 👶", "Away in a Manger"],
       ["❄️ 🎩 💃", "Walking in a Winter Wonderland"],
@@ -39,9 +39,9 @@ export const CHRISTMAS_EMOJI_GAME = {
     ]),
     REVEAL("Hard songs (take your time)", [
       ["👁️ 🎅 💋", "I Saw Mommy Kissing Santa Claus"],
-      ["🌰 🍬 🧚", "Dance of the Sugar Plum Fairy (nut + sweet + fairy)"],
+      ["🌰 🍬 🧚", "Dance of the Sugar Plum Fairy"],
       ["🎉 🌍", "Joy to the World"],
-      ["🎄 🔟 ✌️", "The Twelve Days of Christmas (tree + ten + two)"],
+      ["🎄 🔟 ✌️", "The Twelve Days of Christmas"],
     ]),
 
     H("Christmas movies"),
@@ -60,7 +60,7 @@ export const CHRISTMAS_EMOJI_GAME = {
     ]),
     REVEAL("Hard movies", [
       ["🌃 😴 🎄", "The Nightmare Before Christmas"],
-      ["🎄 🏙️ 🗽", "Miracle on 34th Street (tree + city + statue)"],
+      ["🎄 🏙️ 🗽", "Miracle on 34th Street"],
     ]),
 
     H("Traditions and festive things"),
@@ -74,13 +74,13 @@ export const CHRISTMAS_EMOJI_GAME = {
     REVEAL("Medium traditions", [
       ["💋 🌿", "Kissing under the mistletoe"],
       ["📅 🍫 🚪", "Advent calendar"],
-      ["🎁 📦 😱", "Secret Santa (gift + surprise)"],
+      ["🎁 📦 😱", "Secret Santa"],
       ["🦃 🥧 🍽️", "Christmas dinner"],
       ["✉️ 💌 🎅", "Letter to Santa"],
     ]),
     REVEAL("Hard traditions", [
       ["🎄 🔌 💡 💡", "Untangling the Christmas lights"],
-      ["🥊 📦 🎁", "Boxing Day (boxing glove + box + gift)"],
+      ["🥊 📦 🎁", "Boxing Day"],
       ["🎄 🚪 🎶", "Carol singers at the door"],
       ["🧦 🍊", "An orange in the stocking"],
     ]),

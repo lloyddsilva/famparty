@@ -52,10 +52,8 @@ test("Spotlight in the UI, through to the podium", async ({ browser, baseURL }) 
       const vote = page.locator(".btn-choice").first();
       if (await vote.isVisible().catch(() => false)) await vote.click();
     }
-    await r.host.getByRole("button", { name: /Start story beat/ }).click();
-    await r.host.getByRole("button", { name: /End story beat/ }).click();
-    const nextBtn = r.host.getByRole("button", { name: /Next player|Final results/ });
-    await nextBtn.click();
+    await r.host.getByRole("button", { name: /Reveal the lie/ }).click();
+    await r.host.getByRole("button", { name: /Next player/ }).click();
   }
   await expect(r.tv.getByText("Final Results")).toBeVisible({ timeout: 10000 });
   await expect(r.tv.locator(".podium-spot").first()).toBeVisible();

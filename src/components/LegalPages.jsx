@@ -43,7 +43,7 @@ export function PrivacyPage() {
       <P>Your browser's localStorage holds room codes and host/player tokens so you can rejoin a room after a refresh or a locked phone. Clear your browser storage and they're gone; the room itself expires on its own.</P>
 
       <H>Live rooms (kept 2 hours)</H>
-      <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that, unless the room belongs to a family album (below).</P>
+      <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that.</P>
 
       <H>Nothing is saved beyond the game</H>
       <P>There are currently no accounts and no saved stories or scores. When a room ends or expires, its names, answers, statements and scores are gone. (An earlier version of FamParty offered an optional family album that kept saved statements for 60 days; that feature is currently switched off, and no new albums can be created.)</P>
@@ -52,7 +52,7 @@ export function PrivacyPage() {
       <P>A room code lets anyone who has it join that room while it's live, and a host link lets its holder run that room. Both stop working when the room expires. Share them the way you'd share a meeting link.</P>
 
       <H>IP addresses and hosting logs</H>
-      <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processor: Upstash (rooms and albums).</P>
+      <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processor: Upstash (live rooms).</P>
 
       <H>AI</H>
       <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs are currently hand-written starters, awaiting the offline generation run and human review described on the About page.</P>

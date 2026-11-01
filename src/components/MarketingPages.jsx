@@ -13,7 +13,7 @@ export function GamesIndex() {
       <SiteHeader />
       <main className="mkt">
         <p className="eyebrow">The games</p>
-        <h1>Five games. One room.</h1>
+        <h1>Four games. One room.</h1>
         <p className="sub" style={{ maxWidth: 640, fontSize: "1.15rem" }}>Every game uses the same lobby, the same avatars and the same scoreboard. Learn one and you've learned them all — a show is just two or three of these back to back, hosted from one phone.</p>
         <div className="lp-games" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
           {GAMES.map((g) => (

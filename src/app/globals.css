@@ -244,6 +244,7 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
   .hamburger { display: block; margin-left: auto; }
   .header-ctas .btn.outline { display: none; }
 }
+@media (max-width: 760px) { .tv-only-cta { display: none; } }
 @media (max-width: 860px) {
   .hamburger { display: block; margin-left: auto; }
   .header-ctas .btn.outline { display: none; }

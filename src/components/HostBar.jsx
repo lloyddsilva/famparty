@@ -7,8 +7,18 @@ const SUGGESTED_LABELS = { emoji: "Emoji Decoder", spotlight: "Spotlight", spect
 
 // Small host control bar that sits on the same screen as the game.
 // Props: view, hostAct (host-token actions), onPlayAgain optional.
+const PHASE_WORDS = {
+  lobby: "Lobby", howto: "How to play", prep: "Writing time", question: "Round live",
+  reveal: "Answer shown", spotlight: "Guessing the lie", spotlightReveal: "The lie revealed",
+  story: "Story time", storySave: "Story time", spectrum: "Placing", spectrumReveal: "The crowd revealed",
+  finishWrite: "Writing answers", finishPresent: "Answers going up", finishVote: "Voting",
+  finishReveal: "Authors revealed", scores: "Scores", finale: "Final results",
+};
+const PICKER_GAMES = [["emoji", "🧩 Emoji"], ["spotlight", "🎤 Spotlight"], ["spectrum", "🎚️ Spectrum"], ["finishit", "✍️ Finish It"]];
+
 export default function HostBar({ view, hostAct, allowStart = false }) {
   const [manage, setManage] = useState(false);
+  const [copied, setCopied] = useState("");
   if (!view || !hostAct) return null;
 
   const GAME_MIN = { emoji: 2, spectrum: 2, spotlight: 3, finishit: 3 };
@@ -20,7 +30,7 @@ export default function HostBar({ view, hostAct, allowStart = false }) {
       case "question": return { label: "Reveal answer now →", type: "NEXT" };
       case "reveal": return { label: "Show scores →", type: "NEXT" };
       case "spotlight": return { label: "Reveal the lie →", type: "NEXT" };
-      case "spotlightReveal": return { label: "Start story beat →", type: "NEXT" };
+      case "spotlightReveal": return { label: view.familyLinked ? "Start story beat →" : "Next player →", type: "NEXT" };
       case "story": return { label: "End story beat →", type: "NEXT" };
       case "storySave": return { label: "Next player →", type: "NEXT" };
       case "spectrum": return { label: "Reveal the crowd →", type: "NEXT" };
@@ -46,19 +56,38 @@ export default function HostBar({ view, hostAct, allowStart = false }) {
   return (
     <div className="host-bar">
       <div className="host-bar-main">
-        <span className="host-bar-label">🎛️ {GAME_LABELS[view.game] || view.game} · {view.phase === "lobby" ? `${view.players.length} in` : view.phase}</span>
+        <span className="host-bar-label">🎛️ {GAME_LABELS[view.game] || view.game} · {view.phase === "lobby" ? `${view.players.length} in` : PHASE_WORDS[view.phase] || ""}</span>
         {primary && <button className="btn primary host-bar-btn" disabled={primary.disabled} onClick={() => hostAct({ type: primary.type })}>{primary.label}</button>}
         <button className="btn host-bar-btn" onClick={() => setManage((m) => !m)} aria-expanded={manage}>Manage</button>
       </div>
+      {(view.phase === "lobby" || view.phase === "finale") && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+          {PICKER_GAMES.map(([g, label]) => (
+            <button key={g} className="btn" style={view.game === g ? { borderColor: "var(--yellow)", color: "var(--yellow)" } : {}} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}>{label}</button>
+          ))}
+        </div>
+      )}
       {manage && (
         <div className="host-manage">
+          {!["lobby", "finale"].includes(view.phase) && (
+            <button className="btn" style={{ color: "#ff8fa3" }} onClick={() => hostAct({ type: "END_GAME" })}>⏹ End game → podium</button>
+          )}
+          {view.phase === "lobby" && (
+            <span style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+              <span style={{ fontWeight: 700 }}>Rounds:</span>
+              {[3, 5, 10].map((n) => (
+                <button key={n} className="btn" style={(view.totalRounds || 5) === n ? { borderColor: "var(--yellow)", color: "var(--yellow)" } : {}} onClick={() => hostAct({ type: "SET_ROUNDS", rounds: n })}>{n}</button>
+              ))}
+            </span>
+          )}
           {view.deadline && <button className="btn" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>}
           <button className="btn" onClick={() => hostAct({ type: "LOCK", locked: !view.locked })}>{view.locked ? "🔓 Unlock room" : "🔒 Lock room"}</button>
           <label className="host-relaxed">
             <input type="checkbox" checked={!!view.relaxed} onChange={(e) => hostAct({ type: "SET_RELAXED", relaxed: e.target.checked })} />
             Relaxed timer (longer rounds)
           </label>
-          <button className="btn" onClick={() => { navigator.clipboard?.writeText(hostLink).catch(() => {}); }}>🔗 Copy host link (share with a guest you trust)</button>
+          <button className="btn" onClick={async () => { try { await navigator.clipboard.writeText(hostLink); setCopied("Copied — give it to a guest you trust."); } catch { setCopied(hostLink); } }}>🔗 Copy host link</button>
+          {copied && <span style={{ alignSelf: "center", fontWeight: 600 }}>{copied}</span>}
           {view.phase === "finale" && <button className="btn" onClick={() => hostAct({ type: "PLAY_AGAIN" })}>↺ New show (reset scores)</button>}
           <div className="player-grid" style={{ justifyContent: "flex-start", margin: "8px 0" }}>
             {view.players.map((p) => (

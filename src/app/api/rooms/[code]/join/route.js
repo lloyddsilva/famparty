@@ -45,17 +45,21 @@ export async function POST(req, { params }) {
     const playerToken = typeof body.playerToken === "string" && body.playerToken.length >= 16 ? body.playerToken : newToken();
     const tokenHash = hashToken(playerToken);
     const playerId = newId();
-    const { state, error } = await casUpdate(code, (s) => addPlayer(s, { id: playerId, tokenHash, name, avatar, memberId }, Date.now()));
+    const joinOut = { avatar: null };
+    const { state, error } = await casUpdate(code, (s) => {
+      const out = addPlayer(s, { id: playerId, tokenHash, name, avatar, memberId }, Date.now());
+      if (!out.error) joinOut.avatar = out.avatar || s.players.find((p) => p.tokenHash === tokenHash)?.avatar;
+      return out;
+    });
     if (error) return bad(error, 404);
     const me = state.players.find((p) => p.tokenHash === tokenHash);
     let claimedHostToken = null;
-    if (body.claimHost && state.hostPending) {
+    if (state.hostPending) {
       claimedHostToken = newToken();
       const claim = await casUpdate(code, (s) => applyClaim(s, claimedHostToken));
-      if (!claim.state?.hostPending === false) claimedHostToken = claimedHostToken;
       if (claim.error) claimedHostToken = null;
     }
-    return NextResponse.json({ ok: true, code, playerId: me.id, playerToken, hostToken: claimedHostToken }, { headers: noStore });
+    return NextResponse.json({ ok: true, code, playerId: me.id, playerToken, hostToken: claimedHostToken, avatar: me.avatar }, { headers: noStore });
   } catch (e) {
     return NextResponse.json({ ok: false, error: e.message }, { status: e.code === "NO_REDIS" ? 503 : 500, headers: noStore });
   }
