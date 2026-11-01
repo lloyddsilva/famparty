@@ -23,6 +23,29 @@ const knownRoutes = new Set([
 ]);
 
 const words = (text) => String(text || "").split(/\s+/).filter(Boolean).length;
+const MIN_WORDS = 900;
+
+function blockWords(block) {
+  switch (block.type) {
+    case "paragraph": case "heading": return words(block.text);
+    case "gameCard": return words(block.name) + words(block.how) + words(block.players) + words(block.time) + words(block.needs);
+    case "ideaGrid": case "revealGrid": return (block.items || []).reduce((a, i) => a + words(i.title) + words(i.text) + words(i.clue) + words(i.answer), 0);
+    case "steps": return (block.items || []).reduce((a, i) => a + words(i), 0);
+    case "example": return (block.items || []).reduce((a, i) => a + words(i.text), 0);
+    case "callout": case "pullQuote": return words(block.title) + words(block.text);
+    case "pickerChart": return (block.items || []).reduce((a, i) => a + words(i.if) + words(i.play) + words(i.note), 0);
+    case "tvMock": return words(block.question) + (block.choices || []).reduce((a, c) => a + words(c), 0) + words(block.footer);
+    case "phoneMock": return (block.lines || []).reduce((a, l) => a + words(l), 0);
+    case "table": return (block.rows || []).flat().reduce((a, c) => a + words(c), 0) + (block.head || []).reduce((a, c) => a + words(c), 0);
+    default: return words(block.text);
+  }
+}
+function postWords(post) {
+  return words(post.title) + words(post.description) + words(post.quickAnswer)
+    + (post.takeaways || []).reduce((a, x) => a + words(x), 0)
+    + post.blocks.reduce((a, b) => a + blockWords(b), 0)
+    + (post.faq || []).reduce((a, f) => a + words(f.q) + words(f.a), 0);
+}
 const failures = [];
 
 function checkPlain(value, where) {
@@ -41,6 +64,8 @@ for (const post of BLOG_POSTS) {
   if (typeof post.published !== "boolean") failures.push(`${at}: missing explicit published true/false`);
   if (!post.published) continue;
 
+  const totalWords = postWords(post);
+  if (totalWords < MIN_WORDS) failures.push(`${at}: ${totalWords} words, below the ${MIN_WORDS}-word minimum`);
   if (!post.description || post.description.length > 155) {
     failures.push(`${at}: meta description is ${post.description?.length ?? 0} chars (max 155)`);
   }

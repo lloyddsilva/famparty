@@ -74,3 +74,24 @@ test("saves after the album is deleted recreate no keys", async () => {
   assert.deepEqual(await db.listStatements(fam.id), []);
   assert.deepEqual(await db.listMembers(fam.id), []);
 });
+
+test("every album key has a TTL immediately after createFamily and after touchFamily", async () => {
+  const fam = await db.createFamily("TTL Family", "mtok-ttl", "otok-ttl");
+  const store = redis().store;
+  const check = (label) => {
+    if (!store) return; // Upstash: covered by live behaviour, not introspectable here
+    const keys = [...store.keys()].filter((k) => k.includes(fam.id) || k.includes(db.hashSecret("mtok-ttl")) || k.includes(db.hashSecret("otok-ttl")));
+    assert.ok(keys.length >= 3, `${label}: expected meta + 2 token keys, got ${keys.length}`);
+    for (const k of keys) {
+      const entry = store.get(k);
+      assert.ok(entry?.expiresAt && entry.expiresAt > Date.now(), `${label}: ${k} has a TTL`);
+    }
+  };
+  check("after createFamily");
+  await db.touchFamily(fam.id);
+  check("after touchFamily");
+  const m = await db.addMember(fam.id, "Ana", "🦊");
+  await db.saveStatements(fam.id, m.id, ["ttl truth"], "truth", "ROOMT");
+  check("after activity");
+  await db.deleteFamily(fam.id);
+});

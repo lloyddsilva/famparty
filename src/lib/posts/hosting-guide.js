@@ -1,0 +1,73 @@
+// Rewrite — hosting-grandparents-and-kids (mixed-age game nights)
+const P = (text) => ({ type: "paragraph", text });
+const H = (text) => ({ type: "heading", text });
+const CALL = (title, text, tone = "tip") => ({ type: "callout", title, text, tone });
+
+export const HOSTING_GUIDE = {
+  slug: "hosting-grandparents-and-kids", cat: "Hosting tips", read: "Long read", icon: "🛋️", soft: "#fff3cc",
+  title: "One game for every generation: hosting kids and grandparents together",
+  description: "A practical guide to mixed-age game nights: seating, reading speed, pairing, low-pressure roles, and recovering a dragging game.",
+  dek: "Big tap targets, pausable timers, and a just-watch role: setting up a room where the youngest and oldest players both get in easily.",
+  published: true,
+  quickAnswer: "Seat everyone with a clear view of one big screen, choose games with no reading-speed test, pair the youngest and oldest players as teams, and give anyone who doesn't want to perform a watching-and-voting role. If a game drags, shorten it openly rather than pushing through.",
+  takeaways: [
+    "Reading speed is the hidden difficulty setting in most party games",
+    "Pairing a child with a grandparent removes most of the age gap",
+    "Watching and voting is a full role, not a consolation prize",
+    "A dragging game is a hosting problem with a hosting fix",
+  ],
+  blocks: [
+    P("A mixed-age room — say, players from seven to seventy-something — doesn't fail because the generations want different things. It fails at the seams: text too small to read, rounds too fast to follow, turns that put one person on display before they're ready, and rules that take longer to explain than the game takes to play. All four are hosting problems, which is good news, because hosting problems have practical fixes. This guide works through them in the order you'd meet them on the night."),
+    { type: "example", title: "The same room, two setups", items: [{ label: "Hard mode", text: "Question read once from a laptop at one end; grandma at an angle, grandson reading for her." }, { label: "Hosted", text: "Question on the TV and read aloud; both answer on one phone, as a pair." }] },
+    H("Seating and the screen"),
+    P("Everything important should happen on the biggest screen in the room, with the phones carrying only private information — your answer, your vote, your statements. That split is what lets different reading speeds coexist: the shared facts (the question, the choices, the scores) are big, still, and readable from the couch, while the personal part happens at whatever pace the player's hands move."),
+    P("Seat for the screen, not for conversation. The best seat in the room for a grandparent is the one with the straightest, closest view of the TV — not the sociable corner seat at an angle. If the screen is a laptop, raise it to eye level on a stack of books rather than leaving it flat on a low table; glare and viewing angle quietly exclude the same people every time. Do a thirty-second check before anyone joins: stand where the furthest player will sit and read the smallest text on the screen out loud. If you can't, the room isn't set up yet."),
+    { type: "pullQuote", text: "Seat for the screen, not for conversation." },
+    { type: "ideaGrid", title: "The seating checks that matter", items: [
+      { title: "Straight beats close", text: "A straight-on seat two metres away beats a close seat at forty degrees." },
+      { title: "Light behind the players", text: "Lamps behind the screen wash it out; light behind the viewers doesn't." },
+      { title: "One screen, one job", text: "If the TV is also showing photos or a menu, the game loses its stage. Give it the screen outright." },
+      { title: "Cables are a trip hazard", text: "Tape down or route around any HDMI run across the floor before the room fills." },
+    ] },
+    H("Reading speed is the real difficulty setting"),
+    P("Most party games are reading tests in costume. A trivia question read once, at speed, with a ten-second timer doesn't test knowledge — it tests who processes text fastest, and that's very often neither the seven-year-old nor the grandparent, whatever they know. Three habits neutralise it. Read every question aloud yourself, at talking pace; it costs five seconds and includes everyone. Prefer games where the choices sit still on the player's own phone instead of flashing on a shared screen. And treat any timer as adjustable: if your game has a host, the host should be able to pause it, every time, without it being a favour."),
+    CALL("The narrating host trick", "Read the question and the choices aloud, every round, even when it feels redundant. Players who needed it will never tell you; they'll just start answering faster.", "tip"),
+    H("Pairing players: the single biggest fix"),
+    P("If you do one thing differently for a mixed-age night, do this: pair the youngest and oldest players as one team, sharing one phone or one pencil. Almost every seam disappears inside a pair. The child reads fast and taps fast; the grandparent knows things and argues well; neither is exposed alone. Pairing also solves the numbers problem — an odd headcount stops mattering — and it gives a new arrival an instant job: join a pair."),
+    P("Pairing kids with grandparents gives both something to do: one brings speed, the other brings judgement, and both are genuinely needed. Announce pairs as teams with a shared score, not as help. \"You're a team\" plays completely differently from \"you help Grandma\", and the difference is dignity, in both directions."),
+    { type: "table", caption: "Who pairs well, and why", head: ["Pair", "What each brings", "Watch out for"], rows: [
+      ["Child + grandparent", "Fast reading and tapping · knowledge and confidence", "Let the older player make final calls, or the child becomes staff"],
+      ["New arrival + regular", "Instant welcome · knows the flow", "The regular may play for both; rotate the phone each round"],
+      ["Shy player + confident player", "Cover to join in · energy", "Check the shy player is choosing sometimes, not just nodding"],
+      ["Two grandparents", "Unhurried, thorough turns", "Give them the seats with the best screen view"],
+    ] },
+    H("Roles for people who don't want to perform"),
+    P("Every room has someone who came for the people, not the games. The mistake is treating them as a problem to convert. Give watching a real job instead: voting on other people's answers, guessing, keeping an unofficial score of funniest moments, being the person who reads questions aloud. In voting games, a watcher who votes is playing the same game as everyone else — the only thing they've opted out of is being watched themselves, and that's a reasonable thing to opt out of."),
+    P("Say it out loud when you explain the game: \"You can just watch and vote — that's a full role.\" People take the option more happily when it's offered before anyone has to ask for it, and some of them will quietly upgrade themselves by round three. Nobody should ever be volunteered for a spotlight turn by acclamation. If the room starts chanting a name, that's your cue as host to offer the pass, kindly and out loud."),
+    { type: "phoneMock", title: "A turn that asks for one tap", lines: ["🍕🎉 What phrase is this?", "A · Pizza Party", "B · Movie Night", "One big tap. Locked in. Then look up."] },
+    H("Which games suit which mix"),
+    { type: "pickerChart", title: "Match the game to the room you've got", items: [
+      { if: "Ages roughly 7–80, first game of the night", play: "Emoji Decoder", note: "No rules to explain; choices sit on each phone; host can reveal early" },
+      { if: "Everyone knows each other well", play: "Spotlight", note: "Stories land harder; keep the just-watch option visible" },
+      { if: "A quiet room that needs warming", play: "Spectrum", note: "One slider tap is the smallest possible commitment" },
+      { if: "A loud room with big personalities", play: "Finish It", note: "Anonymous answers keep it kind; the host deals the reveals" },
+      { if: "Mostly grandparents, low phone confidence", play: "Pair up + Emoji Decoder", note: "One phone per pair, host narrates every question" },
+      { if: "Mostly kids, short attention", play: "Short rounds, more games", note: "Swap games every ten minutes instead of lengthening one" },
+    ] },
+    H("Recovering when a game drags"),
+    P("Games drag for three reasons, and each has a host move. If the room is confused, the rules were explained once and lost: stop, re-teach with one practice round that doesn't count, and restart scoring from zero so nobody is punished for the confusion. If the room is slow, the game is asking for more than the moment has — writing long answers after a big meal, for instance. Shorten it openly: \"Last two rounds, winner takes it.\" Announced endings restore energy; silent endurance kills it."),
+    CALL("Change the shape, not the person", "Simultaneous answers, anonymous answers, or pairing the dominant player with the youngest — all three work without a word said about anyone."),
+    P("If one player is dominating — answering first, arguing longest, winning by a distance — don't handicap them in public. Change the shape instead: move to a game where everyone answers at once, or where answers are anonymous, or pair the dominant player with the youngest player and watch the dynamic invert itself. And if a game simply isn't landing with this room, cut it. Two games that fly beat four that limp, and the host who says \"that one's not for us — next\" always looks more in control than the one who pushes through."),
+    { type: "pullQuote", text: "Two games that fly beat four that limp." },
+    CALL("The two-round rule", "Give any new game two full rounds before judging it. The first round teaches the mechanics; the second is the game. Cut after round two if the room still isn't in.", "tip"),
+    { type: "pullQuote", text: "Watching and voting is a full role, not a consolation prize." },
+  ],
+  faq: [
+    { q: "What if someone can't use a phone at all?", a: "Pair them with a neighbour as a team of two on one phone, and let them make the calls. The game doesn't change; the tapping is shared." },
+    { q: "How long should a mixed-age session run?", a: "Shorter than you think. Two or three short games with breaks beats one long one — you can always start another show." },
+    { q: "What do we do with a child who wants every turn?", a: "Give them jobs between turns: reading the question aloud, announcing the leaderboard, choosing which game comes next. Spotlight turns still rotate fairly." },
+    { q: "How do we stop one person dominating?", a: "Change the shape, not the person: simultaneous answers, anonymous answers, or pairing them with the youngest player." },
+  ],
+  related: ["spotlight-stories-that-worked", "your-family-album-explained"],
+  gameSlug: "emoji-decoder",
+};

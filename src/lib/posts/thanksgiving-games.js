@@ -19,7 +19,7 @@ export const THANKSGIVING_GAMES = {
     "Arriving energy is standing energy: use it before people sit down",
     "At the table, play games that need no supplies and no leaving your seat",
     "After dinner, nobody wants rules: voting and guessing beat performing",
-    "Pair kids with grandparents as teams and most age gaps disappear",
+    "Pairing kids with grandparents gives both something to do",
   ],
   blocks: [
     P("Thanksgiving Day has a shape, whether you plan for it or not. People arrive in twos and threes and mill around the kitchen. Then everyone sits, hungry, while the last dishes finish. Then comes the long, full, sleepy stretch where half the room is on the couch and the other half is washing up in shifts. Games that ignore that shape fight the day. Games that follow it feel effortless, because each one asks for exactly the energy the room already has."),

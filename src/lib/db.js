@@ -51,7 +51,9 @@ async function loadMeta(fid) {
 }
 
 async function saveMeta(fid, meta) {
-  await redis().set(metaKey(fid), JSON.stringify(meta));
+  // TTL in the same command: a bare SET would clear the expiry, and a crash
+  // between SET and a separate EXPIRE would leave a key that never expires.
+  await redis().set(metaKey(fid), JSON.stringify(meta), { ex: TTL_SECONDS });
 }
 
 export async function createFamily(name, memberToken, ownerToken) {
@@ -63,8 +65,8 @@ export async function createFamily(name, memberToken, ownerToken) {
     memberTokenHash: hashSecret(memberToken), ownerTokenHash: hashSecret(ownerToken),
   };
   await saveMeta(fid, meta);
-  await r.set(tokenKey(meta.memberTokenHash), fid);
-  await r.set(tokenKey(meta.ownerTokenHash), fid);
+  await r.set(tokenKey(meta.memberTokenHash), fid, { ex: TTL_SECONDS });
+  await r.set(tokenKey(meta.ownerTokenHash), fid, { ex: TTL_SECONDS });
   await expireAll(fid, meta);
   return { id: fid, name, created_at: now };
 }
