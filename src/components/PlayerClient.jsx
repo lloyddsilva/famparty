@@ -77,9 +77,13 @@ export default function PlayerClient() {
     e.preventDefault();
     setBusy(true); setError("");
     const savedToken = localStorage.getItem("famparty:playerToken") || undefined;
+    // If our pre-picked animal was taken while we typed, switch silently
+    // instead of failing the join.
+    const chosenAvatar = takenAvatars.includes(avatar) ? (AVATARS.find((a) => !takenAvatars.includes(a)) || avatar) : avatar;
+    if (chosenAvatar !== avatar) setAvatar(chosenAvatar);
     const res = await fetch(`/api/rooms/${code}/join`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, avatar, playerToken: savedToken, claimHost }),
+      body: JSON.stringify({ name, avatar: chosenAvatar, playerToken: savedToken, claimHost }),
     });
     const data = await res.json();
     setBusy(false);
