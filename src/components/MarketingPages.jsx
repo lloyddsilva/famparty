@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader, SiteFooter } from "./SiteChrome";
 import { GAMES, OCCASIONS, POSTS } from "../lib/siteContent";
+import { BLOG_POSTS } from "../lib/blogPosts";
+import { Block } from "./BlogBlocks";
 
 const gameBySlug = (slug) => GAMES.find((g) => g.slug === slug);
 
@@ -189,8 +191,8 @@ export function HowItWorks() {
 }
 
 export function BlogIndex({ active = "All" }) {
-  const cats = ["All", ...new Set(POSTS.map((p) => p.cat))];
-  const shown = active === "All" ? POSTS : POSTS.filter((p) => p.cat === active);
+  const cats = ["All", ...new Set(BLOG_POSTS.filter((p) => p.published).map((p) => p.cat))];
+  const shown = (active === "All" ? BLOG_POSTS.filter((p) => p.published) : BLOG_POSTS.filter((p) => p.published && p.cat === active));
   const [featured, ...rest] = shown;
   return (
     <>
@@ -224,18 +226,62 @@ export function BlogIndex({ active = "All" }) {
 }
 
 export function BlogPost({ slug }) {
-  const post = POSTS.find((p) => p.slug === slug);
+  const post = BLOG_POSTS.find((p) => p.slug === slug && p.published);
   if (!post) notFound();
+  const related = (post.related || []).map((s) => BLOG_POSTS.find((p) => p.slug === s && p.published)).filter(Boolean);
+  const game = post.gameSlug ? GAMES.find((g) => g.slug === post.gameSlug) : null;
   return (
     <>
       <SiteHeader />
-      <main className="mkt-narrow">
+      <main className="mkt-narrow blog-post">
         <p className="eyebrow">{post.cat} · {post.read}</p>
         <h1>{post.title}</h1>
-        <p className="sub" style={{ fontSize: "1.15rem" }}>{post.dek}</p>
-        <div className="lp-post-art" style={{ background: post.soft, borderRadius: 24, margin: "22px 0" }}>{post.icon}</div>
-        {post.body.map((para, i) => <p key={i} style={{ fontSize: "1.12rem", lineHeight: 1.65, color: "var(--body)" }}>{para}</p>)}
-        <div className="center"><Link className="btn primary" href="/host" style={{ marginTop: 20, padding: "16px 30px" }}>Host a show</Link></div>
+        <p className="blog-dek">{post.description}</p>
+
+        <aside className="blog-quick">
+          <b>Quick answer</b>
+          <p>{post.quickAnswer}</p>
+        </aside>
+
+        {post.takeaways?.length > 0 && (
+          <section className="blog-takeaways">
+            <b>Key takeaways</b>
+            <ul>{post.takeaways.map((x, i) => <li key={i}>{x}</li>)}</ul>
+          </section>
+        )}
+
+        <div className="blog-cover" style={{ background: post.soft }} role="img" aria-label={`${post.title} cover art`}>
+          <span>{post.icon}</span>
+        </div>
+
+        {post.blocks.map((block, i) => <Block key={i} block={block} index={i} />)}
+
+        {post.faq?.length > 0 && (
+          <section>
+            <h2 className="blog-h2">Questions</h2>
+            <div style={{ display: "grid", gap: 10 }}>
+              {post.faq.map((f, i) => (
+                <details key={i} className="faq-item"><summary>{f.q}</summary><p>{f.a}</p></details>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {(related.length > 0 || game) && (
+          <section className="blog-related">
+            <h2 className="blog-h2">Keep reading</h2>
+            <div className="blog-related-links">
+              {related.map((r) => <Link key={r.slug} href={`/blog/${r.slug}`}>{r.icon} {r.title}</Link>)}
+              {game && <Link href={`/games/${game.slug}`}>{game.icon} {game.name} — the game page</Link>}
+            </div>
+          </section>
+        )}
+
+        <div className="blog-cta card center">
+          <h2>Run it on the big screen</h2>
+          <p className="sub">Host a show: the TV displays, everyone plays on their phone. No signup.</p>
+          <Link className="btn primary" href="/host" style={{ padding: "14px 28px" }}>Host a show</Link>
+        </div>
         <p className="center"><Link href="/blog">← All posts</Link></p>
       </main>
       <SiteFooter />

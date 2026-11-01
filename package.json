@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "test": "node --test src/lib/scoring.test.js src/lib/engine.test.js src/lib/games.test.js src/lib/validate.test.js src/lib/kick.test.js src/lib/imageBytes.test.js src/lib/spectrumLayout.test.js src/lib/albumStore.test.js",
-    "build": "next build",
+    "build": "node scripts/check-blog.mjs && next build",
+    "check:blog": "node scripts/check-blog.mjs",
     "check:packs": "node scripts/check-packs.mjs",
     "pre-submit": "node scripts/pre-submit.mjs",
     "start": "next start"

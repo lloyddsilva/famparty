@@ -38,17 +38,10 @@ export const OCCASIONS = [
     tips: ["Spectrum first: one slider tap is about the lowest-effort way to get a whole room participating", "Keep it to one short game — you're an opener, not the meeting", "Prompts are preference-based only; nothing about work, beliefs or identity", "Screen-sharing play is still being tested — run one quick game first to check your setup"] },
 ];
 
-export const POSTS = [
-  { slug: "spotlight-stories-that-worked", cat: "Ideas", read: "Short read", icon: "🎤", soft: "#ffe0e9", title: "Two truths and a lie: writing statements that split the vote",
-    dek: "The secret is a boring lie and an outrageous truth. How to write statements that split the vote.",
-    body: ["A reliable way to write a hard-to-spot lie is to make it the dullest of your three statements. If your truths are vivid and specific, a plain, ordinary lie tends to hide between them — the room's attention goes to the surprising claims first.", "Three patterns worth trying: a specific number (\"I've eaten the same lunch for 200 days\"), a place only you would know, and a talent nobody can test on the spot. Pair one surprising truth with one ordinary lie and let the voters argue it out.", "And when you are the featured player: don't defend the lie. Tell the true stories like they're the suspicious ones. The 30-second story beat afterwards is the point of the round — the points are just an excuse to hear it."] },
-  { slug: "hosting-grandparents-and-kids", cat: "Hosting tips", read: "Short read", icon: "🛋️", soft: "#fff3cc", title: "One game for every generation: hosting kids and grandparents together",
-    dek: "Big tap targets, pausable timers, and a just-watch role: setting up a room where the youngest and oldest players both get in easily.",
-    body: ["Mixed-age rooms tend to snag in predictable places: tiny text, fast reading, and being put on the spot. FamParty is built around all three — answers are big tap targets, the host can pause any timer, and nobody has to perform.", "Practical moves: don't put the most confident reader in charge of anything. Give everyone a clear view of the TV. In Spotlight, let hesitant players just watch and vote until they ask for a turn — watching and voting is a complete way to play.", "Starting with Emoji Decoder helps: there are no rules to explain, the choices are on every phone, and the host can always reveal early if a round runs long."] },
-  { slug: "spectrum-questions-for-any-room", cat: "Games", read: "Short read", icon: "🎚️", soft: "#e4dcff", title: "Spectrum pairs that start arguments (the good kind)",
-    dek: "Cook at home or order in? Choosing pairs that give a room something to argue about.",
-    body: ["A good Spectrum pair has no right answer and a strong smell of identity: how you holiday, how you eat, how you spend a Sunday. The reveal works because everyone commits before anyone sees the crowd.", "Pairs tend to work well when the room expects agreement and might not get it — a strong food opinion, a holiday preference, a Sunday-morning habit. Leave room in the pair for someone to be gloriously alone at one end.", "Keep it to preferences — food, weather, holidays, hobbies. The moment a pair touches beliefs or identity, the game stops being a game."] },
-  { slug: "your-family-album-explained", cat: "Family album", read: "Short read", icon: "🧠", soft: "#fff3cc", title: "The family album: what it keeps, and for how long",
-    dek: "Sixty days, your roster, your stories — and a delete button that means it.",
-    body: ["A family album is one private link that remembers who's who: your roster, the true stories saved from Spotlight (anyone can opt out of saving theirs), and everyone's scores. Next show, Remember This? deals those stories back as a game.", "It is kept for 60 days after your last show, then deleted. No accounts, no indefinite archive: the link is the only key, which is why we tell you plainly to share it only with family. Export everything as JSON whenever you like, and delete the album yourself with a typed confirmation whenever you like.", "Every statement carries a \"don't save this\" option, because the best stories are sometimes the ones that should only live in the room."] },
-];
+import { BLOG_POSTS } from "./blogPosts.js";
+
+// Landing/blog index consume the published posts in the shared shape.
+export const POSTS = BLOG_POSTS.filter((p) => p.published).map((p) => ({
+  slug: p.slug, cat: p.cat, read: p.read, icon: p.icon, soft: p.soft,
+  title: p.title, dek: p.dek, description: p.description,
+}));
