@@ -122,7 +122,7 @@ export function assertExpectedPhase(state, expectedPhase) {
 export function applyHostAction(state, action, now, ctx = {}, expected = {}) {
   // Moderation must never be blocked by a stale screen: hiding a rude answer
   // is exactly the action a host takes while phases are moving (item 4).
-  if (action.type === "HIDE" || action.type === "KICK") return applyAction(state, action, now, ctx);
+  if (["HIDE", "KICK", "END_GAME"].includes(action.type)) return applyAction(state, action, now, ctx);
   const phaseError = assertExpectedPhase(state, expected.phase);
   if (phaseError) return { state, error: phaseError };
   if (action.type === "NEXT" && ["finishPresent", "finishReveal"].includes(state.phase)

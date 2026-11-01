@@ -55,7 +55,7 @@ export async function POST(req, { params }) {
       if (!(await rateLimit(`host:${code}`, 120, 60))) return bad("Too many host actions.", 429);
       // Stale-screen guard (item 4): a host tap made against an old phase must not
       // advance the room twice. The client sends the phase it was looking at.
-      const phaseError = ["HIDE", "KICK"].includes(body.type) ? null : assertExpectedPhase(state0, body.expectedPhase);
+      const phaseError = ["HIDE", "KICK", "END_GAME"].includes(body.type) ? null : assertExpectedPhase(state0, body.expectedPhase);
       if (phaseError) return bad(phaseError, 409);
       action = { type: body.type };
       if (body.type === "LOCK") action.locked = !!body.locked;
