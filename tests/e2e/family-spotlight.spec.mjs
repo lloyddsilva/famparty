@@ -84,13 +84,20 @@ test("family roster, Spotlight save, and Remember This?", async ({ baseURL }) =>
   }
   expect(famState.data.statements.length).toBeGreaterThanOrEqual(8);
 
-  // back to lobby, Remember This? must load saved true statements
-  r = await post(`/api/rooms/${code}/actions`, { type: "PLAY_AGAIN", token: hostToken, expectedPhase: "finale" });
-  expect(r.data.ok).toBeTruthy();
-  r = await post(`/api/rooms/${code}/actions`, { type: "SELECT_GAME", game: "remember", token: hostToken, expectedPhase: "lobby" });
-  r = await post(`/api/rooms/${code}/actions`, { type: "START", token: hostToken, expectedPhase: "lobby" });
+  // Remember This? runs in a NEW room: statements saved in tonight's room are
+  // excluded by design, so the deck must come from the earlier show.
+  const room2 = await post("/api/rooms", { familyToken: memberToken });
+  expect(room2.data.ok).toBeTruthy();
+  const code2 = room2.data.code;
+  const hostToken2 = room2.data.hostToken;
+  for (const m of members) {
+    const j = await post(`/api/rooms/${code2}/join`, { memberId: m.id, familyToken: memberToken });
+    expect(j.data.ok, `member rejoin ${m.name}`).toBeTruthy();
+  }
+  r = await post(`/api/rooms/${code2}/actions`, { type: "SELECT_GAME", game: "remember", token: hostToken2, expectedPhase: "lobby" });
+  r = await post(`/api/rooms/${code2}/actions`, { type: "START", token: hostToken2, expectedPhase: "lobby" });
   expect(r.data.ok, JSON.stringify(r.data)).toBeTruthy();
-  state = await get(`/api/rooms/${code}/state?role=display`);
+  state = await get(`/api/rooms/${code2}/state?role=display`);
   expect(state.data.view.phase).toBe("remember");
   expect(state.data.view.remember.text).toBeTruthy();
   await ctx.dispose();

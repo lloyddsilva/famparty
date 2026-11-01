@@ -79,7 +79,7 @@ test("Finish It in the UI: write, present, vote, authors", async ({ browser, bas
     await enabled.click();
   }
   await r.host.getByRole("button", { name: /Close voting/ }).click();
-  await expect(r.tv.getByText(/vote\(s\)/)).toBeVisible({ timeout: 10000 });
+  await expect(r.tv.getByText(/votes? · /).first()).toBeVisible({ timeout: 10000 });
   await cleanup(r);
 });
 

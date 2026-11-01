@@ -2,7 +2,7 @@
 // a submission is NOT ready until this passes:
 //   npm run pre-submit
 // It fails on: unreviewed content packs, no committed model outputs, a live
-// build that differs from HEAD, or a production database that isn't healthy.
+// build that differs from HEAD, or the production album store (Redis) being unhealthy.
 
 import { execSync } from "node:child_process";
 import { readdirSync, readFileSync, existsSync } from "node:fs";
@@ -42,9 +42,9 @@ try {
 try {
   const res = await fetch(`${demoUrl}/api/health/db`, { signal: AbortSignal.timeout(10000) });
   const data = await res.json();
-  if (!data.ok) failures.push(`Production database not healthy at ${demoUrl}/api/health/db (${data.code || data.backend || "unconfigured"}).`);
-  else if (!data.configured) failures.push("Production database endpoint is up but no production database is configured (local fallback).");
-  else console.log(`✓ Production database healthy (${data.backend})`);
+  if (!data.ok) failures.push(`Production album store not healthy at ${demoUrl}/api/health/db (${data.code || data.backend || "unconfigured"}).`);
+  else if (!data.configured) failures.push("Production album store endpoint is up but no production Redis is configured (local fallback).");
+  else console.log(`✓ Production album store healthy (${data.backend})`);
 } catch (e) {
   failures.push(`Production database health check unreachable: ${e.message}`);
 }
@@ -61,4 +61,4 @@ if (failures.length) {
   for (const f of failures) console.error(`  - ${f}`);
   process.exit(1);
 }
-console.log("✓ Submission-ready: packs reviewed, model outputs committed, live build == HEAD, production database healthy.");
+console.log("✓ Submission-ready: packs reviewed, model outputs committed, live build == HEAD, production album store healthy.");

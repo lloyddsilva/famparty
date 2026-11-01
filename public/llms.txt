@@ -2,7 +2,7 @@
 
 > A party game show for one big screen and everyone's phones. A host runs the show from their phone, a TV (or shared screen) only displays, and 3–12 players join with a QR code or 4-letter room code. No accounts, no app installs, no payments.
 
-FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji Decoder (guess the phrase from emojis), Spotlight (two truths and a lie with a story beat), Spectrum (place yourself between opposites and predict the crowd), Finish It (anonymous sentence completions, voted), and Remember This? (guess who wrote a saved true statement). An optional family album link keeps a roster, saved true statements and scores for 60 days after last activity, then deletes them.
+FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji Decoder (guess the phrase from emojis), Spotlight (two truths and a lie with a story beat), Spectrum (place yourself between opposites and predict the crowd), Finish It (anonymous sentence completions, voted), and Remember This? (guess who wrote a saved true statement). An optional family album link keeps a roster, saved true statements and scores in Redis; album keys expire automatically 60 days after last activity.
 
 ## Key pages
 

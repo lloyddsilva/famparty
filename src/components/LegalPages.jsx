@@ -46,14 +46,14 @@ export function PrivacyPage() {
       <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that, unless the room belongs to a family album (below).</P>
 
       <H>Family albums (kept 60 days after last activity)</H>
-      <P>If you create a family album, our database (Neon Postgres, hosted in AWS's US East region) stores the album name, member names and avatars, saved statements and story lines, game results, and hashed versions of the album's links (we cannot read the links themselves). Albums are deleted after 60 days of inactivity by a daily job. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>
+      <P>If you create a family album, our database (Upstash Redis) stores the album name, member names and avatars, saved statements and story lines, game results, and hashed versions of the album's links (we cannot read the links themselves). Album keys expire automatically 60 days after last activity — every album key carries that expiry, so the whole album goes together. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>
       <P>Exactly what saves, so there are no surprises: in an album room, Spotlight <strong>true statements save by default</strong> — each statement has a "don't save this" option, and ticking it keeps that statement out. The featured player's story line only saves if they choose to type and save one. <strong>Scores from album-room games save automatically</strong> against roster members. Players are told at join when a room belongs to an album.</P>
 
       <H>The album link is the only key</H>
       <P>Anyone who has an album link can get in — that's the design, and the album page says so. We can't recover a lost link and we can't look one up for you. Share it only with your family.</P>
 
       <H>IP addresses and hosting logs</H>
-      <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processors: Upstash (room store) and Neon (album database).</P>
+      <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processor: Upstash (rooms and albums).</P>
 
       <H>AI</H>
       <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs are currently hand-written starters, awaiting the offline generation run and human review described on the About page.</P>

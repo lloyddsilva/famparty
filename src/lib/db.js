@@ -1,192 +1,197 @@
-// Family data: Neon Postgres in production (DATABASE_URL), PGLite locally — same SQL.
-// This is a data-store client, not game state: room state lives only in Redis.
+// Family albums in Redis (the same Upstash database as live rooms; in-memory
+// stand-in locally). No second database, no SQL.
+//
+// Layout per album (every key expires 60 days after last activity, refreshed
+// together by touchFamily):
+//   album:{id}:meta       hash  name, createdAt, lastActiveAt, token hashes
+//   album:{id}:members    hash  memberId -> JSON member
+//   album:{id}:points     hash  memberId -> cumulative points (atomic HINCRBY)
+//   album:{id}:statements hash  dedupeKey -> JSON statement (capped at 200)
+//   album:{id}:results    hash  dedupeKey -> JSON result
+//   albumtoken:{hash}     string albumId (member and owner lookups)
+//
+// Tokens are only ever stored hashed. Statement/result saves are single
+// atomic hash writes (with a Lua cap check), so simultaneous saves can't
+// lose or duplicate data.
 
 import { createHash } from "node:crypto";
+import { redis, usingMemoryStore } from "./redisClient.js";
 
-let implPromise = null;
-function dbUnavailable(cause) {
-  const e = new Error("Family saving is temporarily unavailable. Games still work — try the family album again later.");
-  e.code = "DB_UNAVAILABLE";
-  e.cause = cause;
-  return e;
-}
-
-async function getImpl() {
-  if (implPromise) return implPromise;
-  implPromise = (async () => {
-    try { return await initImpl(); } catch (e) { implPromise = null; throw e?.code === "DB_UNAVAILABLE" ? e : dbUnavailable(e); }
-  })();
-  return implPromise;
-}
-
-async function initImpl() {
-  return (async () => {
-    let rawQuery;
-    if (process.env.DATABASE_URL) {
-      const { Pool } = await import("pg");
-      const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 }); // sslmode=require comes from the Neon URL; no rejectUnauthorized override
-      rawQuery = async (sql, params = []) => (await pool.query(sql, params)).rows;
-    } else {
-      const { PGlite } = await import("@electric-sql/pglite");
-      const db = new PGlite(process.env.PGLITE_DIR || ".pglite");
-      rawQuery = async (sql, params = []) => (await db.query(sql, params)).rows;
-    }
-    const query = async (sql, params = []) => {
-      try { return await rawQuery(sql, params); }
-      catch (e) { throw dbUnavailable(e); }
-    };
-    await query(`CREATE TABLE IF NOT EXISTS families (
-      id TEXT PRIMARY KEY, name TEXT NOT NULL,
-      member_token_hash TEXT UNIQUE NOT NULL, owner_token_hash TEXT UNIQUE NOT NULL,
-      created_at BIGINT NOT NULL, last_active_at BIGINT NOT NULL DEFAULT 0)`);
-    try { await query(`ALTER TABLE families ADD COLUMN last_active_at BIGINT NOT NULL DEFAULT 0`); } catch {}
-    await query(`UPDATE families SET last_active_at = created_at WHERE last_active_at = 0`);
-    await query(`CREATE TABLE IF NOT EXISTS members (
-      id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-      name TEXT NOT NULL, avatar TEXT NOT NULL, created_at BIGINT NOT NULL)`);
-    await query(`CREATE TABLE IF NOT EXISTS saved_statements (
-      id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-      member_id TEXT NOT NULL, text TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'truth',
-      created_at BIGINT NOT NULL)`);
-    await query(`CREATE TABLE IF NOT EXISTS game_results (
-      id TEXT PRIMARY KEY, family_id TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
-      member_id TEXT NOT NULL, game TEXT NOT NULL, points INTEGER NOT NULL, played_at BIGINT NOT NULL)`);
-    // Idempotency migrations run AFTER every CREATE TABLE (a fresh database
-    // has no game_results to ALTER yet).
-    try { await query(`ALTER TABLE saved_statements ADD COLUMN dedupe_key TEXT`); } catch {}
-    try { await query(`ALTER TABLE saved_statements ADD COLUMN room_code TEXT`); } catch {}
-    try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS saved_statements_dedupe ON saved_statements(dedupe_key)`); } catch {}
-    try { await query(`ALTER TABLE game_results ADD COLUMN dedupe_key TEXT`); } catch {}
-    try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS game_results_dedupe ON game_results(dedupe_key)`); } catch {}
-    return { query };
-  })();
-  return implPromise;
-}
-
-/** Read-only readiness probe. Reports configuration, never content or credentials. */
-export async function dbHealth() {
-  const configured = !!process.env.DATABASE_URL;
-  if (process.env.VERCEL && !configured) return { ok: false, configured: false, backend: "none" };
-  try {
-    const { query } = await getImpl();
-    await query(`SELECT 1 AS one`);
-    return { ok: true, configured, backend: configured ? "postgres" : "pglite-local" };
-  } catch (e) {
-    return { ok: false, configured, backend: configured ? "postgres" : "pglite-local", code: e?.code || "DB_UNAVAILABLE" };
-  }
-}
+export const RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
+const TTL_SECONDS = Math.floor(RETENTION_MS / 1000);
+const STATEMENT_CAP = 200;
 
 export const hashSecret = (v) => createHash("sha256").update(String(v || "")).digest("hex");
 const id = (p) => `${p}_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
 
-export const RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
+const metaKey = (fid) => `album:${fid}:meta`;
+const membersKey = (fid) => `album:${fid}:members`;
+const pointsKey = (fid) => `album:${fid}:points`;
+const statementsKey = (fid) => `album:${fid}:statements`;
+const resultsKey = (fid) => `album:${fid}:results`;
+const tokenKey = (hash) => `albumtoken:${hash}`;
+const allKeys = (fid, meta) => [
+  metaKey(fid), membersKey(fid), pointsKey(fid), statementsKey(fid), resultsKey(fid),
+  ...(meta ? [tokenKey(meta.memberTokenHash), tokenKey(meta.ownerTokenHash)] : []),
+];
+
+async function expireAll(fid, meta) {
+  const r = redis();
+  await Promise.all(allKeys(fid, meta).map((k) => r.expire(k, TTL_SECONDS)));
+}
+
+async function loadMeta(fid) {
+  const meta = await redis().hgetall(metaKey(fid));
+  return meta && meta.name ? meta : null;
+}
 
 export async function createFamily(name, memberToken, ownerToken) {
-  const { query } = await getImpl();
+  const r = redis();
+  const fid = id("fam");
   const now = Date.now();
-  const fam = { id: id("fam"), name, created_at: now };
-  await query(`INSERT INTO families (id, name, member_token_hash, owner_token_hash, created_at, last_active_at) VALUES ($1,$2,$3,$4,$5,$6)`,
-    [fam.id, fam.name, hashSecret(memberToken), hashSecret(ownerToken), now, now]);
-  return fam;
+  const meta = {
+    name, createdAt: String(now), lastActiveAt: String(now),
+    memberTokenHash: hashSecret(memberToken), ownerTokenHash: hashSecret(ownerToken),
+  };
+  await r.hset(metaKey(fid), meta);
+  await r.set(tokenKey(meta.memberTokenHash), fid);
+  await r.set(tokenKey(meta.ownerTokenHash), fid);
+  await expireAll(fid, meta);
+  return { id: fid, name, created_at: now };
 }
 
-/** Any real activity (show started, member added, statement saved) keeps the album alive. */
+export async function familyByToken(token) {
+  const r = redis();
+  const hash = hashSecret(token);
+  const fid = await r.get(tokenKey(hash));
+  if (!fid) return null;
+  const meta = await loadMeta(fid);
+  if (!meta) return null;
+  const access = hash === meta.memberTokenHash ? "member" : hash === meta.ownerTokenHash ? "owner" : null;
+  if (!access) return null;
+  return {
+    family: { id: fid, name: meta.name, created_at: Number(meta.createdAt), last_active_at: Number(meta.lastActiveAt) },
+    access,
+  };
+}
+
 export async function touchFamily(familyId) {
   if (!familyId) return;
-  const { query } = await getImpl();
-  await query(`UPDATE families SET last_active_at = $2 WHERE id = $1`, [familyId, Date.now()]);
-}
-
-/** Purge albums idle longer than the retention window. Returns how many were deleted. */
-export async function purgeExpiredFamilies(now = Date.now()) {
-  const { query } = await getImpl();
-  const cutoff = now - RETENTION_MS;
-  const rows = await query(`SELECT id FROM families WHERE last_active_at < $1 AND last_active_at > 0`, [cutoff]);
-  for (const r of rows) await deleteFamily(r.id);
-  return rows.length;
-}
-
-/** Returns { family, access: 'member'|'owner' } or null. */
-export async function familyByToken(token) {
-  const { query } = await getImpl();
-  const h = hashSecret(token);
-  let rows = await query(`SELECT * FROM families WHERE member_token_hash=$1`, [h]);
-  if (rows[0]) return { family: rows[0], access: "member" };
-  rows = await query(`SELECT * FROM families WHERE owner_token_hash=$1`, [h]);
-  if (rows[0]) return { family: rows[0], access: "owner" };
-  return null;
+  const r = redis();
+  const meta = await loadMeta(familyId);
+  if (!meta) return;
+  await r.hset(metaKey(familyId), { lastActiveAt: String(Date.now()) });
+  await expireAll(familyId, meta);
 }
 
 export async function listMembers(familyId) {
-  const { query } = await getImpl();
-  return query(`SELECT m.*, COALESCE((SELECT SUM(points) FROM game_results g WHERE g.member_id=m.id),0) AS total_points
-    FROM members m WHERE m.family_id=$1 ORDER BY m.created_at`, [familyId]);
+  const r = redis();
+  const [members, points] = await Promise.all([r.hgetall(membersKey(familyId)), r.hgetall(pointsKey(familyId))]);
+  if (!members) return [];
+  return Object.values(members)
+    .map((raw) => { const m = typeof raw === "string" ? JSON.parse(raw) : raw; return { ...m, total_points: Number(points?.[m.id] || 0) }; })
+    .sort((a, b) => a.created_at - b.created_at);
 }
 
 export async function addMember(familyId, name, avatar) {
-  const { query } = await getImpl();
-  const m = { id: id("mem"), name, avatar };
-  await query(`INSERT INTO members (id, family_id, name, avatar, created_at) VALUES ($1,$2,$3,$4,$5)`,
-    [m.id, familyId, name, avatar, Date.now()]);
+  const r = redis();
+  const m = { id: id("mem"), family_id: familyId, name, avatar, created_at: Date.now() };
+  await r.hset(membersKey(familyId), { [m.id]: JSON.stringify(m) });
   await touchFamily(familyId);
   return m;
 }
 
 export async function getMember(familyId, memberId) {
-  const { query } = await getImpl();
-  const rows = await query(`SELECT * FROM members WHERE family_id=$1 AND id=$2`, [familyId, memberId]);
-  return rows[0] || null;
+  const all = await listMembers(familyId);
+  return all.find((m) => m.id === memberId) || null;
 }
+
+const SAVE_LUA = `
+if redis.call('HEXISTS', KEYS[1], ARGV[1]) == 1 then return 0 end
+if redis.call('HLEN', KEYS[1]) >= tonumber(ARGV[3]) then return -1 end
+redis.call('HSET', KEYS[1], ARGV[1], ARGV[2])
+return 1
+`;
 
 export async function saveStatements(familyId, memberId, texts, kind = "truth", roomCode = "") {
   if (!familyId || !memberId || !texts?.length) return;
-  await touchFamily(familyId);
-  const { query } = await getImpl();
+  const r = redis();
   for (const text of texts) {
     const dedupe = `${familyId}:${memberId}:${kind}:${roomCode}:${text}`;
-    await query(`INSERT INTO saved_statements (id, family_id, member_id, text, kind, created_at, dedupe_key, room_code) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (dedupe_key) DO NOTHING`,
-      [id("st"), familyId, memberId, text, kind, Date.now(), dedupe, roomCode]);
+    const stmt = { id: id("st"), family_id: familyId, member_id: memberId, text, kind, room_code: roomCode, created_at: Date.now() };
+    await r.eval(SAVE_LUA, [statementsKey(familyId)], [dedupe, JSON.stringify(stmt), String(STATEMENT_CAP)]);
   }
+  await touchFamily(familyId);
 }
 
 export async function listStatements(familyId, limit = 100) {
-  const { query } = await getImpl();
-  return query(`SELECT s.*, m.name AS writer_name, m.avatar AS writer_avatar FROM saved_statements s
-    JOIN members m ON m.id=s.member_id WHERE s.family_id=$1 ORDER BY s.created_at DESC LIMIT $2`, [familyId, limit]);
+  const r = redis();
+  const [stmts, members] = await Promise.all([r.hgetall(statementsKey(familyId)), r.hgetall(membersKey(familyId))]);
+  if (!stmts) return [];
+  const byId = {};
+  for (const raw of Object.values(members || {})) { const m = typeof raw === "string" ? JSON.parse(raw) : raw; byId[m.id] = m; }
+  return Object.values(stmts)
+    .map((raw) => (typeof raw === "string" ? JSON.parse(raw) : raw))
+    .sort((a, b) => b.created_at - a.created_at)
+    .slice(0, limit)
+    .map((s) => ({ ...s, writer_name: byId[s.member_id]?.name || "Someone", writer_avatar: byId[s.member_id]?.avatar || "🦊" }));
 }
 
 export async function trueStatementsForGame(familyId, limit = 10) {
   const rows = await listStatements(familyId, 200);
   return rows.filter((r) => r.kind === "truth")
+    .slice(0, limit)
     .map((r) => ({ id: r.id, text: r.text, writerMemberId: r.member_id, writerName: r.writer_name, roomCode: r.room_code || null }));
 }
 
 export async function saveGameResults(familyId, results) {
   if (!familyId || !results?.length) return;
-  const { query } = await getImpl();
-  for (const r of results) {
-    if (!r.memberId || !r.points) continue;
-    const dedupe = `${familyId}:${r.memberId}:${r.game}:${r.dedupeScope || ""}:${r.points}`;
-    await query(`INSERT INTO game_results (id, family_id, member_id, game, points, played_at, dedupe_key) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (dedupe_key) DO NOTHING`,
-      [id("gr"), familyId, r.memberId, r.game, r.points, Date.now(), dedupe]);
+  const r = redis();
+  for (const res of results) {
+    if (!res.memberId || !res.points) continue;
+    const dedupe = `${familyId}:${res.memberId}:${res.game}:${res.dedupeScope || ""}:${res.points}`;
+    const added = await r.hsetnx(resultsKey(familyId), dedupe, JSON.stringify({
+      id: id("gr"), family_id: familyId, member_id: res.memberId, game: res.game, points: res.points, played_at: Date.now(),
+    }));
+    if (added) await r.hincrby(pointsKey(familyId), res.memberId, res.points);
   }
+  await touchFamily(familyId);
 }
 
 export async function exportFamily(familyId) {
-  const { query } = await getImpl();
-  const [family, members, statements, results] = await Promise.all([
-    query(`SELECT id, name, created_at FROM families WHERE id=$1`, [familyId]),
-    query(`SELECT * FROM members WHERE family_id=$1`, [familyId]),
-    query(`SELECT * FROM saved_statements WHERE family_id=$1`, [familyId]),
-    query(`SELECT * FROM game_results WHERE family_id=$1`, [familyId]),
+  const r = redis();
+  const meta = await loadMeta(familyId);
+  if (!meta) return null;
+  const [members, points, stmts, results] = await Promise.all([
+    r.hgetall(membersKey(familyId)), r.hgetall(pointsKey(familyId)),
+    r.hgetall(statementsKey(familyId)), r.hgetall(resultsKey(familyId)),
   ]);
-  return { family: family[0], members, statements, results };
+  const parse = (obj) => Object.values(obj || {}).map((raw) => (typeof raw === "string" ? JSON.parse(raw) : raw));
+  return {
+    family: { id: familyId, name: meta.name, created_at: Number(meta.createdAt) },
+    members: parse(members).map((m) => ({ ...m, total_points: Number(points?.[m.id] || 0) })),
+    statements: parse(stmts),
+    results: parse(results),
+  };
 }
 
 export async function deleteFamily(familyId) {
-  const { query } = await getImpl();
-  await query(`DELETE FROM saved_statements WHERE family_id=$1`, [familyId]);
-  await query(`DELETE FROM game_results WHERE family_id=$1`, [familyId]);
-  await query(`DELETE FROM members WHERE family_id=$1`, [familyId]);
-  await query(`DELETE FROM families WHERE id=$1`, [familyId]);
+  const r = redis();
+  const meta = await loadMeta(familyId);
+  await r.del(...allKeys(familyId, meta));
+}
+
+/** Readiness probe for /api/health/db. Reports the album store, never content. */
+export async function dbHealth() {
+  try {
+    const pong = await redis().ping();
+    const memory = usingMemoryStore();
+    return {
+      ok: pong === "PONG",
+      configured: !memory,
+      backend: memory ? "memory-local" : "upstash-redis",
+    };
+  } catch (e) {
+    return { ok: false, configured: !usingMemoryStore(), backend: "unreachable", code: e?.code || "REDIS_UNAVAILABLE" };
+  }
 }

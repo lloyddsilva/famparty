@@ -33,8 +33,12 @@ config). Production: https://famparty.vercel.app
 - Host actions send `expectedPhase`; the server 409s on mismatch
   (`assertExpectedPhase`). TV (`/tv/[code]`) is display-only with QR + code and a
   wake lock; host remote is `/host`; players `/join`.
-- Family data (Nov 2): Neon Postgres in prod / PGLite locally (`.pglite`), same
-  SQL in `src/lib/db.js`. Family link = unguessable token stored hashed; member
+- Family albums: **Redis-backed** in `src/lib/db.js` (same Upstash database
+  as rooms; no second database). Album keys (`album:{id}:*`, `albumtoken:{hash}`)
+  all carry a 60-day expiry refreshed by activity; statement saves are atomic
+  capped hash writes, points use HINCRBY. Locally, with no `KV_REST_API_URL`,
+  `src/lib/redisClient.js` provides an in-memory stand-in (CAS + expiry
+  included) so dev and Playwright run offline. Album = unguessable token stored hashed; member
   link (play/view) vs owner link (export/delete, typed `DELETE` confirmation).
   Rooms created from a family are linked; joining via roster attaches scores and
   authorship to **members**. Spotlight truths (per-statement opt-out) and finale
@@ -50,9 +54,12 @@ config). Production: https://famparty.vercel.app
   *and* per IP globally (12 phones share one home IP — keep limits generous).
 
 ## Environment variables (Vercel)
-- `KV_REST_API_URL` / `KV_REST_API_TOKEN` — Upstash (Marketplace).
-- `DATABASE_URL` — Neon production branch (Vercel); local dev uses the Neon `development` branch in `.env.local`.
-- `CRON_SECRET` — **Lloyd to set in Vercel.** `/api/cron/purge-families` fails closed (401) until it exists; Vercel Cron sends it as a Bearer header.
+- `KV_REST_API_URL` / `KV_REST_API_TOKEN` — Upstash (Marketplace). The only
+  data service: rooms and albums both live here. Locally, leave them unset
+  (or blank them in `.env.development.local`) to use the in-memory stand-in.
+- Playwright refuses production targets unless `ALLOW_PROD_E2E=1`.
+- The Neon integration and its env vars are unused since the Redis album
+  store landed; Lloyd will remove the integration himself. Do not delete it.
 
 ## Verify
 ```bash
@@ -88,14 +95,8 @@ vercel ls famparty                         # confirm deployment Ready — a push
 ## Outstanding / open questions for Lloyd
 - Real-device milestone (1 TV + 3 phones, HDMI + cast tab, lock/wake, cellular,
   redeploy mid-game) still needs physical devices.
-- Neon is provisioned (`famparty-db`, `/api/health/db` reports postgres).
-  **Databases are separated:** production uses the Neon `main` branch (Vercel
-  env); local dev and tests point at the Neon `development` branch
-  (`.env.local` DATABASE_URL, rotated Oct 31). Never seed or test against
-  production again. PGLite remains the no-DATABASE_URL fallback.
-  Production still holds 3 invented test families from before the split
-  ("Expiry Test Family" x1, "The Test Family" x2) — deletion proposed to
-  Lloyd, awaiting his approval; do not delete without it.
+- Albums live in Redis with automatic 60-day expiry (no purge job). The
+  separate-Redis-for-tests backlog item is closed by the in-memory stand-in.
 - `famparty.com` domain/trademark — parked, must not block anything.
 - Content packs are unreviewed starter placeholders (see Hard rules); Lloyd's
   human review after the Muse Spark/Image run is the shipping gate.

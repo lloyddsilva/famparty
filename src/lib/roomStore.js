@@ -6,22 +6,9 @@
 // - Answers/votes are separate hash fields (room:{code}:answers:{round}) so
 //   12 simultaneous submissions never overwrite each other.
 
-import { Redis } from "@upstash/redis";
+import { redis } from "./redisClient.js";
 import { ROOM_TTL_SECONDS } from "./engine.js";
-
-let client;
-export function redis() {
-  if (client) return client;
-  const url = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
-  if (!url || !token) {
-    const err = new Error("Redis is not configured. Provision Upstash via the Vercel Marketplace and pull env vars (vercel env pull).");
-    err.code = "NO_REDIS";
-    throw err;
-  }
-  client = new Redis({ url, token });
-  return client;
-}
+export { redis };
 
 const roomKey = (code) => `room:${code}`;
 export const answersKey = (code, round) => `room:${code}:answers:${round}`;

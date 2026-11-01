@@ -229,10 +229,10 @@ FamParty is a Meta hackathon entry. Accurate status:
 ## 15. Current state & honest gaps
 
 - All five games, the family album, roster, and Remember This? are built. Test status, stated precisely: unit tests for the engine/scoring/games pass; the Playwright suites drive the **HTTP API** (13 clients in the emoji game; the family/Spotlight/Remember flow) and pass locally, and the emoji suite also passes against production. **The tests do not poll through the real phone UI the way physical devices do**, and no real-device pass has happened yet.
-- **Production status:** family features and Remember This? now work on the live URL (Neon Postgres connected under the lloyddsilva account; verified by the Playwright family flow against production). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
+- **Production status:** family features and Remember This? work on the live URL. The whole app runs on two services — Vercel and Upstash Redis (rooms and albums in one store; albums expire automatically 60 days after last activity). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
 - The Spectrum awards (*Lonely Island*, *Mind Reader*, *Dead Center*) and the host-paced Finish It reveal are implemented in the engine and TV view; the earlier README described them before they existed.
 - The visual design is the light "poster" redesign (design handoff turn 4, implemented Oct 31): lavender-white background, Gelasio/Outfit self-hosted type, pastel game cards, dark-framed TV. Keep routes, phases, and control inventories; visual details live in `src/app/globals.css` and the marketing IA in section 6 of this README's sibling files (`src/lib/siteContent.js`).
-- Known non-design gaps: production family data awaits a Neon database provision (local works today); the famparty.com domain is unregistered at time of writing; the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.
+- Known non-design gaps: the famparty.com domain is unregistered at time of writing; the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.
 
 ---
 
