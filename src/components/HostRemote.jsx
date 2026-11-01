@@ -123,7 +123,7 @@ export default function HostRemote() {
             )}
             {["spotlight", "story", "spectrum", "finishWrite", "remember"].includes(view.phase) && (
               <>
-                <p className="sub center">{view.phase === "spotlight" ? `${view.votedCount} vote(s) in` : view.phase === "story" ? "Story beat — featured player is talking" : "Round in progress"}</p>
+                <p className="sub center">{view.phase === "spotlight" ? `${view.votedCount} ${view.votedCount === 1 ? "vote" : "votes"} in` : view.phase === "story" ? "Story beat — featured player is talking" : "Round in progress"}</p>
                 <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
                 <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.phase === "story" ? "End story beat →" : "Skip / reveal now →"}</button>
               </>

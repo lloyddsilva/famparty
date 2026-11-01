@@ -19,7 +19,14 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
   };
   const act = (code, token, type, extra = {}, expectedPhase) =>
     post(`/api/rooms/${code}/actions`, { type, token, expectedPhase, ...extra });
-  const state = async (code) => (await (await api.fetch(`/api/rooms/${code}/state?role=display`)).json()).view;
+  const state = async (code) => {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const data = await (await api.fetch(`/api/rooms/${code}/state?role=display`)).json();
+      if (data.view) return data.view;
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    throw new Error(`no view for room ${code}`);
+  };
 
   async function newRoom(game) {
     const room = await post("/api/rooms");
@@ -37,10 +44,21 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
       await page.goto(`${baseURL}/tv/${code}`);
       await page.waitForTimeout(1400);
       const m = await page.evaluate(() => {
+        // The viewport is position:fixed/overflow:hidden, so document
+        // scrollHeight can never fail. Measure the panel's actual content:
+        // every descendant's bottom must sit inside the panel's bottom.
+        const panel = document.querySelector(".tv-panel");
         const frame = document.querySelector(".tv-frame-big");
-        return { scroll: document.documentElement.scrollHeight, inner: window.innerHeight, frameH: frame ? frame.offsetHeight : null };
+        if (!panel) return { maxOverflow: 999, frameH: null };
+        const panelBottom = panel.getBoundingClientRect().bottom;
+        let maxOverflow = 0;
+        for (const el of panel.querySelectorAll("*")) {
+          const r = el.getBoundingClientRect();
+          if (r.height || r.width) maxOverflow = Math.max(maxOverflow, r.bottom - panelBottom);
+        }
+        return { maxOverflow: Math.round(maxOverflow * 10) / 10, frameH: frame ? frame.offsetHeight : null };
       });
-      results.push({ phase: phaseLabel, viewport: `${vp.width}x${vp.height}`, ...m, fits: m.scroll <= vp.height && (m.frameH === null || m.frameH <= 708) });
+      results.push({ phase: phaseLabel, viewport: `${vp.width}x${vp.height}`, ...m, fits: m.maxOverflow <= 1 && (m.frameH === null || m.frameH <= 708) });
       await ctx.close();
     }
   }
@@ -132,7 +150,7 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
     await measure(r2.code, "remember");
   }
 
-  for (const r of results) console.log(`PHASE ${r.phase} @ ${r.viewport}: scrollHeight=${r.scroll} frameH=${r.frameH} fits=${r.fits}`);
+  for (const r of results) console.log(`PHASE ${r.phase} @ ${r.viewport}: contentOverflow=${r.maxOverflow}px frameH=${r.frameH} fits=${r.fits}`);
   const overflow = results.filter((r) => !r.fits);
   expect(overflow, JSON.stringify(overflow)).toHaveLength(0);
   await api.dispose();

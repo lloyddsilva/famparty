@@ -152,10 +152,10 @@ export default function TvDisplay({ code }) {
           {view.phase === "finishVote" && (
             <>
               <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
-              <p className="sub">🗳️ Voting is open on your phones — {view.votedCount} vote(s) in. No voting for your own!</p>
+              <p className="sub">🗳️ Voting is open on your phones — {view.votedCount} {view.votedCount === 1 ? "vote" : "votes"} in. No voting for your own!</p>
             </>
           )}
-          {view.phase === "finishReveal" && <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
+          {view.phase === "finishReveal" && <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} {c.votes === 1 ? "vote" : "votes"} · +{c.points}</div>; })}</div>}
         </div>
       )}
 

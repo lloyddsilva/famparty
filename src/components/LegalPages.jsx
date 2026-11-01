@@ -43,7 +43,7 @@ export function PrivacyPage() {
       <P>Your browser's localStorage holds room codes and host/player tokens so you can rejoin a room after a refresh or a locked phone. Clear your browser storage and they're gone; the room itself expires on its own.</P>
 
       <H>Live rooms (kept 2 hours)</H>
-      <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that unless a player chose to save it to a family album (below).</P>
+      <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that, unless the room belongs to a family album (below).</P>
 
       <H>Family albums (kept 60 days after last activity)</H>
       <P>If you create a family album, our database (Neon Postgres, hosted in AWS's US East region) stores the album name, member names and avatars, saved statements and story lines, game results, and hashed versions of the album's links (we cannot read the links themselves). Albums are deleted after 60 days of inactivity by a daily job. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>

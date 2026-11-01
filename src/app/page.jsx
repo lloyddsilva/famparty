@@ -90,7 +90,7 @@ export default function Page() {
             <div>
               <p className="eyebrow">The family album</p>
               <h2>Last month's truths are tonight's quiz.</h2>
-              <p>One private link for your family, no accounts. It remembers who's who, keeps the true stories people choose to save for 60 days after your last show, and deals them back as Remember This?. Anyone with the link can get in, so share it only with family.</p>
+              <p>One private link for your family, no accounts. It remembers who's who, keeps the true stories people don't opt out of saving for 60 days after your last show, and deals them back as Remember This?. Anyone with the link can get in, so share it only with family.</p>
               <Link className="lp-btn-dark" href="/family">Start your family album</Link>
             </div>
             <div aria-hidden="true">

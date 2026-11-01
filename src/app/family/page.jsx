@@ -24,7 +24,7 @@ export default function Page() {
         <div style={{ marginTop: 26 }}>
           <span className="sticker">Family album</span>
           <h1 style={{ fontSize: "2.6rem", marginTop: 14 }}>Your family, remembered — for a while.</h1>
-          <p className="sub" style={{ fontSize: "1.08rem" }}>A family album is one private link with your roster on it. True stories people choose to save in Spotlight land here, scores add up across shows, and Remember This? deals the stories back as a game. No accounts — the link is the only key.</p>
+          <p className="sub" style={{ fontSize: "1.08rem" }}>A family album is one private link with your roster on it. True stories saved from Spotlight land here (anyone can opt out of saving theirs), scores add up across shows, and Remember This? deals the stories back as a game. No accounts — the link is the only key.</p>
           <div className="how-list">
             <div className="how-item"><span style={{ fontSize: 24 }}>👨‍👩‍👧</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>One roster.</b> Everyone joins as themselves, so scores and stories attach to the person.</p></div>
             <div className="how-item"><span style={{ fontSize: 24 }}>🗓️</span><p style={{ margin: 0, lineHeight: 1.55 }}><b>Kept for 60 days after your last show</b>, then deleted. Every show, member or saved story restarts the clock.</p></div>
