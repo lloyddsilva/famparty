@@ -85,7 +85,22 @@ export default function PlayerClient() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, avatar: chosenAvatar, playerToken: savedToken, claimHost }),
     });
-    const data = await res.json();
+    let data = await res.json();
+    if (!data.ok && /avatar/i.test(data.error || "")) {
+      // Our animal was taken between page load and tapping I'm in: pick the
+      // next free one and try once more, no error shown.
+      const peek = await fetch(`/api/rooms/${code}/peek`).then((r) => r.json()).catch(() => null);
+      const taken = peek?.takenAvatars || [];
+      const free = AVATARS.find((a) => !taken.includes(a));
+      if (free) {
+        setAvatar(free);
+        const retry = await fetch(`/api/rooms/${code}/join`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, avatar: free, playerToken: savedToken, claimHost }),
+        });
+        data = await retry.json();
+      }
+    }
     setBusy(false);
     if (!data.ok) { refreshTaken(code); return setError(data.error || "Could not join."); }
     localStorage.setItem("famparty:playerCode", data.code);
