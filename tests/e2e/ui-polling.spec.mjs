@@ -16,7 +16,7 @@ test("TV + host + 3 phones play a round by polling", async ({ browser, baseURL }
   await host.getByRole("button", { name: /Create room/ }).click();
   await expect(host.getByText(/Room [A-Z0-9]{4}/)).toBeVisible();
   const roomText = await host.locator("h2").first().textContent();
-  const code = roomText.replace("Room ", "").trim();
+  const code = (roomText.match(/[A-Z0-9]{4}/) || [""])[0];
 
   await tv.goto(`${baseURL}/tv/${code}`);
   await expect(tv.locator(".room-code")).toHaveText(code);

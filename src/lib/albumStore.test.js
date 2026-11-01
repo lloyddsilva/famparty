@@ -46,3 +46,31 @@ test("statement dedupe and statement cap helpers hold under repeats", async () =
   assert.equal(stmts.length, 2);
   await db.deleteFamily(fam.id);
 });
+
+test("album names round-trip as strings: null, 0, 007, true", async () => {
+  for (const name of ["null", "0", "007", "true"]) {
+    const fam = await db.createFamily(name, `mtok-${name}`, `otok-${name}`);
+    const found = await db.familyByToken(`mtok-${name}`);
+    assert.ok(found, `album named ${name} is findable`);
+    assert.strictEqual(found.family.name, name);
+    assert.strictEqual(typeof found.family.name, "string");
+    await db.deleteFamily(fam.id);
+    assert.equal(await db.familyByToken(`mtok-${name}`), null);
+  }
+});
+
+test("saves after the album is deleted recreate no keys", async () => {
+  const fam = await db.createFamily("Gone Family", "mtok-gone", "otok-gone");
+  const m = await db.addMember(fam.id, "Ana", "🦊");
+  await db.deleteFamily(fam.id);
+  await db.saveStatements(fam.id, m.id, ["orphan truth"], "truth", "ROOMX");
+  await db.saveGameResults(fam.id, [{ memberId: m.id, game: "emoji", points: 500, dedupeScope: "ROOMX:g1" }]);
+  await assert.rejects(() => db.addMember(fam.id, "Late", "🐼"), /no longer exists/);
+  const store = redis().store;
+  if (store) {
+    const keys = [...store.keys()].filter((k) => k.includes(fam.id) || k.includes(db.hashSecret("mtok-gone")));
+    assert.deepEqual(keys, [], `expected no keys, found ${keys.join(", ")}`);
+  }
+  assert.deepEqual(await db.listStatements(fam.id), []);
+  assert.deepEqual(await db.listMembers(fam.id), []);
+});

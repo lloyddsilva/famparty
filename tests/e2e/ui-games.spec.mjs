@@ -7,7 +7,7 @@ async function makeRoom(browser, baseURL) {
   await host.goto(`${baseURL}/host`);
   await host.getByRole("button", { name: /Create room/ }).click();
   await expect(host.locator("h2")).toContainText(/Room [A-Z0-9]{4}/);
-  const code = (await host.locator("h2").first().textContent()).replace("Room ", "").trim().split(" ")[0];
+  const code = ((await host.locator("h2").first().textContent()).match(/[A-Z0-9]{4}/) || [""])[0];
   const tvCtx = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const tv = await tvCtx.newPage();
   await tv.goto(`${baseURL}/tv/${code}`);

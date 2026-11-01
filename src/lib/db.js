@@ -41,8 +41,17 @@ async function expireAll(fid, meta) {
 }
 
 async function loadMeta(fid) {
-  const meta = await redis().hgetall(metaKey(fid));
-  return meta && meta.name ? meta : null;
+  // Meta is stored as a single JSON string, never as separate hash fields:
+  // Redis clients JSON-parse hash values, so a name like "null" or "007"
+  // would change type (and existence checks on truthiness would break).
+  const raw = await redis().get(metaKey(fid));
+  if (!raw) return null;
+  const meta = typeof raw === "string" ? JSON.parse(raw) : raw;
+  return meta && typeof meta === "object" ? meta : null;
+}
+
+async function saveMeta(fid, meta) {
+  await redis().set(metaKey(fid), JSON.stringify(meta));
 }
 
 export async function createFamily(name, memberToken, ownerToken) {
@@ -50,10 +59,10 @@ export async function createFamily(name, memberToken, ownerToken) {
   const fid = id("fam");
   const now = Date.now();
   const meta = {
-    name, createdAt: String(now), lastActiveAt: String(now),
+    name: String(name), createdAt: now, lastActiveAt: now,
     memberTokenHash: hashSecret(memberToken), ownerTokenHash: hashSecret(ownerToken),
   };
-  await r.hset(metaKey(fid), meta);
+  await saveMeta(fid, meta);
   await r.set(tokenKey(meta.memberTokenHash), fid);
   await r.set(tokenKey(meta.ownerTokenHash), fid);
   await expireAll(fid, meta);
@@ -70,7 +79,7 @@ export async function familyByToken(token) {
   const access = hash === meta.memberTokenHash ? "member" : hash === meta.ownerTokenHash ? "owner" : null;
   if (!access) return null;
   return {
-    family: { id: fid, name: meta.name, created_at: Number(meta.createdAt), last_active_at: Number(meta.lastActiveAt) },
+    family: { id: fid, name: String(meta.name), created_at: Number(meta.createdAt), last_active_at: Number(meta.lastActiveAt) },
     access,
   };
 }
@@ -80,7 +89,7 @@ export async function touchFamily(familyId) {
   const r = redis();
   const meta = await loadMeta(familyId);
   if (!meta) return;
-  await r.hset(metaKey(familyId), { lastActiveAt: String(Date.now()) });
+  await saveMeta(familyId, { ...meta, lastActiveAt: Date.now() });
   await expireAll(familyId, meta);
 }
 
@@ -93,10 +102,22 @@ export async function listMembers(familyId) {
     .sort((a, b) => a.created_at - b.created_at);
 }
 
+const MEMBER_LUA = `
+if redis.call('EXISTS', KEYS[2]) == 0 then return -2 end
+redis.call('HSET', KEYS[1], ARGV[1], ARGV[2])
+redis.call('EXPIRE', KEYS[1], tonumber(ARGV[3]))
+return 1
+`;
+
 export async function addMember(familyId, name, avatar) {
   const r = redis();
   const m = { id: id("mem"), family_id: familyId, name, avatar, created_at: Date.now() };
-  await r.hset(membersKey(familyId), { [m.id]: JSON.stringify(m) });
+  const res = await r.eval(MEMBER_LUA, [membersKey(familyId), metaKey(familyId)], [m.id, JSON.stringify(m), String(TTL_SECONDS)]);
+  if (res === -2) {
+    const e = new Error("This album no longer exists.");
+    e.status = 404;
+    throw e;
+  }
   await touchFamily(familyId);
   return m;
 }
@@ -107,9 +128,11 @@ export async function getMember(familyId, memberId) {
 }
 
 const SAVE_LUA = `
+if redis.call('EXISTS', KEYS[2]) == 0 then return -2 end
 if redis.call('HEXISTS', KEYS[1], ARGV[1]) == 1 then return 0 end
 if redis.call('HLEN', KEYS[1]) >= tonumber(ARGV[3]) then return -1 end
 redis.call('HSET', KEYS[1], ARGV[1], ARGV[2])
+redis.call('EXPIRE', KEYS[1], tonumber(ARGV[4]))
 return 1
 `;
 
@@ -119,7 +142,7 @@ export async function saveStatements(familyId, memberId, texts, kind = "truth", 
   for (const text of texts) {
     const dedupe = `${familyId}:${memberId}:${kind}:${roomCode}:${text}`;
     const stmt = { id: id("st"), family_id: familyId, member_id: memberId, text, kind, room_code: roomCode, created_at: Date.now() };
-    await r.eval(SAVE_LUA, [statementsKey(familyId)], [dedupe, JSON.stringify(stmt), String(STATEMENT_CAP)]);
+    await r.eval(SAVE_LUA, [statementsKey(familyId), metaKey(familyId)], [dedupe, JSON.stringify(stmt), String(STATEMENT_CAP), String(TTL_SECONDS)]);
   }
   await touchFamily(familyId);
 }
@@ -137,12 +160,22 @@ export async function listStatements(familyId, limit = 100) {
     .map((s) => ({ ...s, writer_name: byId[s.member_id]?.name || "Someone", writer_avatar: byId[s.member_id]?.avatar || "🦊" }));
 }
 
-export async function trueStatementsForGame(familyId, limit = 10) {
+export async function trueStatementsForGame(familyId) {
   const rows = await listStatements(familyId, 200);
   return rows.filter((r) => r.kind === "truth")
-    .slice(0, limit)
     .map((r) => ({ id: r.id, text: r.text, writerMemberId: r.member_id, writerName: r.writer_name, roomCode: r.room_code || null }));
 }
+
+const RESULT_LUA = `
+if redis.call('EXISTS', KEYS[3]) == 0 then return -2 end
+local added = redis.call('HSETNX', KEYS[1], ARGV[1], ARGV[2])
+if added == 1 then
+  redis.call('HINCRBY', KEYS[2], ARGV[3], tonumber(ARGV[4]))
+  redis.call('EXPIRE', KEYS[1], tonumber(ARGV[5]))
+  redis.call('EXPIRE', KEYS[2], tonumber(ARGV[5]))
+end
+return added
+`;
 
 export async function saveGameResults(familyId, results) {
   if (!familyId || !results?.length) return;
@@ -150,10 +183,9 @@ export async function saveGameResults(familyId, results) {
   for (const res of results) {
     if (!res.memberId || !res.points) continue;
     const dedupe = `${familyId}:${res.memberId}:${res.game}:${res.dedupeScope || ""}:${res.points}`;
-    const added = await r.hsetnx(resultsKey(familyId), dedupe, JSON.stringify({
+    await r.eval(RESULT_LUA, [resultsKey(familyId), pointsKey(familyId), metaKey(familyId)], [dedupe, JSON.stringify({
       id: id("gr"), family_id: familyId, member_id: res.memberId, game: res.game, points: res.points, played_at: Date.now(),
-    }));
-    if (added) await r.hincrby(pointsKey(familyId), res.memberId, res.points);
+    }), res.memberId, String(res.points), String(TTL_SECONDS)]);
   }
   await touchFamily(familyId);
 }
@@ -168,7 +200,7 @@ export async function exportFamily(familyId) {
   ]);
   const parse = (obj) => Object.values(obj || {}).map((raw) => (typeof raw === "string" ? JSON.parse(raw) : raw));
   return {
-    family: { id: familyId, name: meta.name, created_at: Number(meta.createdAt) },
+    family: { id: familyId, name: String(meta.name), created_at: Number(meta.createdAt) },
     members: parse(members).map((m) => ({ ...m, total_points: Number(points?.[m.id] || 0) })),
     statements: parse(stmts),
     results: parse(results),

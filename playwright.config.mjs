@@ -4,7 +4,7 @@ import { defineConfig } from "@playwright/test";
 // production Redis) unless explicitly flagged. Local runs use the in-memory
 // store when KV_REST_API_URL is unset.
 const baseURL = process.env.E2E_BASE_URL || "http://localhost:3000";
-if (/famparty\.vercel\.app/.test(baseURL) && process.env.ALLOW_PROD_E2E !== "1") {
+if (/famparty\.(vercel\.app|com)/.test(baseURL) && process.env.ALLOW_PROD_E2E !== "1") {
   throw new Error(`Refusing to run Playwright against production (${baseURL}). Set ALLOW_PROD_E2E=1 only for a deliberate, small production check.`);
 }
 
@@ -13,5 +13,6 @@ export default defineConfig({
   timeout: 120000,
   workers: 1,
   reporter: [["list"]],
+  globalSetup: "./tests/e2e/global-setup.mjs",
   use: { baseURL },
 });
