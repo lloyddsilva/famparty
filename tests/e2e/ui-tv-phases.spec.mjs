@@ -19,6 +19,7 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
   };
   const act = (code, token, type, extra = {}, expectedPhase) =>
     post(`/api/rooms/${code}/actions`, { type, token, expectedPhase, ...extra });
+  const get2 = async (path, token) => (await api.fetch(path, { headers: token ? { "x-room-token": token } : {} })).json();
   const state = async (code) => {
     for (let attempt = 0; attempt < 4; attempt++) {
       const data = await (await api.fetch(`/api/rooms/${code}/state?role=display`)).json();
@@ -114,9 +115,10 @@ test("all TV phases fit at 720p and 1080p", async ({ browser, baseURL }) => {
     await act(r.code, r.hostToken, "NEXT", {}, "finishPresent");
     expect((await state(r.code)).phase).toBe("finishVote");
     await measure(r.code, "finishVote (12 max answers)");
-    for (const [i, p] of r.players.entries()) {
-      const target = r.players[(i + 1) % 12];
-      await post(`/api/rooms/${r.code}/actions`, { type: "VOTE", token: p.playerToken, choice: target.playerId });
+    for (const p of r.players) {
+      const mine = await get2(`/api/rooms/${r.code}/state?role=player`, p.playerToken);
+      const cand = mine.view.finishit.candidates.find((c) => !c.mine);
+      await post(`/api/rooms/${r.code}/actions`, { type: "VOTE", token: p.playerToken, choice: cand.id });
     }
     expect((await state(r.code)).phase).toBe("finishReveal");
     await measure(r.code, "finishReveal (12 max answers)");

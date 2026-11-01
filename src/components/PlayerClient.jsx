@@ -246,7 +246,7 @@ export default function PlayerClient() {
             <h3 className="center">Vote for the funniest — not your own</h3>
             {view.myVote === null || view.myVote === undefined ? (
               <div className="choices">{view.finishit.candidates.map((c, i) => (
-                <button key={c.id} className="choice btn-choice" disabled={c.id === me?.id} onClick={() => act({ type: "VOTE", choice: c.id })}><b>{i + 1}</b>{c.text}{c.id === me?.id ? " (yours)" : ""}</button>
+                <button key={c.id} className="choice btn-choice" disabled={c.mine} onClick={() => act({ type: "VOTE", choice: c.id })}><b>{i + 1}</b>{c.text}{c.mine ? " (yours)" : ""}</button>
               ))}</div>
             ) : <p className="center sub">✅ Vote in.</p>}
             <p className="sub center">Answers are anonymous until the reveal.</p>

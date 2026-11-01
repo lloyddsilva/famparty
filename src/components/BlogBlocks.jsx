@@ -78,11 +78,18 @@ export function Block({ block, index }) {
             <p className="blog-tv-head">{block.header}</p>
             {block.emoji && <div className="blog-tv-emoji">{block.emoji}</div>}
             <p className="blog-tv-q">{block.question}</p>
-            {block.choices && (
+            {block.dots ? (
+              <div className="blog-tv-spectrum" aria-hidden="true">
+                <div className="blog-tv-track">
+                  {block.dots.map((d, i) => <span key={i} className="blog-tv-dot" style={{ left: `${d.left}%` }}>{d.emoji}</span>)}
+                </div>
+                <div className="blog-tv-ends"><span>{block.left}</span><span>{block.right}</span></div>
+              </div>
+            ) : block.choices ? (
               <div className="blog-tv-choices">
                 {block.choices.map((c, i) => <span key={i}><b>{"ABCD"[i]}</b>{c}</span>)}
               </div>
-            )}
+            ) : null}
             {block.footer && <p className="blog-tv-foot">{block.footer}</p>}
           </div>
           <figcaption>{block.game ? `${block.game} on the TV` : "On the TV"}</figcaption>

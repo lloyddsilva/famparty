@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { addPlayer } from "../../../../../lib/engine.js";
 import { casUpdate, rateLimit } from "../../../../../lib/roomStore.js";
-import { cleanCode, cleanName, isCleanName, isAvatar, newId, newToken, hashToken, parseJsonBody , clientIp } from "../../../../../lib/validate.js";
+import { cleanCode, cleanName, isCleanName, isAvatar, newId, newToken, hashToken, parseJsonBody, clientIp, rateLimitFor } from "../../../../../lib/validate.js";
 import { familyByToken, getMember } from "../../../../../lib/db.js";
 import { loadRoom } from "../../../../../lib/roomStore.js";
 
@@ -34,7 +34,7 @@ export async function POST(req, { params }) {
     // Two layers (item 6): per IP+room (generous — 12 phones share one home IP),
     // plus a per-IP ceiling across ALL rooms so code guessing is throttled too.
     if (!(await rateLimit(`join:${ip}:${code}`, 40, 60))) return bad("Too many joins. Wait a few seconds.", 429);
-    if (!(await rateLimit(`joinall:${ip}`, 60, 60))) return bad("Too many join attempts. Wait a minute.", 429);
+    if (!(await rateLimit(`joinall:${ip}`, rateLimitFor(60), 60))) return bad("Too many join attempts. Wait a minute.", 429);
     if (!memberId && !isCleanName(name)) return bad("Our filter tripped on that one. Mind wording it differently?");
 
     const playerToken = typeof body.playerToken === "string" && body.playerToken.length >= 16 ? body.playerToken : newToken();

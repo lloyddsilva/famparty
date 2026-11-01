@@ -357,6 +357,10 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
 .blog-tv-choices span { background: #fff; border-radius: 12px; padding: 11px 13px; font-weight: 600; }
 .blog-tv-choices b { color: var(--violet); margin-right: 8px; }
 .blog-tv-foot { color: var(--yellow-ink); font-weight: 600; margin: 12px 0 0; }
+.blog-tv-spectrum { margin: 16px 6px 6px; }
+.blog-tv-track { position: relative; height: 14px; border-radius: 99px; background: linear-gradient(90deg, var(--violet), var(--yellow), var(--pink)); margin: 34px 0 8px; }
+.blog-tv-dot { position: absolute; top: -30px; transform: translateX(-50%); font-size: 26px; }
+.blog-tv-ends { display: flex; justify-content: space-between; font-weight: 700; color: var(--yellow-ink); font-size: .9rem; }
 .blog-tv figcaption, .blog-phone figcaption { text-align: center; color: var(--faint); margin-top: 8px; font-size: .9rem; }
 .blog-phone { background: #fff; border: 2px solid var(--divider); border-radius: 34px; padding: 20px; max-width: 330px; margin: 22px auto; display: grid; gap: 9px; box-shadow: var(--card-shadow); }
 .blog-phone-title { font-weight: 700; margin: 0; text-align: center; }

@@ -76,11 +76,19 @@ test("finishit: no self-vote, exact-normalized duplicates split points", () => {
   assert.equal(pv.finishit.candidates.length, 4);
   s = act(s, { type: "NEXT" });
   assert.equal(s.phase, "finishVote");
+  const candOf = (state, writerId) => {
+    const v = buildView(state, { viewer: { role: "host" } });
+    return v.finishit.candidates.find((c) => {
+      const idx = state.finishOrder.indexOf(writerId);
+      return c.id === state.finishCandidateIds[idx];
+    }).id;
+  };
+  // a raw player id is no longer accepted as a vote target
   assert.equal(applyAction(s, { type: "VOTE", playerId: "p0", choice: "p0" }, NOW).error, "Invalid vote.");
-  s = act(s, { type: "VOTE", playerId: "p2", choice: "p0" });
-  s = act(s, { type: "VOTE", playerId: "p3", choice: "p0" });
-  s = act(s, { type: "VOTE", playerId: "p0", choice: "p2" });
-  s = act(s, { type: "VOTE", playerId: "p1", choice: "p2" });
+  s = act(s, { type: "VOTE", playerId: "p2", choice: candOf(s, "p0") });
+  s = act(s, { type: "VOTE", playerId: "p3", choice: candOf(s, "p0") });
+  s = act(s, { type: "VOTE", playerId: "p0", choice: candOf(s, "p2") });
+  s = act(s, { type: "VOTE", playerId: "p1", choice: candOf(s, "p2") });
   assert.equal(s.phase, "finishReveal");
   // p0+p1 wrote the same normalized text: 2 votes * 100 split between them
   assert.equal(s.players.find((p) => p.id === "p0").score, 100);
@@ -108,10 +116,10 @@ test("finishit: host-hidden answers stay hidden on the TV at vote and reveal", (
   s = act(s, { type: "NEXT" });
   assert.equal(s.phase, "finishVote");
   const view = buildView(s, { viewer: { role: "display" } });
-  const hiddenEntry = view.finishit.candidates.find((c) => c.id === "p0");
+  const hiddenEntry = view.finishit.candidates[s.finishOrder.indexOf("p0")];
   assert.equal(hiddenEntry.text, "Hidden by host");
   const hostView = buildView(s, { viewer: { role: "host" } });
-  assert.equal(hostView.finishit.candidates.find((c) => c.id === "p0").text, "something rude");
+  assert.equal(hostView.finishit.candidates[s.finishOrder.indexOf("p0")].text, "something rude");
 });
 
 test("remember: writer cannot score on their own statement", () => {
@@ -172,4 +180,28 @@ test("shuffle produces a near-uniform permutation distribution", async () => {
   }
   assert.equal(counts.size, 6, `expected all 6 permutations, saw ${counts.size}`);
   for (const [k, v] of counts) assert.ok(v > 50 && v < 160, `permutation ${k} biased: ${v}/600`);
+});
+
+test("finishit: no player id appears in candidates before the reveal; mine flag is viewer-only", () => {
+  let s = room("finishit");
+  s = act(s, { type: "START" });
+  for (const id of ["p0", "p1", "p2", "p3"]) s = act(s, { type: "FINISH_SUBMIT", playerId: id, text: `answer ${id}` });
+  assert.equal(s.phase, "finishPresent");
+  for (const role of ["display", "host"]) {
+    const view = buildView(s, { viewer: { role } });
+    for (const c of view.finishit.candidates) {
+      assert.ok(!["p0", "p1", "p2", "p3"].includes(c.id), `candidate id ${c.id} leaks a player id (${role})`);
+      assert.equal(c.authorId, undefined);
+    }
+  }
+  // step through presentation, then check the vote phase as a player
+  s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" }); s = act(s, { type: "NEXT" });
+  s = act(s, { type: "NEXT" });
+  assert.equal(s.phase, "finishVote");
+  const mine = buildView(s, { viewer: { role: "player", playerId: "p0" } });
+  const own = mine.finishit.candidates.find((c) => c.mine);
+  assert.ok(own, "own answer is flagged mine for the voter");
+  assert.ok(!["p0", "p1", "p2", "p3"].includes(own.id));
+  const others = buildView(s, { viewer: { role: "player", playerId: "p1" } });
+  assert.notEqual(others.finishit.candidates.find((c) => c.mine)?.id, own.id);
 });

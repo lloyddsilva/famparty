@@ -66,7 +66,6 @@ export const SPOTLIGHT_GUIDE = {
         { title: "Read it yourself", text: "If the featured player would rather not perform, the host reads the statements off the TV." },
         { title: "Reveal fast on a collapse", text: "Everyone spotted it? Reveal, take the story, move on. Never apologise for a player." },
       ] },
-    { type: "pullQuote", text: "Load the truths with detail, keep the lie plain, and let the room's instincts work against them." },
   ],
   faq: [
     { q: "What makes a lie too obvious?", a: "Anything much grander than your truths. If the lie needs a celebrity, a record or a rescue, the room will pick it on sight. Match the lie's size to your most ordinary truth." },

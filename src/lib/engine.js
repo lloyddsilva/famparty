@@ -43,7 +43,7 @@ export function createRoom({ code, hostTokenHash, now, familyId = null }) {
     players: [], qIndex: 0, deadline: null, paused: false, pausedRemainingMs: null,
     locked: false, createdAt: now, updatedAt: now,
     featuredOrder: [], featuredIdx: 0, spotlightOrder: [0, 1, 2], votes: {},
-    finishOrder: [], rememberItems: [], roundId: "lobby-0", gameId: null,
+    finishOrder: [], finishCandidateIds: [], rememberItems: [], roundId: "lobby-0", gameId: null,
   };
 }
 
@@ -171,7 +171,12 @@ function startSpectrum(state, now) {
 }
 function finishToPresent(state, now) {
   const ids = state.players.filter((p) => p.finishAnswer).map((p) => p.id);
-  return toPhase({ ...state, votes: {}, finishOrder: shuffle(ids, now % 100000), finishRevealStep: 0, finishAuthors: false }, "finishPresent", now);
+  const order = shuffle(ids, now % 100000);
+  // Opaque per-round candidate ids: the writer's player id must never reach
+  // any client before the reveal. Votes carry the candidate id; the engine
+  // maps it back to the writer server-side.
+  const candidateIds = order.map((_, i) => `cand-${i + 1}`);
+  return toPhase({ ...state, votes: {}, finishOrder: order, finishCandidateIds: candidateIds, finishRevealStep: 0, finishAuthors: false }, "finishPresent", now);
 }
 function finishToVote(state, now) {
   return toPhase(state, "finishVote", now, VOTE_MS);
@@ -282,8 +287,10 @@ export function applyAction(state, action, now, ctx = {}) {
         return { state: guessers.every((p) => next.votes[p.id] !== undefined) ? revealRemember(next, now) : next };
       }
       if (state.phase === "finishVote") {
-        if (actor.id === action.choice || !state.finishOrder.includes(action.choice)) return fail("Invalid vote.");
-        const next = { ...state, votes: { ...state.votes, [actor.id]: action.choice }, updatedAt: now };
+        const candIdx = (state.finishCandidateIds || []).indexOf(String(action.choice));
+        const targetId = candIdx >= 0 ? state.finishOrder[candIdx] : null;
+        if (!targetId || actor.id === targetId) return fail("Invalid vote.");
+        const next = { ...state, votes: { ...state.votes, [actor.id]: targetId }, updatedAt: now };
         return { state: state.players.every((p) => next.votes[p.id] !== undefined) ? revealFinish(next, now) : next };
       }
       return fail("Not voting now.");
@@ -354,6 +361,7 @@ export function applyAction(state, action, now, ctx = {}) {
         state: {
           ...state, phase: "lobby", qIndex: 0, deadline: null, paused: false, locked: false, votes: {}, featuredOrder: [], featuredIdx: 0,
           players: state.players.map((p) => ({ ...p, score: 0, streak: 0, lastCorrect: null, lastPoints: 0, statements: null, watching: false, storyLine: null, finishAnswer: null, spectrumPos: null })),
+          finishCandidateIds: [],
           updatedAt: now,
         },
       };
@@ -376,7 +384,8 @@ export function applyAction(state, action, now, ctx = {}) {
       next = { ...next, votes };
       if (next.finishOrder?.includes(action.playerId)) {
         const removedIdx = next.finishOrder.indexOf(action.playerId);
-        next = { ...next, finishOrder: next.finishOrder.filter((id) => id !== action.playerId) };
+        next = { ...next, finishOrder: next.finishOrder.filter((id) => id !== action.playerId),
+                 finishCandidateIds: (next.finishCandidateIds || []).filter((_, i) => i !== removedIdx) };
         // If the removed answer was already on screen, step back so the next
         // unseen answer still needs its own host tap (item 4).
         if (next.phase === "finishPresent" && removedIdx < (next.finishRevealStep ?? 0)) {
@@ -465,17 +474,17 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
           prompt: finishItem,
           ...(state.phase === "finishPresent" ? {
             presenting: true, totalCandidates: state.finishOrder.length,
-            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id) => { const p = findPlayer(state, id); return p ? { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean),
+            candidates: state.finishOrder.slice(0, state.finishRevealStep ?? 0).map((id, i) => { const p = findPlayer(state, id); return p ? { id: state.finishCandidateIds?.[i] || `cand-${i + 1}`, mine: viewer.playerId === id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean),
           } : {}),
-          ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id) => { const p = findPlayer(state, id); return p ? { id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean) } : {}),
+          ...(state.phase === "finishVote" ? { candidates: state.finishOrder.map((id, i) => { const p = findPlayer(state, id); return p ? { id: state.finishCandidateIds?.[i] || `cand-${i + 1}`, mine: viewer.playerId === id, text: p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer } : null; }).filter(Boolean) } : {}),
           ...(state.phase === "finishReveal" ? {
             authorsRevealed: !!state.finishAuthors,
             totalCandidates: state.finishOrder.length,
-            candidates: state.finishOrder.map((id) => {
+            candidates: state.finishOrder.map((id, i) => {
               const p = findPlayer(state, id);
               if (!p) return null;
               const text = p.hidden && isDisplay ? "Hidden by host" : p.finishAnswer;
-              return { id, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints };
+              return { id: state.finishCandidateIds?.[i] || `cand-${i + 1}`, text, authorId: id, votes: (state.finishVoteCount || {})[id] || 0, points: p.lastPoints };
             }).filter(Boolean),
           } : {}),
         }

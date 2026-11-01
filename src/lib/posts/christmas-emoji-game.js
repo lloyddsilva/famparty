@@ -101,7 +101,6 @@ export const CHRISTMAS_EMOJI_GAME = {
         { if: "Kids or mixed ages", play: "A point whenever you're right", note: "Nobody is out of it before the last clue" },
         { if: "Pairs on one phone", play: "Team points, shared sheet", note: "Swap sheets to mark; the argument is the prize" },
       ] },
-    H("Writing your own clues"),
     CALL("The one-person test", "Show the clue to one person who hasn't seen the answer. Instant: it's easy. One wrong turn: good medium. Still stuck: add a literal emoji."),
     P("Build the phrase from its sounds, not its meaning. Start from the answer and break it into syllables; find an emoji whose name sounds like each syllable; fill gaps with literal pictures. \"Mistletoe\" is 💋 (kiss) plus 🦶 (toe) if you want it hard, or 🌿 with a kiss for medium. The mistake to avoid is picturing the *idea*: three snowflakes could be winter, snow, cold, or Christmas itself, and a clue that could be anything is just a guess. Test every clue on one person who hasn't seen the answer. If they get it in under a minute with one wrong turn, it's a good medium. If they get it instantly, it's easy. If they're still stuck, add one literal emoji — never remove one."),
     { type: "tvMock", game: "Emoji Decoder", header: "Emoji Decoder · Christmas round", emoji: "🎄🪨", question: "What phrase is this?", choices: ["Rockin' Around the Christmas Tree", "Deck the Halls", "Jingle Bell Rock", "O Christmas Tree"], footer: "Same clues, on the big screen, with speed points." },

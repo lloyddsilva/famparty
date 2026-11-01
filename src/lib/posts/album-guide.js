@@ -29,7 +29,7 @@ export const ALBUM_GUIDE = {
     ] },
     P("Two rows surprise people. True statements save by default at the end of your turn; your control is the per-statement \"don't save this\" tick. Scores save automatically in album rooms. What never saves: the lie, anything from a non-album room, and story lines nobody typed."),
     H("What isn't saved"),
-    { type: "tvMock", game: "Remember This?", header: "Remember This? · From the album", emoji: "🧠", question: "\"I once met a penguin.\" — who wrote it?", choices: ["Ana", "Ben", "Cleo", "Dan"], footer: "Only true statements are dealt. The writer can't score." },
+    { type: "tvMock", game: "Remember This?", header: "Remember This? · From the album", emoji: "🧠", question: "\"I once met a penguin.\"", footer: "Whose true statement is this? Guess on your phones — the writer can't score." },
     P("Nothing from ordinary rooms. A room that wasn't started from an album leaves nothing behind when it expires — names, answers and scores in a normal room are gone with it. Chat doesn't exist in FamParty, so there's no chat to save. And your album links themselves are stored only as cryptographic hashes: we couldn't read you your link back if we wanted to, which is the point of the next section."),
     CALL("Why hashes matter to you", "Because the link is stored hashed, nobody at FamParty can read it back to you. That's a feature with a cost: save the owner link when it's shown.", "warn"),
     H("The link is the only key: member vs owner"),

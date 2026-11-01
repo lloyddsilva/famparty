@@ -98,6 +98,16 @@ for (const post of BLOG_POSTS) {
   if (!sawVisual) failures.push(`${at}: no visuals at all`);
   if (proseSinceVisual > MAX_GAP) failures.push(`${at}: ${proseSinceVisual} words of prose after the last visual, max ${MAX_GAP}`);
 
+  // no repeated heading or pull quote within a post
+  const seenTexts = new Map();
+  for (const block of post.blocks) {
+    if (block.type === "heading" || block.type === "pullQuote") {
+      const key = String(block.text || "").trim().toLowerCase();
+      if (key && seenTexts.has(key)) failures.push(`${at}: repeated ${block.type} "${block.text}"`);
+      seenTexts.set(key, true);
+    }
+  }
+
   // internal links: related posts + game page
   for (const rel of post.related || []) {
     const target = BLOG_POSTS.find((p) => p.slug === rel);

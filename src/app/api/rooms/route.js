@@ -12,7 +12,10 @@ export async function POST(req) {
   try {
     // Room creation is capped per IP (item 7): rooms live 2h in Redis.
     const ip = clientIp(req);
-    if (!(await rateLimit(`create:${ip}`, 20, 3600))) {
+    // Test-only escape hatch: suites create dozens of rooms from one IP.
+    // Never honoured on Vercel, where the real limit always applies.
+    const createLimit = !process.env.VERCEL && process.env.FAMPARTY_TEST_ROOM_LIMIT ? Number(process.env.FAMPARTY_TEST_ROOM_LIMIT) : 20;
+    if (!(await rateLimit(`create:${ip}`, createLimit, 3600))) {
       return NextResponse.json({ ok: false, error: "Too many rooms created. Try again later." }, { status: 429, headers: noStore });
     }
     const body = await parseJsonBody(req).catch(() => null);

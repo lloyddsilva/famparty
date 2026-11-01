@@ -94,3 +94,13 @@ export function clientIp(req) {
     "local"
   );
 }
+
+/** Test-only rate-limit scaling. Suites create dozens of rooms, joins and
+ * families from one IP; production limits would (correctly) stop them.
+ * Never honoured on Vercel. */
+export function rateLimitFor(base) {
+  if (!process.env.VERCEL && process.env.FAMPARTY_TEST_ROOM_LIMIT) {
+    return Math.max(base, Number(process.env.FAMPARTY_TEST_ROOM_LIMIT) * 10);
+  }
+  return base;
+}

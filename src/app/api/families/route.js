@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createFamily } from "../../../lib/db.js";
-import { newToken, parseJsonBody, isCleanText , clientIp } from "../../../lib/validate.js";
+import { newToken, parseJsonBody, isCleanText, clientIp, rateLimitFor } from "../../../lib/validate.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ const noStore = { "Cache-Control": "no-store" };
 export async function POST(req) {
   try {
     const ip = clientIp(req);
-    if (!(await rateLimit(`familycreate:${ip}`, 10, 3600))) {
+    if (!(await rateLimit(`familycreate:${ip}`, rateLimitFor(10), 3600))) {
       return NextResponse.json({ ok: false, error: "Too many families created from here. Try again later." }, { status: 429, headers: noStore });
     }
   } catch { /* rate limiting unavailable — creation still proceeds */ }

@@ -28,7 +28,7 @@ export const SPECTRUM_GUIDE = {
       ] },
     H("What makes a pair work"),
     P("Four things. First, both ends must be genuinely livable: if one end is a joke answer, everyone piles onto the other and there's no spread to reveal. Second, the pair should be about taste, not correctness — the moment one end is objectively better, you're running a quiz. Third, it helps if people have evidence about each other: pairs about visible habits (cooking, holidays, mornings) let the room check placements against what they know, which is where the \"you're not a night owl, I've seen you\" arguments come from. Fourth, the middle must mean something. On a good pair, the centre is a real position, not a refuge."),
-    { type: "tvMock", game: "Spectrum", header: "Spectrum · Placing", emoji: "🎚️", question: "Early bird ↔ Night owl", choices: ["🦊 far left", "You: placing, unseen", "🦄 far right"], footer: "Nobody sees your dot until everybody's lands." },
+    { type: "tvMock", game: "Spectrum", header: "Spectrum · Round 1", emoji: "🎚️", question: "Early bird ↔ Night owl", footer: "Place yourself on your phone. Nothing shows here until the reveal." },
     CALL("Commit before you see anyone else", "The order is the mechanic: place yourself while the room is invisible, then let every position land at once."),
     GRID("For family", [
       ["Cook at home", "Order takeaway"], ["Beach holiday", "Mountain holiday"], ["Early bird", "Night owl"],
@@ -74,7 +74,7 @@ export const SPECTRUM_GUIDE = {
       "Interview the edges first: the most isolated placement and anyone the room got wrong. \"Explain yourself\" beats \"who agrees?\" every time.",
     ] },
     P("Two hosting habits keep the discussion kind. Interview placements, not people: \"what pulls you that far left?\" lands better than \"why are you like this?\". And let people move after the argument — a player who shifts their dot because a story persuaded them is the game working at its best, not a rule break. In FamParty's Spectrum, the reveal also names the Lonely Island (furthest from the crowd), the Mind Reader (best prediction) and the Dead Center; if you're playing on paper, stealing those three awards costs nothing and gives the reveal a second beat."),
-    { type: "tvMock", game: "Spectrum", header: "Spectrum · Reveal", emoji: "🎚️", question: "Cook at home ↔ Order takeaway", choices: ["🦊 far left", "🐼 middle", "🦄 far right", "🐸 also far right, louder"], footer: "Every avatar lands at once. The crowd leans right." },
+    { type: "tvMock", game: "Spectrum", header: "Spectrum · Reveal", emoji: "🎚️", question: "Cook at home ↔ Order takeaway", left: "Cook at home", right: "Order takeaway", dots: [{ emoji: "🦊", left: 12 }, { emoji: "🐼", left: 48 }, { emoji: "🦄", left: 86 }, { emoji: "🐸", left: 93 }], footer: "Every avatar lands at once. The crowd leans right." },
     CALL("Keep it to preferences", "Food, weather, holidays, hobbies, how you spend a Sunday. The moment a pair touches beliefs, identity or health, the game stops being a game.", "warn"),
   ],
   faq: [

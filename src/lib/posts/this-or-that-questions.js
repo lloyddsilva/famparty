@@ -51,7 +51,7 @@ export const THIS_OR_THAT_QUESTIONS = {
       { label: "Reveal", text: "Eleven of fourteen are far toward cooking. Two are alone at the takeaway end." },
       { label: "The game", text: "\"Explain yourselves\" produces fifteen minutes on one grandmother's gravy. Nobody checks a phone." },
     ] },
-    { type: "tvMock", game: "Spectrum", header: "Spectrum · Reveal", emoji: "🎚️", question: "Cook at home ↔ Order takeaway", choices: ["🦊 far left", "🐼 middle", "🦄 far right", "🐸 far right, explaining"], footer: "Placed privately. Revealed together. Argued about immediately." },
+    { type: "tvMock", game: "Spectrum", header: "Spectrum · Reveal", emoji: "🎚️", question: "Cook at home ↔ Order takeaway", left: "Cook at home", right: "Order takeaway", dots: [{ emoji: "🦊", left: 10 }, { emoji: "🐼", left: 52 }, { emoji: "🦄", left: 84 }, { emoji: "🐸", left: 92 }], footer: "Placed privately. Revealed together. Argued about immediately." },
   ],
   faq: [
     { q: "How many questions make a game?", a: "Ten to fifteen with discussion, fewer than you expect. The questions are quick; the arguments are the duration." },

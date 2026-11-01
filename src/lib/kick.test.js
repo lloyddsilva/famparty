@@ -79,7 +79,8 @@ const scenarios = {
     for (const id of ["p0", "p1", "p2", "p3"]) s = act(s, { type: "FINISH_SUBMIT", playerId: id, text: `answer ${id}` });
     for (let i = 0; i < 5; i++) s = act(s, { type: "NEXT" });
     assert.equal(s.phase, "finishVote");
-    s = act(s, { type: "VOTE", playerId: "p1", choice: "p0" });
+    const candP0 = s.finishCandidateIds[s.finishOrder.indexOf("p0")];
+    s = act(s, { type: "VOTE", playerId: "p1", choice: candP0 });
     s = act(s, { type: "KICK", playerId: "p0" });
     viewsOk(s);
     assert.equal(s.votes.p1, undefined); // votes for the removed author are gone

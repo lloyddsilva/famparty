@@ -58,6 +58,8 @@ config). Production: https://famparty.vercel.app
   data service: rooms and albums both live here. Locally, leave them unset
   (or blank them in `.env.development.local`) to use the in-memory stand-in.
 - Playwright refuses production targets unless `ALLOW_PROD_E2E=1`.
+- Local test servers may set `FAMPARTY_TEST_ROOM_LIMIT` to raise the
+  rooms/hour cap for suites; the code ignores it on Vercel.
 - The Neon integration and its env vars are unused since the Redis album
   store landed; Lloyd will remove the integration himself. Do not delete it.
 
