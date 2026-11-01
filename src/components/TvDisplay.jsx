@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, Podium, CHOICE_LABELS } from "./SharedViews";
@@ -13,9 +13,14 @@ export default function TvDisplay({ code }) {
   const { view, error, serverNow } = useRoom(code, { role: "display" });
   useEffect(() => {
     if (!code) return;
-    QRCode.toDataURL(`${window.location.origin}/join?code=${code}${view?.hostPending ? "&claim=1" : ""}`, { width: 260, margin: 1 })
+    QRCode.toDataURL(`${window.location.origin}/join?code=${code}`, { width: 260, margin: 1 })
       .then(setQr).catch(() => {});
-  }, [code, view?.hostPending]);
+  }, [code]);
+  useEffect(() => {
+    let lock = null;
+    navigator.wakeLock?.request("screen").then((l) => { lock = l; }).catch(() => {});
+    return () => { lock?.release?.().catch(() => {}); };
+  }, []);
   const seconds = useCountdown(view, serverNow);
   const [qr, setQr] = useState("");
   const [scale, setScale] = useState(1);
@@ -51,7 +56,7 @@ export default function TvDisplay({ code }) {
           <div className="tv-lobby-right">
             <span className="sticker">Lobby</span>
             <h2 className="tv-lobby-h">{view.players.length} of 12 are in.</h2>
-            <p className="tv-sub">{view.hostPending ? "First person to scan becomes the host." : "The host starts the show from their phone."}</p>
+            <p className="tv-sub">{view.hostPending ? "First person to join becomes the host." : "The host starts the show from their phone."}</p>
             <div className="player-grid tv-grid" style={{ justifyContent: "flex-start", margin: "14px 0 0" }}>
               {view.players.map((p) => <div key={p.id} className="player-chip"><span>{p.avatar}</span>{p.name}</div>)}
               {view.players.length === 0 && <p className="tv-sub">Waiting for players…</p>}
@@ -72,7 +77,7 @@ export default function TvDisplay({ code }) {
 
       {view.phase === "question" && view.question && (
         <div className="card center">
-          <div className="q-head"><span>Round {view.qIndex + 1} / {view.totalQuestions}</span><span className="timer">{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? 20}s`}</span><span>{view.answeredCount} / {view.players.length} answered</span></div>
+          <div className="q-head"><span>Round {view.qIndex + 1} / {view.totalQuestions}</span><span className="timer">{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? 20}s`}</span><span>{view.answeredCount} / {view.activeCount} answered</span></div>
           <div className="timer-bar"><span style={{ width: `${(((seconds ?? 20) / 20) * 100)}%` }} /></div>
           <div className="big-emoji">{view.question.emoji}</div>
           <p className="tv-question">What phrase is this?</p>
@@ -91,7 +96,7 @@ export default function TvDisplay({ code }) {
             {view.question.choices.map((c, i) => <div key={c} className={`choice ${i === view.question.answerIndex ? "correct" : "dim"}`}><b>{CHOICE_LABELS[i]}</b>{c}</div>)}
           </div>
           <div className="player-grid tv-grid">
-            {view.players.map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.lastCorrect ? `+${p.lastPoints}` : "✖"}</div>)}
+            {view.players.filter((p) => !p.waiting).map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.lastCorrect ? `+${p.lastPoints}` : "✖"}</div>)}
           </div>
         </div>
       )}

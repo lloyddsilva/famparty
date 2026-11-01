@@ -33,8 +33,7 @@ async function cleanup(r) {
 
 test("Spotlight in the UI, through to the podium", async ({ browser, baseURL }) => {
   const r = await makeRoom(browser, baseURL);
-  await r.host.getByRole("button", { name: /Change game/ }).click();
-  await r.host.locator(".choice", { hasText: "Spotlight" }).click();
+  await r.host.getByRole("button", { name: "🎤 Spotlight" }).click();
   await r.host.getByRole("button", { name: /Start .*Spotlight/ }).click();
   await r.host.getByRole("button", { name: /Skip intro/ }).click();
   for (const [i, { page }] of r.phones.entries()) {
@@ -53,7 +52,8 @@ test("Spotlight in the UI, through to the podium", async ({ browser, baseURL }) 
       if (await vote.isVisible().catch(() => false)) await vote.click();
     }
     await r.host.getByRole("button", { name: /Reveal the lie/ }).click();
-    await r.host.getByRole("button", { name: /Next player/ }).click();
+    await r.host.getByRole("button", { name: /Start story beat/ }).click();
+    await r.host.getByRole("button", { name: /End story beat/ }).click();
   }
   await expect(r.tv.getByText("Final Results")).toBeVisible({ timeout: 10000 });
   await expect(r.tv.locator(".podium-spot").first()).toBeVisible();
@@ -62,8 +62,7 @@ test("Spotlight in the UI, through to the podium", async ({ browser, baseURL }) 
 
 test("Finish It in the UI: write, present, vote, authors", async ({ browser, baseURL }) => {
   const r = await makeRoom(browser, baseURL);
-  await r.host.getByRole("button", { name: /Change game/ }).click();
-  await r.host.locator(".choice", { hasText: "Finish It" }).click();
+  await r.host.getByRole("button", { name: "✍️ Finish It" }).click();
   await r.host.getByRole("button", { name: /Start .*Finish It/ }).click();
   await r.host.getByRole("button", { name: /Skip intro/ }).click();
   const answers = ["extra snacks", "a nap", "more wifi"];
@@ -92,10 +91,9 @@ test("host picker offers exactly four games (no Remember This?)", async ({ brows
   await page.goto(`${baseURL}/host`);
   await page.getByRole("button", { name: /Create room/ }).click();
   await expect(page.getByText(/Room [A-Z0-9]{4}/)).toBeVisible();
-  // game picker is behind "Change game"; only four games exist now
-  await page.getByRole("button", { name: /Change game/ }).click();
-  for (const label of ["Emoji Decoder", "Spotlight", "Spectrum", "Finish It"]) {
-    await expect(page.locator(".choice", { hasText: label })).toBeVisible();
+  // the one game picker is the HostBar picker; only four games exist now
+  for (const label of ["🧩 Emoji", "🎤 Spotlight", "🎚️ Spectrum", "✍️ Finish It"]) {
+    await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
   }
   await expect(page.getByText(/Remember This/)).toHaveCount(0);
   await ctx.close();

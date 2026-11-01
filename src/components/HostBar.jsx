@@ -16,7 +16,7 @@ const PHASE_WORDS = {
 };
 const PICKER_GAMES = [["emoji", "🧩 Emoji"], ["spotlight", "🎤 Spotlight"], ["spectrum", "🎚️ Spectrum"], ["finishit", "✍️ Finish It"]];
 
-export default function HostBar({ view, hostAct, allowStart = false }) {
+export default function HostBar({ view, hostAct, allowStart = false, compact = false }) {
   const [manage, setManage] = useState(false);
   const [copied, setCopied] = useState("");
   if (!view || !hostAct) return null;
@@ -30,7 +30,7 @@ export default function HostBar({ view, hostAct, allowStart = false }) {
       case "question": return { label: "Reveal answer now →", type: "NEXT" };
       case "reveal": return { label: "Show scores →", type: "NEXT" };
       case "spotlight": return { label: "Reveal the lie →", type: "NEXT" };
-      case "spotlightReveal": return { label: view.familyLinked ? "Start story beat →" : "Next player →", type: "NEXT" };
+      case "spotlightReveal": return { label: "Start story beat →", type: "NEXT" };
       case "story": return { label: "End story beat →", type: "NEXT" };
       case "storySave": return { label: "Next player →", type: "NEXT" };
       case "spectrum": return { label: "Reveal the crowd →", type: "NEXT" };
@@ -54,17 +54,18 @@ export default function HostBar({ view, hostAct, allowStart = false }) {
     : "";
 
   return (
-    <div className="host-bar">
+    <div className="host-bar" style={compact ? { position: "fixed", top: "auto", left: 10, right: 10, bottom: 10, zIndex: 60, maxWidth: 560, margin: "0 auto", padding: "8px 10px" } : undefined}>
       <div className="host-bar-main">
-        <span className="host-bar-label">🎛️ {GAME_LABELS[view.game] || view.game} · {view.phase === "lobby" ? `${view.players.length} in` : PHASE_WORDS[view.phase] || ""}</span>
+        {!compact && <span className="host-bar-label">🎛️ {GAME_LABELS[view.game] || view.game} · {view.phase === "lobby" ? `${view.players.length} in` : PHASE_WORDS[view.phase] || ""}</span>}
         {primary && <button className="btn primary host-bar-btn" disabled={primary.disabled} onClick={() => hostAct({ type: primary.type })}>{primary.label}</button>}
         <button className="btn host-bar-btn" onClick={() => setManage((m) => !m)} aria-expanded={manage}>Manage</button>
       </div>
-      {(view.phase === "lobby" || view.phase === "finale") && (
+      {(view.phase === "lobby" || view.phase === "finale") && (!compact || view.phase === "finale") && (
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
-          {PICKER_GAMES.map(([g, label]) => (
-            <button key={g} className="btn" style={view.game === g ? { borderColor: "var(--yellow)", color: "var(--yellow)" } : {}} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}>{label}</button>
-          ))}
+          {PICKER_GAMES.map(([g, label]) => {
+            const belowMin = view.players.length < (GAME_MIN[g] ?? 3);
+            return <button key={g} disabled={belowMin} title={belowMin ? `Needs ${GAME_MIN[g] ?? 3}+ players` : undefined} className="btn" style={{ ...(view.game === g ? { borderColor: "var(--yellow)", color: "var(--yellow)" } : {}), ...(belowMin ? { opacity: .45 } : {}) }} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}>{label}</button>;
+          })}
         </div>
       )}
       {manage && (

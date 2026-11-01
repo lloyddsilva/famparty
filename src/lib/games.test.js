@@ -244,3 +244,45 @@ test("waiting players don't hold up the round (spectrum early finish)", () => {
   s = act(s, { type: "PLACE", playerId: "p2", pos: 30, prediction: "left" });
   assert.equal(s.phase, "spectrumReveal"); // revealed without the waiting player
 });
+
+test("spotlight without an album: story beat runs, then next turn/finale (host tap and timer)", () => {
+  const noAlbumRoom = () => {
+    let s = room("spotlight");
+    s = { ...s, familyId: null };
+    s = act(s, { type: "START" });
+    s = act(s, { type: "SUBMIT_STATEMENTS", playerId: "p0", statements: { texts: ["T1", "LIE", "T2"], lieIndex: 1, dontSave: [false, false, false] } });
+    s = act(s, { type: "SUBMIT_STATEMENTS", playerId: "p1", statements: { texts: ["A", "B", "L"], lieIndex: 2, dontSave: [false, false, false] } });
+    s = act(s, { type: "BEGIN_SPOTLIGHT" });
+    const liePos = s.spotlightOrder.indexOf(1);
+    s = act(s, { type: "VOTE", playerId: "p1", choice: liePos });
+    s = act(s, { type: "VOTE", playerId: "p2", choice: liePos });
+    s = act(s, { type: "VOTE", playerId: "p3", choice: liePos });
+    assert.equal(s.phase, "spotlightReveal");
+    s = act(s, { type: "NEXT" }); // Start story beat
+    assert.equal(s.phase, "story");
+    return s;
+  };
+  // host tap through the beat: next featured turn, no storySave
+  let s = noAlbumRoom();
+  s = act(s, { type: "NEXT" }); // End story beat
+  assert.equal(s.phase, "spotlight");
+  assert.equal(s.featuredIdx, 1);
+  // timer expiry through the beat on the last turn: finale, no storySave
+  s = noAlbumRoom();
+  s = { ...s, featuredIdx: 1, featuredOrder: ["p0", "p1"] };
+  // move to the last turn's story by expiring the beat on turn 2 setup:
+  s = advanceIfExpired(s, NOW + 999999);
+  assert.equal(s.phase, "finale");
+});
+
+test("finale pick below the minimum is refused (SELECT_GAME) and skipped (NEXT_GAME)", () => {
+  let s = room("emoji", 2);
+  s = act(s, { type: "START" });
+  s = applyAction(s, { type: "END_GAME" }, NOW).state;
+  assert.equal(s.phase, "finale");
+  const pick = applyAction(s, { type: "SELECT_GAME", game: "finishit" }, NOW);
+  assert.ok(pick.error);
+  assert.equal(pick.state.game, "emoji");
+  const next = applyAction(s, { type: "NEXT_GAME" }, NOW);
+  assert.equal(next.state.game, "spectrum"); // finishit/spotlight need 3
+});

@@ -75,7 +75,7 @@ export const GAMES_LIKE_JACKBOX = {
     { type: "pickerChart", title: "Which is right for your group?", items: [
       { if: "Gamers, one host happy to own software, long night", play: "Jackbox", note: "Deepest catalogue; check each game's rating and the family-friendly setting" },
       { if: "You want a library, not a show", play: "AirConsole", note: "Free to start; check what full access unlocks today" },
-      { if: "Family room, TV, ages mixed, nothing to install", play: "FamParty", note: "Free, 3–12 players, five games with family-friendly prompts" },
+      { if: "Family room, TV, ages mixed, nothing to install", play: "FamParty", note: "Free, 2–12 players, four games with family-friendly prompts" },
       { if: "A quiz for a class, team or big group", play: "Kahoot!", note: "You bring or pick the questions" },
       { if: "Word people, two teams, quiet arguments", play: "Codenames Online", note: "Free in the browser" },
       { if: "Drawing and chaos, everyone remote", play: "skribbl.io or Gartic Phone", note: "No shared TV needed; Gartic wants a voice call" },

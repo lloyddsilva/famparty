@@ -22,7 +22,7 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
   for (let i = 0; i < 3; i++) {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await ctx.newPage();
-    await page.goto(`${baseURL}/join?code=${code}${i === 0 ? "&claim=1" : ""}`);
+    await page.goto(`${baseURL}/join?code=${code}`);
     await page.locator('input[placeholder="e.g. Alex"]').fill(`Demo${i + 1}`);
     await page.getByRole("button", { name: /I'm in/ }).click();
     await expect(page.getByText("You're in!")).toBeVisible();
@@ -73,7 +73,9 @@ test("demo script rehearsal, timed", async ({ browser, baseURL }) => {
     if (await v.isVisible().catch(() => false)) await v.click();
   }
   await host.getByRole("button", { name: /Reveal the lie/ }).click();
-  lap("spotlight turn done");
+  await host.getByRole("button", { name: /Start story beat/ }).click();
+  await host.getByRole("button", { name: /End story beat/ }).click();
+  lap("spotlight turn + story beat done");
   await endGame();
 
   // Next: Spectrum, one round

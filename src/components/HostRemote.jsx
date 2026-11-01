@@ -23,7 +23,6 @@ export default function HostRemote() {
   const [setupName, setSetupName] = useState("");
   const [setupAvatar, setSetupAvatar] = useState(AVATARS[0]);
   const [playerCreds, setPlayerCreds] = useState(null);
-  const [changeGame, setChangeGame] = useState(false);
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
@@ -166,14 +165,6 @@ export default function HostRemote() {
                   ▶ Start {GAME_OPTIONS.find(([g]) => g === view.game)?.[1] || "Emoji Decoder"}
                 </button>
                 {!canStart && <p className="sub center">Waiting for {missing} more player{missing === 1 ? "" : "s"} — show the QR on the TV so people can scan in.</p>}
-                <button className="btn big" onClick={() => setChangeGame((c) => !c)}>Change game</button>
-                {changeGame && (
-                  <div className="choices">
-                    {GAME_OPTIONS.map(([g, label, desc]) => (
-                      <button key={g} className={`choice btn-choice ${view.game === g ? "correct" : ""}`} onClick={() => hostAct({ type: "SELECT_GAME", game: g })}><b>{label}</b><br /><small>{desc}</small></button>
-                    ))}
-                  </div>
-                )}
               </>
             )}
             {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} meId={me?.id} />}
@@ -185,7 +176,7 @@ export default function HostRemote() {
         <div className="card" style={{ marginTop: 14 }}>
           <PlayerGame view={playerView} act={playerAct} me={me} seconds={seconds} />
           <div style={{ marginTop: 14 }}>
-            {(!playerCreds || playerCreds.skipped || view.phase === "lobby") && <HostBar view={view} hostAct={hostAct} />}
+            <HostBar compact view={view} hostAct={hostAct} />
           </div>
         </div>
       )}

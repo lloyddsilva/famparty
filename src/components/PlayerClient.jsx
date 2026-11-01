@@ -10,7 +10,6 @@ import { LogoMark } from "./Logo";
 export default function PlayerClient() {
   const [code, setCode] = useState("");
   const [fromQr, setFromQr] = useState(false);
-  const [claimHost, setClaimHost] = useState(false);
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(() => AVATARS[Math.floor(Math.random() * AVATARS.length)]);
   const [creds, setCreds] = useState(null);
@@ -24,7 +23,6 @@ export default function PlayerClient() {
     const params = new URLSearchParams(window.location.search);
     const c = params.get("code");
     if (c) { setCode(c.toUpperCase()); setFromQr(true); }
-    if (params.get("claim") === "1") setClaimHost(true);
     const savedCode = localStorage.getItem("famparty:playerCode");
     const savedToken = localStorage.getItem("famparty:playerToken");
     if (savedCode && savedToken && !params.get("member") && (!c || c.toUpperCase() === savedCode)) {
@@ -85,7 +83,7 @@ export default function PlayerClient() {
     if (chosenAvatar !== avatar) setAvatar(chosenAvatar);
     const res = await fetch(`/api/rooms/${code}/join`, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, avatar: chosenAvatar, playerToken: savedToken, claimHost }),
+      body: JSON.stringify({ name, avatar: chosenAvatar, playerToken: savedToken }),
     });
     let data = await res.json();
     if (!data.ok && /avatar/i.test(data.error || "")) {
@@ -98,7 +96,7 @@ export default function PlayerClient() {
         setAvatar(free);
         const retry = await fetch(`/api/rooms/${code}/join`, {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, avatar: free, playerToken: savedToken, claimHost }),
+          body: JSON.stringify({ name, avatar: free, playerToken: savedToken }),
         });
         data = await retry.json();
       }

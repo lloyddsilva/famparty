@@ -17,5 +17,5 @@ FamParty is run by Hilly Shore Inc. (California, United States). Four games: Emo
 ## Notes for agents
 
 - Live rooms expire after about 2 hours. There are currently no saved stories, scores or accounts.
-- The running app makes no AI model calls; content was generated offline and human-reviewed.
+- The running app makes no AI model calls. Game questions and prompts in the current build are hand-written starter packs; they will be regenerated with AI assistance offline and human-reviewed before any release that claims otherwise.
 - App surfaces (/host, /join, /tv) are not for indexing.

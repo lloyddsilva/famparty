@@ -148,6 +148,12 @@ function revealSpotlight(state, now) {
   const fPts = spotlightPoints({ isLiePick: false, fooledCount: fooled }).featured;
   return toPhase({ ...state, players: players.map((p) => p.id === f.id ? { ...p, lastPoints: fPts, score: p.score + fPts } : p) }, "spotlightReveal", now);
 }
+function afterStoryBeat(state, now) {
+  if (state.familyId) return toPhase(state, "storySave", now);
+  const idx = state.featuredIdx + 1;
+  if (idx >= state.featuredOrder.length) return toPhase(state, "finale", now);
+  return startSpotlightTurn({ ...state, featuredIdx: idx }, now);
+}
 function startSpotlightTurn(state, now) {
   const f = featured(state);
   if (!f) return toPhase(state, "finale", now);
@@ -236,7 +242,7 @@ export function advanceIfExpired(state, now, ctx = {}) {
     case "howto": return beginGame({ ...state, deadline: null }, now);
     case "question": return scoreEmojiReveal(state, ctx.answers, now);
     case "spotlight": return revealSpotlight(state, now);
-    case "story": return toPhase(state, "storySave", now);
+    case "story": return afterStoryBeat(state, now);
     case "spectrum": return revealSpectrum(state, now);
     case "finishWrite": return finishToPresent(state, now);
     case "finishVote": return revealFinish(state, now);
@@ -255,6 +261,8 @@ export function applyAction(state, action, now, ctx = {}) {
   switch (action.type) {
     case "SELECT_GAME": {
       if (!["lobby", "finale"].includes(state.phase) || !GAMES.includes(action.game)) return fail("Cannot pick a game now.");
+      const min = GAME_MIN_PLAYERS[action.game] ?? 3;
+      if (state.players.length < min) return fail(`Need at least ${min} players for this game.`);
       return { state: { ...state, game: action.game, nextGamePicked: state.phase === "finale" ? true : state.nextGamePicked, updatedAt: now } };
     }
     case "START": {
@@ -270,7 +278,7 @@ export function applyAction(state, action, now, ctx = {}) {
     case "NEXT_GAME": {
       if (state.phase !== "finale") return fail("Finish this game first.");
       const order = ["emoji", "spotlight", "spectrum", "finishit"];
-      let nextGame = state.nextGamePicked ? state.game : null;
+      let nextGame = state.nextGamePicked && state.players.length >= (GAME_MIN_PLAYERS[state.game] ?? 3) ? state.game : null;
       if (!nextGame) {
         for (let step = 1; step <= order.length; step++) {
           const cand = order[(order.indexOf(state.game) + step) % order.length];
@@ -371,16 +379,8 @@ export function applyAction(state, action, now, ctx = {}) {
       if (state.phase === "question") return { state: scoreEmojiReveal(state, ctx.answers, now) };
       if (state.phase === "reveal") return { state: toPhase(state, "scores", now) };
       if (state.phase === "spotlight") return { state: revealSpotlight(state, now) };
-      if (state.phase === "spotlightReveal") {
-        if (!state.familyId) {
-          // No album: no story to save, so skip storySave and go to the next turn.
-          const idx = state.featuredIdx + 1;
-          if (idx >= state.featuredOrder.length) return { state: toPhase(state, "finale", now) };
-          return { state: startSpotlightTurn({ ...state, featuredIdx: idx }, now) };
-        }
-        return { state: toPhase(state, "story", now, STORY_MS) };
-      }
-      if (state.phase === "story") return { state: toPhase(state, "storySave", now) };
+      if (state.phase === "spotlightReveal") return { state: toPhase(state, "story", now, STORY_MS) };
+      if (state.phase === "story") return { state: afterStoryBeat(state, now) };
       if (state.phase === "storySave") {
         const idx = state.featuredIdx + 1;
         if (idx >= state.featuredOrder.length) return { state: toPhase(state, "finale", now) };
@@ -505,7 +505,7 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
     familyLinked: !!state.familyId, hostPending: !!state.hostPending, relaxed: !!state.relaxed,
     totalRounds: state.totalRounds || 5,
     suggestedNext: (() => {
-      if (state.nextGamePicked) return state.game;
+      if (state.nextGamePicked && state.players.length >= (GAME_MIN_PLAYERS[state.game] ?? 3)) return state.game;
       const order = ["emoji", "spotlight", "spectrum", "finishit"];
       for (let step = 1; step <= order.length; step++) {
         const cand = order[(order.indexOf(state.game) + step) % order.length];

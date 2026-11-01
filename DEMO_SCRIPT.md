@@ -20,18 +20,26 @@
 ### 0:45–1:30 — Emoji Decoder + Spotlight (two games, one room)
 - Host taps **Start**. A 5-second "How to play" card is on the TV; let it run once so the room hears the one-sentence rules.
 - Play two Emoji Decoder rounds: big emoji, four choices per phone, leaderboard on TV.
-- Between games, the host taps **Next: Spotlight** on the podium screen. Scores carry over; nobody rejoins.
-- Spotlight: statements were written in prep (write these off-camera if time is tight). One vote, one reveal, and the 30-second story beat — the featured player talks.
+- Host taps **Manage → End game → podium**. On the podium, the host taps **Next: Spotlight**. Scores carry over; nobody rejoins.
+- Spotlight: statements were written in prep (write these off-camera if time is tight). One vote, one reveal, then **Start story beat** — the featured player tells the real story for 30 seconds. Host taps **End story beat**, then **Manage → End game → podium** again.
 
 ### 1:30–2:15 — Spectrum and Finish It (the other two)
-- **Next: Spectrum.** Everyone places themselves, predicts the crowd, and the dots land at once. Call out the Lonely Island.
+- **Next: Spectrum.** Everyone places themselves, predicts the crowd, and the dots land at once. Call out the Lonely Island. Then **Manage → End game → podium**.
 - **Next: Finish It.** One prompt, anonymous answers dealt onto the TV one by one, voting, authors unmasked.
 - Podium. Someone points at the TV. That's the shot.
 
 ### 2:15–2:45 — Built with Muse
 *Editor on screen.*
 
-> "Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — the whole app, engine, tests and content pipeline. Content is generated once, offline, with Muse Spark and Muse Image, then a person reads every line before it ships."
+> "Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — the whole app, engine, tests and content pipeline."
+
+**ONLY IF THE CONTENT RUN IS DONE, add:**
+
+> "Content is generated once, offline, with Muse Spark and Muse Image, then a person reads every line before it ships."
+
+**Otherwise, say this instead (the honest line for the current build):**
+
+> "Built with Muse; the current game content is hand-written starter packs."
 
 - Show `scripts/generate-content.mjs`, the committed outputs, one pack, and `npm run pre-submit` passing.
 - "The running app makes **no live model calls** and holds **no model API keys**."
