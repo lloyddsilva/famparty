@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const metadata = { alternates: { canonical: "/" } };
 import { SiteHeader, SiteFooter } from "../components/SiteChrome";
 import { GAMES, OCCASIONS, POSTS } from "../lib/siteContent";
 

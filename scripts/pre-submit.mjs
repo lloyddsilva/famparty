@@ -49,6 +49,13 @@ try {
   failures.push(`Production database health check unreachable: ${e.message}`);
 }
 
+// After Lloyd's content run and review flip packs to reviewed:true, restore
+// the final content wording in /about, /privacy and /llms.txt (they currently
+// state, correctly, that packs are unreviewed hand-written starters).
+if (!unreviewed.length) {
+  console.log("NOTE: packs are marked reviewed — restore the final content wording in /about, /privacy and public/llms.txt, and confirm it matches what actually ran.");
+}
+
 if (failures.length) {
   console.error("\n✖ NOT submission-ready:");
   for (const f of failures) console.error(`  - ${f}`);

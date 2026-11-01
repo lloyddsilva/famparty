@@ -33,7 +33,7 @@ export const OCCASIONS = [
     show: ["emoji-decoder", "finish-it", "spectrum"],
     tips: ["Emoji Decoder first — zero rules, instant shouting", "Finish It while energy is high; anonymous answers mean bold answers", "Spectrum last, when people are ready to defend their strangest opinions", "The host can pause any round that turns into a debate. Let it"] },
   { slug: "teams", icon: "💻", name: "Teams & video calls", soft: "#e4dcff", sub: "Share the screen. A short opener.",
-    intro: "A short opener that isn't a corporate exercise. Share the TV screen on your call; everyone plays on their own phone, wherever they are.",
+    intro: "A short opener that isn't a corporate exercise. The idea: share the TV screen on your call and everyone plays on their own phone. Screen-sharing play is still being tested, so run one quick game first to check your setup.",
     show: ["spectrum", "emoji-decoder"],
     tips: ["Spectrum first: one slider tap is about the lowest-effort way to get a whole room participating", "Keep it to one short game — you're an opener, not the meeting", "Prompts are preference-based only; nothing about work, beliefs or identity", "Screen-sharing play is still being tested — run one quick game first to check your setup"] },
 ];

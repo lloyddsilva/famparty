@@ -18,5 +18,5 @@ FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji De
 ## Notes for agents
 
 - Live rooms expire after 2 hours. Family albums expire 60 days after last activity.
-- The running app makes no AI model calls; content was generated offline and human-reviewed.
+- The running app makes no AI model calls. Content packs are currently hand-written starters awaiting the offline Muse generation run and human review.
 - App surfaces (/host, /join, /tv) and family album pages (/f/...) are not for indexing.

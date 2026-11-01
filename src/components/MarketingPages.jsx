@@ -134,7 +134,7 @@ export function OccasionDetail({ slug }) {
 
 const FAQS = [
   ["What do my guests need?", "Just a phone with a browser. They scan the QR code on the TV, pick a name and an animal, and they're in. No app, no account, no password."],
-  ["What do I need as the host?", "Two screens you already own: a TV (or laptop, tablet, or a screen shared on a video call) for the show, and your phone to run it. You control the pace — start, pause, skip, and reveal — from your phone."],
+  ["What do I need as the host?", "Two screens you already own: a TV (or laptop or tablet) for the show, and your phone to run it. Screen-sharing the display on a video call is the idea for remote groups — we haven't finished testing that flow yet. You control the pace — start, pause, skip, and reveal — from your phone."],
   ["How many people can play?", "3 to 12 players per room. Games are built for a crowd: voting, fooling, and crowd-reading don't work with two."],
   ["Does it cost anything?", "No. There are no payments, no subscriptions, and no accounts. Create a room and play — that's the whole deal."],
   ["What is the family album?", "An optional private link for your family. It keeps a roster of your people, saves true stories from Spotlight (each person can opt out per statement), remembers scores, and unlocks Remember This?. It is kept for 60 days after your last show, then deleted. The link itself is the key — anyone who has it can get in, so share it only with family."],
@@ -161,7 +161,7 @@ export function HowItWorks() {
           <div className="lp-occasions">
             <div className="lp-occ"><span>🛋️</span><span><b>On the TV</b><small>HDMI from a laptop, a cast tab, or the TV's own browser. The display tries to keep the screen on (best effort — many TV browsers ignore it, so turning off the TV's sleep setting helps).</small></span></div>
             <div className="lp-occ"><span>💻</span><span><b>On a laptop</b><small>A kitchen-table screen works fine for small rooms. Prop it where everyone can see it.</small></span></div>
-            <div className="lp-occ"><span>📞</span><span><b>On a video call</b><small>Share the display screen; everyone else plays on their own phone, wherever they are.</small></span></div>
+            <div className="lp-occ"><span>📞</span><span><b>On a video call</b><small>Share the display screen; everyone else plays on their own phone. Still being tested — run one quick game first.</small></span></div>
           </div>
         </section>
 

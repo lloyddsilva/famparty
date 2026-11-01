@@ -46,8 +46,8 @@ export function PrivacyPage() {
       <P>While a game is live, our room store (Upstash Redis) holds the things a game needs: player names and avatars, answers and votes, typed statements and answers, and scores. Room keys expire automatically after 2 hours. Nothing from a live room is kept after that unless a player chose to save it to a family album (below).</P>
 
       <H>Family albums (kept 60 days after last activity)</H>
-      <P>If you create a family album, our database (Neon Postgres, hosted in AWS's US East region) stores the album name, member names and avatars, the statements and story lines players chose to save, game results, and hashed versions of the album's links (we cannot read the links themselves). Albums are deleted after 60 days of inactivity by a daily job. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>
-      <P>Players are told at join when a room belongs to an album, and every statement has a "don't save this" option. Saving is always a choice.</P>
+      <P>If you create a family album, our database (Neon Postgres, hosted in AWS's US East region) stores the album name, member names and avatars, saved statements and story lines, game results, and hashed versions of the album's links (we cannot read the links themselves). Albums are deleted after 60 days of inactivity by a daily job. The album owner can export everything as JSON, or delete the album at any time, from the album page.</P>
+      <P>Exactly what saves, so there are no surprises: in an album room, Spotlight <strong>true statements save by default</strong> — each statement has a "don't save this" option, and ticking it keeps that statement out. The featured player's story line only saves if they choose to type and save one. <strong>Scores from album-room games save automatically</strong> against roster members. Players are told at join when a room belongs to an album.</P>
 
       <H>The album link is the only key</H>
       <P>Anyone who has an album link can get in — that's the design, and the album page says so. We can't recover a lost link and we can't look one up for you. Share it only with your family.</P>
@@ -56,7 +56,7 @@ export function PrivacyPage() {
       <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processors: Upstash (room store) and Neon (album database).</P>
 
       <H>AI</H>
-      <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app and its content; the running app makes no model calls and holds no model API keys.</P>
+      <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs are currently hand-written starters, awaiting the offline generation run and human review described on the About page.</P>
 
       <H>Your rights</H>
       <P>Because there are no accounts, the owner link is how you prove control of an album: with it you can see, export, and permanently delete everything in it. For anything else — including requests from California or EEA/UK residents to access or delete personal data — use the contact email below and we'll respond. We don't sell or share personal data. After deletion, our providers' backups may retain data briefly before it's overwritten; we don't control those schedules.</P>
@@ -88,7 +88,7 @@ export function TermsPage() {
       <P>Family albums are deleted after 60 days of inactivity. We don't guarantee the service or your album will be available, so export anything you want to keep (the owner link can download a JSON export at any time).</P>
 
       <H>Game content</H>
-      <P>Game questions and prompts were written with AI assistance and are being human-reviewed before release. Third-party material (fonts, the word list) is credited in our third-party notices.</P>
+      <P>Game questions and prompts in the current build are hand-written starter packs. They will be regenerated with AI assistance offline and human-reviewed before any release that claims otherwise. Third-party material (fonts, the word list) is credited in our third-party notices.</P>
 
       <H>Warranties and liability</H>
       <P>The service is provided "as is" without warranties of any kind. To the extent the law allows, {OPERATOR} isn't liable for indirect or incidental damages arising from use of the service. Nothing here limits liability that can't be limited by law.</P>
@@ -111,7 +111,7 @@ export function AboutPage() {
       <P>Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — built during this hackathon (first commit: October 31, 2026). The running app makes no live model calls.</P>
 
       <H>How the content is made</H>
-      <P>Game content is generated once, offline, with Muse Spark (text) and Muse Image (title-card art), then reviewed by a person before it ships. The generation scripts, prompts and raw outputs are committed in the repository. A pack is only marked reviewed after a human has read every line.</P>
+      <P>Today's facts: the content packs in the current build are hand-written starters — the Muse Spark / Muse Image generation run has not happened yet, and no pack is marked reviewed. When the run happens, content will be generated once, offline (scripts, prompts and raw outputs committed in the repository), and a pack will only be marked reviewed after a person has read every line.</P>
     </Shell>
   );
 }

@@ -79,7 +79,7 @@ export default function HostRemote() {
                   {{ emoji: "Emoji Decoder", spotlight: "Spotlight", spectrum: "Spectrum", finishit: "Finish It", remember: "Remember This?" }[view.game] || view.game}
                   {view.phase === "question" || view.phase === "reveal" || view.phase === "scores" ? ` · Round ${view.qIndex + 1}/${view.totalQuestions}` : ""}
                 </p>
-                {(view.deadline || view.paused) && <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem" }}>{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? ""}s`}</p>}
+                {(view.deadline || view.paused) && <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem", whiteSpace: "nowrap" }}>{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? ""}s`}</p>}
               </div>
               <p style={{ margin: "8px 0 0", fontFamily: "Gelasio, Georgia, serif", fontWeight: 700, fontSize: "2rem" }}>
                 {view.phase === "question" ? `${view.answeredCount} of ${view.players.length} answered`
@@ -154,7 +154,6 @@ export default function HostRemote() {
             {view.phase === "scores" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.qIndex + 1 >= view.totalQuestions ? "Final results →" : "Next round →"}</button>}
             {view.phase === "finale" && <button className="btn primary big" onClick={() => hostAct({ type: "PLAY_AGAIN" })}>↺ Back to lobby</button>}
             {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} />}
-          <p className="sub" style={{ fontSize: ".85rem", textAlign: "center" }}>By playing you agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
 
             <div>
               <p className="sub" style={{ margin: "18px 0 4px", fontWeight: 700 }}>Players · 🙈 hide on TV · ✕ remove (every phase)</p>

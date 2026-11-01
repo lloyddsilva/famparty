@@ -11,6 +11,13 @@ export default function TvDisplay({ code }) {
   const { view, error, serverNow } = useRoom(code, { role: "display" });
   const seconds = useCountdown(view, serverNow);
   const [qr, setQr] = useState("");
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const update = () => setScale(Math.min(window.innerWidth / 1280, window.innerHeight / 720));
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   useEffect(() => {
     // Keep the TV awake where the platform allows it.
@@ -25,7 +32,8 @@ export default function TvDisplay({ code }) {
   if (!view) return <main className="shell wide"><div className="card center">Connecting to room {code}…</div></main>;
 
   return (
-    <main className="tv-shell">
+    <main className="tv-viewport">
+     <div className="tv-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
      <div className="tv-frame-big"><div className={`tv-panel ${["question", "reveal"].includes(view.phase) ? "yellow" : "white"}`}>
       {view.phase === "lobby" && (
         <div className="tv-lobby">
@@ -84,8 +92,8 @@ export default function TvDisplay({ code }) {
 
       {["spotlight", "spotlightReveal", "story", "storySave"].includes(view.phase) && view.spotlight && (
         <div className="card center">
-          <p className="eyebrow">SPOTLIGHT · {view.spotlight.turn} OF {view.spotlight.totalTurns}{view.phase === "spotlight" ? ` · ⏱ ${seconds ?? 30}s · ${view.votedCount} voted` : ""}</p>
-          <div className="me-avatar" style={{ fontSize: "4rem", display: "inline-block" }}>{view.spotlight.avatar}</div>
+          <div className="q-head"><span>Spotlight · {view.spotlight.turn} of {view.spotlight.totalTurns}</span><span className="timer">{view.paused ? "⏸ Paused" : view.phase === "spotlight" ? `⏱ ${seconds ?? 30}s` : ""}</span><span>{view.phase === "spotlight" ? `${view.votedCount} voted` : ""}</span></div>
+          <div className="me-avatar" style={{ fontSize: "2.4rem", display: "inline-block", padding: "2px 8px" }}>{view.spotlight.avatar}</div>
           <h2>{view.spotlight.name}</h2>
           {view.phase !== "story" && view.phase !== "storySave" && (
             <div className="choices">
@@ -137,17 +145,17 @@ export default function TvDisplay({ code }) {
           {view.phase === "finishWrite" && <p className="sub">{view.players.filter((p) => p.hasAnswer).length}/{view.players.length} answers in — write yours on your phone.</p>}
           {view.phase === "finishPresent" && (
             <>
-              <div className="choices">{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
+              <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
               <p className="sub">{view.finishit.candidates.length} of {view.finishit.totalCandidates} answers on screen — voting opens when they're all out…</p>
             </>
           )}
           {view.phase === "finishVote" && (
             <>
-              <div className="choices">{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
+              <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{view.finishit.candidates.map((c, i) => <div key={c.id} className="choice"><b>{i + 1}</b>{c.text}</div>)}</div>
               <p className="sub">🗳️ Voting is open on your phones — {view.votedCount} vote(s) in. No voting for your own!</p>
             </>
           )}
-          {view.phase === "finishReveal" && <div className="choices">{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
+          {view.phase === "finishReveal" && <div className={`choices ${view.finishit.candidates.length > 6 ? "tv-finish-grid" : ""}`}>{[...view.finishit.candidates].sort((a, b) => b.votes - a.votes).map((c) => { const a = view.players.find((p) => p.id === c.authorId); return <div key={c.id} className={`choice ${c.votes ? "correct" : "dim"}`}><b>{a?.avatar} {a?.name}</b> “{c.text}” · {c.votes} vote(s) · +{c.points}</div>; })}</div>}
         </div>
       )}
 
@@ -177,6 +185,7 @@ export default function TvDisplay({ code }) {
         </div>
       )}
      </div></div>
+     </div>
     </main>
   );
 }

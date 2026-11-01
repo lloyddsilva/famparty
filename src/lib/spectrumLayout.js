@@ -8,15 +8,24 @@
 // offset in px from the track, always within the panel bounds we test for.
 
 export const SPECTRUM_LANES = [
-  { row: 0, top: -42 },   // above, closest
-  { row: 1, top: 22 },    // below, closest
-  { row: 2, top: -84 },   // above, second
-  { row: 3, top: 64 },    // below, second
+  { row: 0, top: -48 },   // above, closest
+  { row: 1, top: 26 },    // below, closest
+  { row: 2, top: -96 },   // above, second (48px clear of row 0)
+  { row: 3, top: 74 },    // below, second
 ];
 const MIN_GAP = 6;
 const NUDGES = [0, -4, 4, -8, 8, -12, 12, -16, 16];
 
 export function spectrumLayout(placements) {
+  // One avatar size per reveal: if anyone needs shrinking, everyone shrinks,
+  // so size never looks like it means something.
+  const raw = spectrumLayoutRaw(placements);
+  const uniform = [...raw.values()].some((v) => v.scale < 1) ? 0.8 : 1;
+  for (const v of raw.values()) v.scale = uniform;
+  return raw;
+}
+
+function spectrumLayoutRaw(placements) {
   const sorted = [...placements].sort((a, b) => a.pos - b.pos);
   const lanes = SPECTRUM_LANES.map(() => []); // display positions per lane
   const out = new Map();
@@ -45,7 +54,7 @@ export function spectrumLayout(placements) {
       row: laneDef.row,
       top: laneDef.top,
       pos: placed.displayPos,
-      scale: placed.nudged || placed.lane > 1 ? 0.72 : 1,
+      scale: placed.nudged || placed.lane > 1 ? 0.8 : 1,
     });
   }
   return out;

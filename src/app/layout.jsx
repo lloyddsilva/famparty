@@ -7,7 +7,6 @@ export const metadata = {
   ...(SITE_URL ? { metadataBase: new URL(SITE_URL) } : {}),
   title: { default: "FamParty — Party with the fam.", template: "%s" },
   description,
-  ...(SITE_URL ? { alternates: { canonical: "/" } } : {}),
   openGraph: {
     title: "FamParty — Party with the fam.",
     description,

@@ -289,3 +289,27 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
 .tv-sub { font-size: 20px; color: var(--muted); margin: 0; line-height: 1.45; }
 .tv-panel .spectrum-line { margin: 120px 0 110px; }
 @media (max-width: 760px) { .tv-lobby { grid-template-columns: 1fr; } }
+
+/* fixed 1280x720 TV stage, scaled to any viewport (item 3) */
+.tv-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--bg); }
+.tv-stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center; padding: 12px 14px; }
+.tv-panel .eyebrow { font-size: 20px; letter-spacing: .06em; }
+.tv-finish-grid { grid-template-columns: 1fr 1fr; }
+.tv-finish-grid .choice { font-size: 20px; padding: 10px 14px; line-height: 1.3; }
+.tv-panel .leaderboard { grid-template-columns: 1fr 1fr; gap: 6px 14px; }
+.tv-panel .lb-row { padding: 6px 10px; }
+.tv-panel .spectrum-line { margin: 150px 0 130px; }
+
+/* TV density: measured phases must fit the 720 stage with max-length input */
+.tv-panel .card { padding: 6px 2px; }
+.tv-panel .card h2 { font-size: 30px; margin: 4px 0 8px; }
+.tv-panel.white .big-emoji { font-size: 64px; margin: 6px 0 0; }
+.tv-finish-grid { grid-template-columns: 1fr 1fr 1fr; }
+.tv-finish-grid .choice { line-height: 1.22; padding: 8px 12px; }
+.tv-panel .podium { margin: 10px 0; gap: 10px; }
+.tv-panel .podium-spot { padding: 10px 14px; }
+.tv-panel .podium-avatar { font-size: 2rem; }
+.tv-panel .lb-row { font-size: 20px; }
+
+.tv-panel .choices .choice { line-height: 1.3; }
+.tv-panel .card .choices { margin-top: 8px; gap: 8px; }
