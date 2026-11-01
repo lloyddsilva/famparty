@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { addPlayer } from "../../../../../lib/engine.js";
 import { casUpdate, rateLimit } from "../../../../../lib/roomStore.js";
-import { cleanCode, cleanName, isCleanName, isAvatar, newId, newToken, hashToken, parseJsonBody } from "../../../../../lib/validate.js";
+import { cleanCode, cleanName, isCleanName, isAvatar, newId, newToken, hashToken, parseJsonBody , clientIp } from "../../../../../lib/validate.js";
 import { familyByToken, getMember } from "../../../../../lib/db.js";
 import { loadRoom } from "../../../../../lib/roomStore.js";
 
@@ -30,7 +30,7 @@ export async function POST(req, { params }) {
     }
     if (!name) return bad("Enter your name.");
     if (!isAvatar(avatar)) return bad("Pick an avatar.");
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    const ip = clientIp(req);
     // Two layers (item 6): per IP+room (generous — 12 phones share one home IP),
     // plus a per-IP ceiling across ALL rooms so code guessing is throttled too.
     if (!(await rateLimit(`join:${ip}:${code}`, 40, 60))) return bad("Too many joins. Wait a few seconds.", 429);

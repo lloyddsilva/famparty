@@ -83,3 +83,14 @@ export function makeRoomCode() {
 export function parseJsonBody(req) {
   return req.json().catch(() => null);
 }
+
+/** Client IP for rate limiting. On Vercel, x-vercel-forwarded-for is set by
+ * the platform and can't be spoofed by the client, unlike x-forwarded-for. */
+export function clientIp(req) {
+  return (
+    req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    "local"
+  );
+}

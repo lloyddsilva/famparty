@@ -33,7 +33,17 @@ export const HOSTING_GUIDE = {
     P("Most party games are reading tests in costume. A trivia question read once, at speed, with a ten-second timer doesn't test knowledge — it tests who processes text fastest, and that's very often neither the seven-year-old nor the grandparent, whatever they know. Three habits neutralise it. Read every question aloud yourself, at talking pace; it costs five seconds and includes everyone. Prefer games where the choices sit still on the player's own phone instead of flashing on a shared screen. And treat any timer as adjustable: if your game has a host, the host should be able to pause it, every time, without it being a favour."),
     CALL("The narrating host trick", "Read the question and the choices aloud, every round, even when it feels redundant. Players who needed it will never tell you; they'll just start answering faster.", "tip"),
     H("Pairing players: the single biggest fix"),
+    { type: "pickerChart", title: "Pairing, in one view", items: [
+        { if: "A fast reader + a slow reader", play: "One pair, one phone", note: "Speed and judgement in the same seat" },
+        { if: "A shy player + a confident one", play: "One pair, shared calls", note: "Cover to join in, without being carried" },
+      ] },
+    H("Pairing players: the single biggest fix"),
     P("If you do one thing differently for a mixed-age night, do this: pair the youngest and oldest players as one team, sharing one phone or one pencil. Almost every seam disappears inside a pair. The child reads fast and taps fast; the grandparent knows things and argues well; neither is exposed alone. Pairing also solves the numbers problem — an odd headcount stops mattering — and it gives a new arrival an instant job: join a pair."),
+    { type: "example", title: "One pair, one turn", items: [
+        { label: "The question", text: "🍕🎉 on the TV, four choices on the shared phone." },
+        { label: "The child", text: "Reads the choices aloud, fast, and wants Pizza Party." },
+        { label: "The grandparent", text: "Points out it could be a birthday. They confer. The phone taps once — theirs, together." },
+      ] },
     P("Pairing kids with grandparents gives both something to do: one brings speed, the other brings judgement, and both are genuinely needed. Announce pairs as teams with a shared score, not as help. \"You're a team\" plays completely differently from \"you help Grandma\", and the difference is dignity, in both directions."),
     { type: "table", caption: "Who pairs well, and why", head: ["Pair", "What each brings", "Watch out for"], rows: [
       ["Child + grandparent", "Fast reading and tapping · knowledge and confidence", "Let the older player make final calls, or the child becomes staff"],
@@ -56,11 +66,14 @@ export const HOSTING_GUIDE = {
     ] },
     H("Recovering when a game drags"),
     P("Games drag for three reasons, and each has a host move. If the room is confused, the rules were explained once and lost: stop, re-teach with one practice round that doesn't count, and restart scoring from zero so nobody is punished for the confusion. If the room is slow, the game is asking for more than the moment has — writing long answers after a big meal, for instance. Shorten it openly: \"Last two rounds, winner takes it.\" Announced endings restore energy; silent endurance kills it."),
+    { type: "phoneMock", title: "The host's rescue kit", lines: ["⏸ Pause the round", "✂️ Last two rounds — winner takes it", "🔀 Same game, everyone answers at once"] },
     CALL("Change the shape, not the person", "Simultaneous answers, anonymous answers, or pairing the dominant player with the youngest — all three work without a word said about anyone."),
     P("If one player is dominating — answering first, arguing longest, winning by a distance — don't handicap them in public. Change the shape instead: move to a game where everyone answers at once, or where answers are anonymous, or pair the dominant player with the youngest player and watch the dynamic invert itself. And if a game simply isn't landing with this room, cut it. Two games that fly beat four that limp, and the host who says \"that one's not for us — next\" always looks more in control than the one who pushes through."),
     { type: "pullQuote", text: "Two games that fly beat four that limp." },
     CALL("The two-round rule", "Give any new game two full rounds before judging it. The first round teaches the mechanics; the second is the game. Cut after round two if the room still isn't in.", "tip"),
     { type: "pullQuote", text: "Watching and voting is a full role, not a consolation prize." },
+    { type: "pullQuote", text: "Watching and voting is a full role, not a consolation prize." },
+    { type: "tvMock", game: "Emoji Decoder", header: "Emoji Decoder · Round 1", emoji: "🍕🎉", question: "What phrase is this?", choices: ["Pizza Party", "Movie Night", "Birthday Cake", "Picnic Day"], footer: "One pair, one phone, one tap. The TV does the reading." },
   ],
   faq: [
     { q: "What if someone can't use a phone at all?", a: "Pair them with a neighbour as a team of two on one phone, and let them make the calls. The game doesn't change; the tapping is shared." },

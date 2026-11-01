@@ -19,10 +19,16 @@ export const SPECTRUM_GUIDE = {
   ],
   blocks: [
     P("A spectrum pair looks like the simplest thing in the world: two opposites, one line, put yourself somewhere on it. The reason rooms argue about it for ten minutes is the order of operations. Everyone commits to a position while nobody can see anyone else's — no anchoring, no drifting toward the majority — and then every position lands at once. The surprise isn't where you are. It's where everyone else is, and how wrong your guess about them was."),
-    { type: "pullQuote", text: "The surprise isn't where you are. It's where everyone else is." },
     P("This post is mostly the raw material: forty original pairs, sorted by who's in the room. Around them, the short version of what makes a pair work, a few that fall flat and why, and how to run the reveal so it turns into conversation instead of a shrug."),
+    { type: "ideaGrid", title: "What a pair needs", items: [
+        { title: "Two livable ends", text: "If one end is a joke, everyone piles onto the other." },
+        { title: "Taste, not correctness", text: "The moment one end is objectively better, it's a quiz." },
+        { title: "Evidence in the room", text: "Visible habits let people challenge placements with stories." },
+        { title: "A real middle", text: "The centre should be a position, not a hiding place." },
+      ] },
     H("What makes a pair work"),
     P("Four things. First, both ends must be genuinely livable: if one end is a joke answer, everyone piles onto the other and there's no spread to reveal. Second, the pair should be about taste, not correctness — the moment one end is objectively better, you're running a quiz. Third, it helps if people have evidence about each other: pairs about visible habits (cooking, holidays, mornings) let the room check placements against what they know, which is where the \"you're not a night owl, I've seen you\" arguments come from. Fourth, the middle must mean something. On a good pair, the centre is a real position, not a refuge."),
+    { type: "tvMock", game: "Spectrum", header: "Spectrum · Placing", emoji: "🎚️", question: "Early bird ↔ Night owl", choices: ["🦊 far left", "You: placing, unseen", "🦄 far right"], footer: "Nobody sees your dot until everybody's lands." },
     CALL("Commit before you see anyone else", "The order is the mechanic: place yourself while the room is invisible, then let every position land at once."),
     GRID("For family", [
       ["Cook at home", "Order takeaway"], ["Beach holiday", "Mountain holiday"], ["Early bird", "Night owl"],

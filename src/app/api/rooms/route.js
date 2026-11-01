@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createRoom } from "../../../lib/engine.js";
 import { createRoom as storeRoom } from "../../../lib/roomStore.js";
-import { makeRoomCode, newToken, hashToken, parseJsonBody } from "../../../lib/validate.js";
+import { makeRoomCode, newToken, hashToken, parseJsonBody , clientIp } from "../../../lib/validate.js";
 import { familyByToken, touchFamily } from "../../../lib/db.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
@@ -11,7 +11,7 @@ const noStore = { "Cache-Control": "no-store" };
 export async function POST(req) {
   try {
     // Room creation is capped per IP (item 7): rooms live 2h in Redis.
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    const ip = clientIp(req);
     if (!(await rateLimit(`create:${ip}`, 20, 3600))) {
       return NextResponse.json({ ok: false, error: "Too many rooms created. Try again later." }, { status: 429, headers: noStore });
     }

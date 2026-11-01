@@ -11,7 +11,9 @@ import { existsSync } from "node:fs";
 import { BLOG_POSTS } from "../src/lib/blogPosts.js";
 import { GAMES, OCCASIONS } from "../src/lib/siteContent.js";
 
-const VISUAL_TYPES = new Set(["gameCard", "ideaGrid", "steps", "table", "pickerChart", "tvMock", "phoneMock", "example", "callout", "pullQuote", "revealGrid"]);
+// Only visuals that teach or show something count toward the gap rule.
+// Callouts and pull quotes are emphasis, not visuals (audit fix).
+const VISUAL_TYPES = new Set(["gameCard", "ideaGrid", "steps", "table", "pickerChart", "tvMock", "phoneMock", "example", "revealGrid"]);
 const MAX_GAP = 180;
 const FIRST_VISUAL_BY = 150;
 
@@ -62,7 +64,8 @@ function walkStrings(value, where) {
 for (const post of BLOG_POSTS) {
   const at = `post "${post.slug}"`;
   if (typeof post.published !== "boolean") failures.push(`${at}: missing explicit published true/false`);
-  if (!post.published) continue;
+  const checkDrafts = process.argv.includes("--all");
+  if (!post.published && !checkDrafts) continue;
 
   const totalWords = postWords(post);
   if (totalWords < MIN_WORDS) failures.push(`${at}: ${totalWords} words, below the ${MIN_WORDS}-word minimum`);
@@ -97,7 +100,9 @@ for (const post of BLOG_POSTS) {
 
   // internal links: related posts + game page
   for (const rel of post.related || []) {
-    if (!knownRoutes.has(`/blog/${rel}`)) failures.push(`${at}: related link /blog/${rel} does not exist`);
+    const target = BLOG_POSTS.find((p) => p.slug === rel);
+    if (!target) failures.push(`${at}: related link /blog/${rel} does not exist`);
+    else if (post.published && !target.published) failures.push(`${at}: published post links to draft /blog/${rel}`);
   }
   if (post.gameSlug && !knownRoutes.has(`/games/${post.gameSlug}`)) {
     failures.push(`${at}: game link /games/${post.gameSlug} does not exist`);
@@ -109,4 +114,5 @@ if (failures.length) {
   for (const f of failures) console.error(`  - ${f}`);
   process.exit(1);
 }
-console.log(`✓ Blog gate: ${BLOG_POSTS.filter((p) => p.published).length} published posts pass.`);
+const checked = BLOG_POSTS.filter((p) => p.published || process.argv.includes("--all")).length;
+console.log(`✓ Blog gate: ${checked} posts pass${process.argv.includes("--all") ? " (including drafts)" : ""}.`);

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { advanceIfExpired, buildView, roundKeyFor } from "../../../../../lib/engine.js";
 import { casUpdate, loadRoom, loadAnswers, loadPresence, touchPresence, rateLimit } from "../../../../../lib/roomStore.js";
-import { cleanCode, hashToken } from "../../../../../lib/validate.js";
+import { cleanCode, hashToken , clientIp } from "../../../../../lib/validate.js";
 import { scheduleFamilyWrites } from "../../../../../lib/familyWrites.js";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export async function GET(req, { params }) {
     if (!state) {
       // Failed lookups are rate-limited per IP so code guessing is throttled,
       // without touching normal polling of real rooms (item 9).
-      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+      const ip = clientIp(req);
       try { if (!(await rateLimit(`lookup:${ip}`, 90, 60))) return NextResponse.json({ ok: false, error: "Too many room lookups. Wait a minute." }, { status: 429, headers: noStore }); } catch {}
       return NextResponse.json({ ok: false, error: "Room not found or expired." }, { status: 404, headers: noStore });
     }

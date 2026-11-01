@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadRoom, rateLimit } from "../../../../../lib/roomStore.js";
-import { cleanCode } from "../../../../../lib/validate.js";
+import { cleanCode , clientIp } from "../../../../../lib/validate.js";
 
 export const dynamic = "force-dynamic";
 export async function GET(req, { params }) {
@@ -9,7 +9,7 @@ export async function GET(req, { params }) {
   try {
     const room = await loadRoom(code);
     if (!room) {
-      const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+      const ip = clientIp(req);
       try { if (!(await rateLimit(`lookup:${ip}`, 90, 60))) return NextResponse.json({ ok: false, error: "Too many room lookups. Wait a minute." }, { status: 429, headers: { "Cache-Control": "no-store" } }); } catch {}
       return NextResponse.json({ ok: false, error: "Room not found or expired." }, { status: 404, headers: { "Cache-Control": "no-store" } });
     }

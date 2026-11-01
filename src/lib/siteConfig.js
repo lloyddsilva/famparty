@@ -5,9 +5,7 @@ export const OPERATOR = "Hilly Shore Inc.";
 export const OPERATOR_REGION = "California, United States";
 export const GOVERNING_LAW = "California";
 
-// TODO (Lloyd): supply the real contact address and set
-// NEXT_PUBLIC_CONTACT_EMAIL in Vercel before the legal pages are final.
-export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "support@famparty.com";
 
 // Canonical base URL for metadata/sitemap. Until famparty.com is connected,
 // this is the live deployment host. Set NEXT_PUBLIC_SITE_URL when the real

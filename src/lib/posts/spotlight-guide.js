@@ -18,10 +18,15 @@ export const SPOTLIGHT_GUIDE = {
   ],
   blocks: [
     P("Two truths and a lie lives or dies in the writing. The guessing is quick; the writing is where the featured player decides whether the room splits, argues and demands a replay — or shrugs and picks the obvious one in four seconds. This guide is about the writing and the short performance that follows it. It stays on technique: if you want a big bank of example statements to adapt, that's a separate post (Two Truths and a Lie ideas), linked at the end. The two deliberately don't repeat each other's examples."),
+    { type: "steps", title: "The game in twenty seconds", items: ["Write two truths and one lie, privately.", "Everyone else guesses the lie.", "The featured player tells one true story. That's the round."] },
     { type: "pullQuote", text: "A believable lie is not a clever lie. It's a sized lie." },
     H("What makes a lie believable"),
     P("A believable lie is not a clever lie. It's a sized lie. Voters don't judge statements one at a time; they judge the set, and they instinctively pick the statement that feels different in scale from the other two. A lie about meeting someone famous fails next to truths about breakfast, not because it's impossible, but because it's the only statement in the set carrying a headline. Match the lie's size — its drama, its rarity, its consequences — to your more ordinary truth, and it stops glowing."),
     P("The second force is specificity, and it cuts in a direction most people don't expect. Details make a statement sound invented. \"I ate the same lunch for 200 days\" sounds like a fabrication precisely because of the number; a real memory keeps its numbers, a made-up one usually rounds them off. So specific truths read as lies, and a smooth, detail-free lie reads as the kind of thing that's too boring to invent. That asymmetry is the whole game."),
+    { type: "example", title: "Feel the size difference", items: [
+        { label: "Too big", text: "\"I once met a head of state.\" — a headline looking for two whispers to hide behind." },
+        { label: "Sized right", text: "\"I queued behind a footballer at a petrol station in 2019 and said nothing.\" — same claim, shrunk to life-size with details." },
+      ] },
     CALL("The room judges the set, not the statement", "Voters compare your three against each other. Anything that stands out — in size, voice or drama — gets picked, true or not."),
     { type: "ideaGrid", title: "The four dials of a believable set", items: [
       { title: "Size", text: "All three statements should carry roughly the same amount of drama. One headline in the set is a flare." },
@@ -49,12 +54,18 @@ export const SPOTLIGHT_GUIDE = {
     P("That last step is the one people skip, and it's the one the room remembers. The vote creates thirty seconds of attention aimed at you. Having the first sentence of the true story ready — \"So, the pyjamas. It was February and the door had swollen shut…\" — turns a win into the moment the game exists for."),
     H("Acting as the featured player"),
     P("During the vote, your job is to give nothing away unevenly. Answer questions about all three statements with the same energy and roughly the same amount of detail. The classic tell is defending the lie harder than the truths, or laughing only at questions about one statement. If anything, tell the true stories with a slight smirk, as if they were the suspicious ones — voters read confidence backwards more often than you'd think."),
+    { type: "phoneMock", title: "During the vote, your phone just waits", lines: ["Your three statements are on the TV", "Keep the same face for all of them", "Your story comes after the reveal"] },
     CALL("Don't perform innocence", "Saying \"would I lie to you?\" or over-explaining a truth marks it. Calm, equal treatment of all three is the whole act. The room is reading differences, not guilt.", "tip"),
     P("When the lie is revealed, the featured player scores for everyone fooled — and then the game hands them the microphone. In FamParty's Spotlight that beat is thirty seconds on the TV with no typing allowed, because you should be talking. Use it on one truth, told properly: where you were, what happened, the detail that proves it. The optional one-line save afterwards is for the family album; the story itself belongs to the room, out loud."),
     { type: "tvMock", game: "Spotlight", header: "Spotlight · Your turn", emoji: "🎤", question: "Which one is the lie?", choices: ["Same lunch, 200 days", "I have a brother", "Locked out in pyjamas"], footer: "Votes are private on phones. The story comes after the reveal." },
     { type: "phoneMock", title: "Writing yours (Spotlight prep)", lines: ["Statement 1 — a truth, with a detail", "Statement 2 — a truth, with a detail", "Statement 3 — mark which one is the lie", "Anyone can switch to just watching instead"] },
     H("Hosting notes"),
     P("If you're hosting, protect the writing time. Two minutes of quiet while people write is what separates sets worth voting on from whatever was typed while laughing. Read the three statements off the TV yourself if the featured player would rather not; the statements matter more than who voices them. And if a set collapses — everyone spots it instantly — don't apologise for the player. Reveal fast, enjoy the story anyway, and move on. The story was always the prize."),
+    { type: "ideaGrid", title: "The host's three moves", items: [
+        { title: "Protect the writing", text: "Two quiet minutes while people write. Sets written in noise are guessable in seconds." },
+        { title: "Read it yourself", text: "If the featured player would rather not perform, the host reads the statements off the TV." },
+        { title: "Reveal fast on a collapse", text: "Everyone spotted it? Reveal, take the story, move on. Never apologise for a player." },
+      ] },
     { type: "pullQuote", text: "Load the truths with detail, keep the lie plain, and let the room's instincts work against them." },
   ],
   faq: [
