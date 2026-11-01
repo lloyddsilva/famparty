@@ -55,7 +55,7 @@ Fast cuts, 3–4 seconds each. The montage room has **6+ players**: the 3 phones
 - Show `scripts/generate-content.mjs` and `content/outputs/` (prompts and raw outputs are committed).
 - Show one pack in `src/lib/packs.js` with `reviewed: true`, then `npm run pre-submit` **passing** on screen.
 
-> "…and nothing ships until a human reviews it. The running app makes **no live model calls** and holds **no model API keys** — it runs on database and Redis credentials, and everything it serves is committed files and your family's input."
+> "…and the packs in this build were reviewed by a person before they shipped — that's me, reading every line. The running app makes **no live model calls** and holds **no model API keys** — it runs on database and Redis credentials, and the games serve committed content plus whatever your room types in."
 
 *Final frame: landing page.*
 

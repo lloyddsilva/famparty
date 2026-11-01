@@ -266,22 +266,26 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
 .tv-panel .card { background: transparent; border: none; box-shadow: none; margin-top: 0; }
 .tv-panel .choice { background: #fff; }
 
-/* TV 4e sizing: 20px floor, 36px question, 120px emoji, fits 1280x720 */
+/* TV 4e sizing (px, measured): 20px floor, 36px question, 120px emoji.
+   Stage uses the full 720p height; 12 chips must fit with no scrolling. */
 .tv-shell { padding: 12px 14px 16px; }
-.tv-panel { font-size: 20px; padding: 20px 26px; }
+.tv-panel { font-size: 20px; padding: 22px 28px; min-height: 636px; }
 .tv-panel.yellow { background: var(--yellow); }
-.tv-panel .q-head { font-size: 1.05rem; }
-.tv-panel .player-chip { font-size: 1.1rem; padding: 6px 14px; }
-.tv-panel .player-grid { margin: 10px 0 0; gap: 8px; }
-.tv-question { font-family: Gelasio, Georgia, serif; font-weight: 700; font-size: 36px; margin: 2px 0 10px; color: var(--ink); }
-.tv-panel .big-emoji { font-size: 104px; margin: 4px 0 0; line-height: 1.1; }
-.tv-panel .choices { margin-top: 10px; gap: 8px; }
-.tv-panel .choice { padding: 12px 16px; }
-.tv-lobby { display: grid; grid-template-columns: 330px 1fr; gap: 30px; align-items: center; text-align: left; }
+.tv-panel .q-head { font-size: 20px; }
+.tv-panel .player-chip { font-size: 20px; padding: 8px 16px; }
+.tv-panel .player-chip span { font-size: 28px; }
+.tv-panel .player-grid { margin: 12px 0 0; gap: 8px; }
+.tv-question { font-family: Gelasio, Georgia, serif; font-weight: 700; font-size: 36px; margin: 4px 0 12px; color: var(--ink); }
+.tv-panel .big-emoji { font-size: 120px; margin: 2px 0 0; line-height: 1.1; }
+.tv-panel .choices { margin-top: 12px; gap: 10px; }
+.tv-panel .choice { padding: 14px 18px; font-size: 24px; }
+.tv-panel h2.tv-lobby-h { font-size: 50px; margin: 14px 0 8px; }
+.tv-lobby { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: center; text-align: left; min-height: 560px; }
 .tv-lobby-left { text-align: center; }
-.tv-lobby-left .qr { width: 205px; height: 205px; margin: 0 auto 6px; }
-.tv-lobby-left .room-code { font-size: 58px; }
+.tv-lobby-left .qr { width: 230px; height: 230px; margin: 0 auto 8px; }
+.tv-lobby-left .room-code { font-size: 64px; }
+.tv-lobby .sticker { font-size: 20px; padding: 9px 18px; }
 .tv-join-line { font-size: 20px; font-weight: 600; color: var(--muted); margin: 4px 0 0; }
-.tv-lobby-h { font-size: 46px; margin: 12px 0 6px; }
 .tv-sub { font-size: 20px; color: var(--muted); margin: 0; line-height: 1.45; }
+.tv-panel .spectrum-line { margin: 120px 0 110px; }
 @media (max-width: 760px) { .tv-lobby { grid-template-columns: 1fr; } }

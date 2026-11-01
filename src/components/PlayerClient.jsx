@@ -48,10 +48,11 @@ export default function PlayerClient() {
   }, [code]);
 
   function refreshTaken(forCode) {
-    fetch(`/api/rooms/${forCode}/state?role=display`).then((r) => r.json()).then((d) => {
-      if (d.view) {
-        setTakenAvatars(d.view.players.map((p) => p.avatar));
-        setRoomFull(d.view.players.length >= 12);
+    // Peek returns the RAW taken avatars (the display view masks hidden players).
+    fetch(`/api/rooms/${forCode}/peek`).then((r) => r.json()).then((d) => {
+      if (d.ok) {
+        setTakenAvatars(d.takenAvatars || []);
+        setRoomFull((d.playerCount || 0) >= 12);
       }
     }).catch(() => {});
   }
@@ -111,10 +112,12 @@ export default function PlayerClient() {
               <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} disabled={takenAvatars.includes(a)} title={takenAvatars.includes(a) ? "Taken in this room" : undefined} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>)}</div>
             </>
           )}
-          {familyLinkedRoom && <p className="notice">💾 This room belongs to a family album. Saved statements are kept for 60 days. Spotlight true statements and scores may save — you can say "don't save this" on any statement.</p>}
+          {familyLinkedRoom && <p className="notice">💾 This room belongs to a family album. Saved statements are kept for 60 days. Spotlight true statements and scores may save — you can say "don't save this" on any statement. <a href="/privacy" target="_blank" rel="noreferrer">Privacy</a></p>}
           {roomFull && <p className="error">This room is full (12 players). Ask the host to start a new room, or wait for the next show.</p>}
           {error && <p className="error">{error}</p>}
           <button className="btn primary big" disabled={busy || roomFull}>{busy ? "Joining…" : roomFull ? "Room full" : "I'm in"}</button>
+          <p className="sub" style={{ fontSize: ".85rem", textAlign: "center" }}>By playing you agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
+
         </form>
       </main>
     );

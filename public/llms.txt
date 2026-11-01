@@ -1,0 +1,22 @@
+# FamParty
+
+> A party game show for one big screen and everyone's phones. A host runs the show from their phone, a TV (or shared screen) only displays, and 3–12 players join with a QR code or 4-letter room code. No accounts, no app installs, no payments.
+
+FamParty is run by Hilly Shore Inc. (California, United States). Games: Emoji Decoder (guess the phrase from emojis), Spotlight (two truths and a lie with a story beat), Spectrum (place yourself between opposites and predict the crowd), Finish It (anonymous sentence completions, voted), and Remember This? (guess who wrote a saved true statement). An optional family album link keeps a roster, saved true statements and scores for 60 days after last activity, then deletes them.
+
+## Key pages
+
+- [Home](/) — what FamParty is and how a show starts
+- [Games](/games) — the five games and how a show flows
+- [How it works](/how-it-works) — TV, host phone and player phones; safety; FAQ
+- [Family album](/family) — the roster, saved stories and 60-day retention
+- [Blog](/blog) — ideas and hosting tips
+- [Privacy](/privacy) — what is stored and for how long
+- [Terms](/terms) — short, plain terms of service
+- [About](/about) — who runs FamParty and how it was built
+
+## Notes for agents
+
+- Live rooms expire after 2 hours. Family albums expire 60 days after last activity.
+- The running app makes no AI model calls; content was generated offline and human-reviewed.
+- App surfaces (/host, /join, /tv) and family album pages (/f/...) are not for indexing.

@@ -54,6 +54,7 @@ async function initImpl() {
     // Idempotency migrations run AFTER every CREATE TABLE (a fresh database
     // has no game_results to ALTER yet).
     try { await query(`ALTER TABLE saved_statements ADD COLUMN dedupe_key TEXT`); } catch {}
+    try { await query(`ALTER TABLE saved_statements ADD COLUMN room_code TEXT`); } catch {}
     try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS saved_statements_dedupe ON saved_statements(dedupe_key)`); } catch {}
     try { await query(`ALTER TABLE game_results ADD COLUMN dedupe_key TEXT`); } catch {}
     try { await query(`CREATE UNIQUE INDEX IF NOT EXISTS game_results_dedupe ON game_results(dedupe_key)`); } catch {}
@@ -137,14 +138,14 @@ export async function getMember(familyId, memberId) {
   return rows[0] || null;
 }
 
-export async function saveStatements(familyId, memberId, texts, kind = "truth", dedupeScope = "") {
+export async function saveStatements(familyId, memberId, texts, kind = "truth", roomCode = "") {
   if (!familyId || !memberId || !texts?.length) return;
   await touchFamily(familyId);
   const { query } = await getImpl();
   for (const text of texts) {
-    const dedupe = `${familyId}:${memberId}:${kind}:${dedupeScope}:${text}`;
-    await query(`INSERT INTO saved_statements (id, family_id, member_id, text, kind, created_at, dedupe_key) VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (dedupe_key) DO NOTHING`,
-      [id("st"), familyId, memberId, text, kind, Date.now(), dedupe]);
+    const dedupe = `${familyId}:${memberId}:${kind}:${roomCode}:${text}`;
+    await query(`INSERT INTO saved_statements (id, family_id, member_id, text, kind, created_at, dedupe_key, room_code) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (dedupe_key) DO NOTHING`,
+      [id("st"), familyId, memberId, text, kind, Date.now(), dedupe, roomCode]);
   }
 }
 
@@ -157,7 +158,7 @@ export async function listStatements(familyId, limit = 100) {
 export async function trueStatementsForGame(familyId, limit = 10) {
   const rows = await listStatements(familyId, 200);
   return rows.filter((r) => r.kind === "truth")
-    .map((r) => ({ id: r.id, text: r.text, writerMemberId: r.member_id, writerName: r.writer_name }));
+    .map((r) => ({ id: r.id, text: r.text, writerMemberId: r.member_id, writerName: r.writer_name, roomCode: r.room_code || null }));
 }
 
 export async function saveGameResults(familyId, results) {

@@ -71,7 +71,11 @@ export async function POST(req, { params }) {
         if (!state0.familyId) return bad("Remember This? needs a family-linked room with saved statements.");
         // Only statements whose writer is in this room (item 7): otherwise there is no right answer.
         const memberIds = new Set(state0.players.map((p) => p.memberId).filter(Boolean));
-        action.items = (await trueStatementsForGame(state0.familyId, 30)).filter((i) => memberIds.has(i.writerMemberId)).slice(0, 10);
+        const pool = (await trueStatementsForGame(state0.familyId, 50))
+          .filter((i) => memberIds.has(i.writerMemberId))
+          .filter((i) => i.roomCode !== state0.code); // never tonight's own statements
+        for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+        action.items = pool.slice(0, 10);
         if (!action.items.length) return bad("No saved true statements from players in this room yet. Play Spotlight with this group first.");
       }
     } else if (PLAYER_ACTIONS.has(body.type)) {

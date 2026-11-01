@@ -54,6 +54,8 @@ export default function HostRemote() {
           <p className="sub">You run the show from this phone. The TV only displays — open the TV link shown after you create the room.</p>
           {error && <p className="error">{error}</p>}
           <button className="btn primary big" disabled={busy} onClick={create}>{busy ? "Creating…" : "Create room"}</button>
+          <p className="sub" style={{ fontSize: ".85rem", textAlign: "center" }}>By playing you agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
+
         </div>
       </main>
     );
@@ -77,7 +79,7 @@ export default function HostRemote() {
                   {{ emoji: "Emoji Decoder", spotlight: "Spotlight", spectrum: "Spectrum", finishit: "Finish It", remember: "Remember This?" }[view.game] || view.game}
                   {view.phase === "question" || view.phase === "reveal" || view.phase === "scores" ? ` · Round ${view.qIndex + 1}/${view.totalQuestions}` : ""}
                 </p>
-                {view.deadline && <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem" }}>{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? ""}s`}</p>}
+                {(view.deadline || view.paused) && <p style={{ margin: 0, fontWeight: 700, fontSize: "1.2rem" }}>{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? ""}s`}</p>}
               </div>
               <p style={{ margin: "8px 0 0", fontFamily: "Gelasio, Georgia, serif", fontWeight: 700, fontSize: "2rem" }}>
                 {view.phase === "question" ? `${view.answeredCount} of ${view.players.length} answered`
@@ -144,7 +146,6 @@ export default function HostRemote() {
             {view.phase === "finishVote" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Close voting →</button>}
             {view.phase === "question" && (
               <>
-                <p className="sub center">{view.answeredCount}/{view.players.length} answered{view.paused ? " · ⏸ paused" : ""}</p>
                 <button className="btn big" onClick={() => hostAct({ type: view.paused ? "RESUME" : "PAUSE" })}>{view.paused ? "▶ Resume" : "⏸ Pause"}</button>
                 <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>Reveal answer now →</button>
               </>
@@ -153,6 +154,8 @@ export default function HostRemote() {
             {view.phase === "scores" && <button className="btn primary big" onClick={() => hostAct({ type: "NEXT" })}>{view.qIndex + 1 >= view.totalQuestions ? "Final results →" : "Next round →"}</button>}
             {view.phase === "finale" && <button className="btn primary big" onClick={() => hostAct({ type: "PLAY_AGAIN" })}>↺ Back to lobby</button>}
             {(view.phase === "scores" || view.phase === "finale") && <Leaderboard players={view.players} />}
+          <p className="sub" style={{ fontSize: ".85rem", textAlign: "center" }}>By playing you agree to the <a href="/terms" target="_blank" rel="noreferrer">Terms</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
+
             <div>
               <p className="sub" style={{ margin: "18px 0 4px", fontWeight: 700 }}>Players · 🙈 hide on TV · ✕ remove (every phase)</p>
               <div className="player-grid" style={{ justifyContent: "flex-start", margin: "8px 0" }}>

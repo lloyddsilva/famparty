@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, Podium, CHOICE_LABELS } from "./SharedViews";
-import { spectrumRows } from "../lib/spectrumLayout";
+import { spectrumLayout } from "../lib/spectrumLayout";
 
 export default function TvDisplay({ code }) {
   const joinHost = typeof window !== "undefined" ? `${window.location.host}/join` : "this site /join";
@@ -55,7 +55,7 @@ export default function TvDisplay({ code }) {
           <div className="choices host-choices">
             {view.question.choices.map((c, i) => <div key={c} className="choice"><b>{CHOICE_LABELS[i]}</b>{c}</div>)}
           </div>
-          <div className="player-grid tv-grid">{view.players.map((p) => <div key={p.id} className="player-chip">{p.avatar} {p.name} {p.answered ? "✅" : "…"}</div>)}</div>
+          <div className="player-grid tv-grid">{view.players.map((p) => <div key={p.id} className="player-chip" style={p.answered ? {} : { opacity: .5 }}>{p.avatar} {p.name} {p.answered ? "✅" : ""}</div>)}</div>
         </div>
       )}
 
@@ -110,10 +110,11 @@ export default function TvDisplay({ code }) {
             <span className="spectrum-end">{view.spectrum.left}</span>
             <div className="spectrum-line">
               {view.phase === "spectrumReveal" && (() => {
-                const rows = spectrumRows(view.spectrum.placements);
+                const layout = spectrumLayout(view.spectrum.placements);
                 return view.spectrum.placements.map((pl) => {
                   const p = view.players.find((x) => x.id === pl.id);
-                  return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%`, top: -38 - (rows.get(pl.id) || 0) * 40 }} title={p?.name}>{p?.avatar}</span>;
+                  const cell = layout.get(pl.id);
+                  return <span key={pl.id} className="spectrum-dot" style={{ left: `${cell.pos}%`, top: cell.top, fontSize: `${42 * cell.scale}px` }} title={p?.name}>{p?.avatar}</span>;
                 });
               })()}
               {view.phase === "spectrumReveal" && <span className="spectrum-median" style={{ left: `${view.spectrum.median}%` }} />}

@@ -15,10 +15,12 @@ Modifications: FamParty adds a small number of variant terms and removes
 
 The typefaces served from `public/fonts/` (variable woff2) are:
 
-- **Gelasio** and **Outfit**, from Google Fonts, licensed under the
-  **SIL Open Font License, Version 1.1** (OFL). Copyright their respective
-  authors (Gelasio: Eben Sorkin; Outfit: Outfit Project / Smartsheet Inc).
-  Full licence text: https://openfontlicense.org (also available at
-  https://github.com/google/fonts/blob/main/ofl/gelasio/OFL.txt and
-  https://github.com/google/fonts/blob/main/ofl/outfit/OFL.txt).
-  The fonts are self-hosted; no requests are made to Google at runtime.
+- **Gelasio** — Copyright 2022 The Gelasio Project Authors
+  (https://github.com/SorkinType/Gelasio)
+- **Outfit** — Copyright 2021 The Outfit Project Authors
+  (https://github.com/Outfitio/Outfit-Fonts)
+
+Both are licensed under the **SIL Open Font License, Version 1.1**. The full
+licence texts are included in this repo at `public/fonts/OFL-Gelasio.txt` and
+`public/fonts/OFL-Outfit.txt`. The fonts are self-hosted; no requests are
+made to Google at runtime.

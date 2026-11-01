@@ -140,7 +140,7 @@ const FAQS = [
   ["What is the family album?", "An optional private link for your family. It keeps a roster of your people, saves true stories from Spotlight (each person can opt out per statement), remembers scores, and unlocks Remember This?. It is kept for 60 days after your last show, then deleted. The link itself is the key — anyone who has it can get in, so share it only with family."],
   ["Is it suitable for kids and grandparents?", "Yes — that's who it's designed for. Content is written to be family-friendly, answers are big tap targets, the host can pause any timer, and nobody has to perform: every game has a low-pressure way to join in, including just watching and voting."],
   ["What if someone writes something rude?", "Nobody pre-reads answers — the game would stall. Instead, the host can hide any player's name or words from the TV at any moment, or remove them from the room entirely. Names and written answers also pass a word filter, but filters can miss things; the host's hide button is the real safety net."],
-  ["Does it work on a video call?", "Share the TV screen on Zoom, Meet, or Teams and everyone plays on their own phone wherever they are. It runs in a browser tab with nothing to install."],
+  ["Does it work on a video call?", "The idea: share the TV screen on Zoom, Meet, or Teams and everyone plays on their own phone wherever they are, in a browser tab with nothing to install. We haven't finished testing this flow yet, so try it with a quick game before the real night."],
 ];
 
 export function HowItWorks() {
@@ -159,7 +159,7 @@ export function HowItWorks() {
         <section className="lp-section">
           <h2 className="lp-h2" style={{ fontSize: "2.2rem" }}>Three ways to gather</h2>
           <div className="lp-occasions">
-            <div className="lp-occ"><span>🛋️</span><span><b>On the TV</b><small>HDMI from a laptop, a cast tab, or the TV's own browser. The display link keeps itself awake.</small></span></div>
+            <div className="lp-occ"><span>🛋️</span><span><b>On the TV</b><small>HDMI from a laptop, a cast tab, or the TV's own browser. The display tries to keep the screen on (best effort — many TV browsers ignore it, so turning off the TV's sleep setting helps).</small></span></div>
             <div className="lp-occ"><span>💻</span><span><b>On a laptop</b><small>A kitchen-table screen works fine for small rooms. Prop it where everyone can see it.</small></span></div>
             <div className="lp-occ"><span>📞</span><span><b>On a video call</b><small>Share the display screen; everyone else plays on their own phone, wherever they are.</small></span></div>
           </div>

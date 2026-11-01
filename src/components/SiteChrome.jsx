@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GAMES, OCCASIONS } from "../lib/siteContent";
+import { CONTACT_EMAIL, OPERATOR } from "../lib/siteConfig";
 
 function Dropdown({ label, panelClass, children, width }) {
   const [open, setOpen] = useState(false);
@@ -93,9 +94,12 @@ export function SiteFooter() {
           <Link href="/family">Family album</Link>
           <Link href="/how-it-works">How it works</Link>
           <Link href="/blog">Blog</Link>
-          <Link href="/tv">TV display</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/about">About</Link>
+          {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
         </nav>
-        <span>No accounts · No payments · Family-friendly</span>
+        <span>© {new Date().getFullYear()} {OPERATOR} · No accounts · No payments · Family-friendly</span>
       </div>
     </footer>
   );

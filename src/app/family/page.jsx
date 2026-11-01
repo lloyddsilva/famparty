@@ -39,11 +39,11 @@ export default function Page() {
               <label>Family name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 40))} placeholder="e.g. The River Family" required /></label>
               {error && <p className="error">{error}</p>}
               <button className="btn primary big">Create family album</button>
-              <p className="sub" style={{ fontSize: ".9rem" }}>We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key.</p>
+              <p className="sub" style={{ fontSize: ".9rem" }}>We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key. See the <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
             </form>
           ) : (
             <>
-              <p className="sub"><strong>Save these now — the owner link is shown only once here.</strong> We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key.</p>
+              <p className="sub"><strong>Save these now — the owner link is shown only once here.</strong> We keep your album for 60 days after your last show, then delete it. There are no accounts; the link is the only key. See the <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.</p>
               <label>Member link (play + view)<input readOnly value={`${window.location.origin}/f/${links.memberToken}`} onFocus={(e) => e.target.select()} /></label>
               <label>Owner link (export + delete)<input readOnly value={`${window.location.origin}/f/${links.ownerToken}`} onFocus={(e) => e.target.select()} /></label>
               <a className="btn primary big" href={`/f/${links.memberToken}`}>Open your album →</a>
