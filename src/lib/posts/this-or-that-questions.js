@@ -44,7 +44,7 @@ export const THIS_OR_THAT_QUESTIONS = {
       "Reveal all positions at once. Never go person by person; the pattern is the point.",
       "Interview the edges: the person furthest out, and anyone the room predicted wrong. Then move on while it's still warm.",
     ] },
-    P("That group version is what a spectrum game is. In FamParty's Spectrum, the slider and the majority prediction are built in, the avatars land on the TV at once, and the reveal names a Lonely Island (furthest from the crowd), a Mind Reader (best prediction) and a Dead Center. On paper, the same thing works with pointing and a confident host. Either way, the questions above are the fuel: pick the set that matches your room, and stop while a question is still being argued about."),
+    P("That group version is what a spectrum game is. In FamParty's Spectrum, the slider and the majority prediction are built in, the avatars land on the TV at once, and the reveal names a Lonely Island (furthest from the crowd), a Mind Reader (best prediction) and a Dead Center. On paper, the same thing works with pointing and a confident host. On paper, the questions above are the fuel: pick the set that matches your room. (FamParty's Spectrum plays the same shape with its own built-in pairs.) Either way, stop while a question is still being argued about."),
     { type: "example", title: "One round, played out", items: [
       { label: "Question", text: "\"Cook at home or order takeaway?\" — placed privately, no talking." },
       { label: "Prediction", text: "Most of the room expects takeaway to win. It doesn't." },

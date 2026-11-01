@@ -497,7 +497,17 @@ export function buildView(state, { answers = {}, presence = {}, viewer = {} } = 
         }
       : null,
     myAnswer: viewer.playerId ? (typeof answers[viewer.playerId] === "object" && answers[viewer.playerId] !== null ? answers[viewer.playerId].choice : (answers[viewer.playerId] ?? null)) : null,
-    myVote: viewer.playerId ? (state.votes[viewer.playerId] ?? null) : null,
+    // In Finish It, votes are stored against writer ids server-side. Before
+    // the reveal, the client must only ever see the opaque candidate id.
+    myVote: viewer.playerId ? (() => {
+      const raw = state.votes[viewer.playerId];
+      if (raw === undefined) return null;
+      if (state.game === "finishit" && ["finishPresent", "finishVote"].includes(state.phase)) {
+        const idx = state.finishOrder.indexOf(raw);
+        return idx >= 0 ? (state.finishCandidateIds?.[idx] ?? null) : null;
+      }
+      return raw;
+    })() : null,
     myPlacement: rawMe?.spectrumPos ?? null,
     iAmFeatured: f?.id === viewer.playerId,
     me,

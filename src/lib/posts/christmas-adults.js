@@ -49,7 +49,7 @@ export const CHRISTMAS_ADULTS = {
     GC("8. Emoji Decoder", "3–12 players", "10 min", "A TV or laptop, a phone each",
       "Emoji clues on the big screen — 🎄🔔 — four choices on every phone, speed scoring, leaderboard on TV. Everyone answers at once; the only person exposed is whoever's winning."),
     GC("9. Finish It: Christmas Edition", "4–12 players", "12 min", "A phone each, or paper and a bowl",
-      "Everyone privately finishes the same sentence; answers are read out anonymously and voted. Sample round below. Anonymity is the entire technology here: it is why the answers are actually funny."),
+      "Play it yourself: everyone privately finishes the same Christmas sentence (samples below) on paper; answers are read out anonymously and voted. FamParty's Finish It runs this shape with its own general prompts. Anonymity is the entire technology here: it is why the answers are actually funny."),
     GC("10. Charades, Christmas Films Only", "6–20 in two teams", "15 min", "Slips with film titles, a timer",
       "Narrowing charades to Christmas films makes it fairer and faster — the room shares the same small canon. Sixty seconds a turn, teams alternate."),
     GC("11. The Carol Relay", "6–16 in two teams", "10 min", "Nothing",

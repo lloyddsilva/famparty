@@ -205,3 +205,19 @@ test("finishit: no player id appears in candidates before the reveal; mine flag 
   const others = buildView(s, { viewer: { role: "player", playerId: "p1" } });
   assert.notEqual(others.finishit.candidates.find((c) => c.mine)?.id, own.id);
 });
+
+test("finishit: after voting, myVote and finishit fields contain no player ids before reveal", () => {
+  let s = room("finishit");
+  s = act(s, { type: "START" });
+  for (const id of ["p0", "p1", "p2", "p3"]) s = act(s, { type: "FINISH_SUBMIT", playerId: id, text: `answer ${id}` });
+  for (let i = 0; i < 5; i++) s = act(s, { type: "NEXT" });
+  assert.equal(s.phase, "finishVote");
+  const cand = (state, writer) => state.finishCandidateIds[state.finishOrder.indexOf(writer)];
+  s = act(s, { type: "VOTE", playerId: "p0", choice: cand(s, "p1") });
+  const view = buildView(s, { viewer: { role: "player", playerId: "p0" } });
+  const surface = JSON.stringify(view.finishit) + JSON.stringify(view.myVote);
+  for (const pid of ["p0", "p1", "p2", "p3"]) {
+    assert.ok(!surface.includes(`"${pid}"`), `player id ${pid} leaked into finishit/myVote`);
+  }
+  assert.ok(String(view.myVote).startsWith("cand-"), `myVote is a candidate id, got ${view.myVote}`);
+});

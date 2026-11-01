@@ -67,7 +67,7 @@ export const CHRISTMAS_FAMILY = {
     GC("17. Candle Categories", "3–12 players", "5 min", "Nothing",
       "Categories at half volume: name a Christmas film, a thing in a stocking, a winter animal. Three seconds each, spoken softly. It's Categories (game 7) with the energy turned down for the room and the hour."),
     GC("18. Spotlight: This Year's Story", "4–12 players", "12 min", "A phone each (or just voices)",
-      "The storytelling version: each person gets thirty seconds for the best small story of their year — no competition, no scoring unless the room wants it. In FamParty's Spotlight the story beat is built in, after the guessing round."),
+      "The storytelling version: each person gets thirty seconds for the best small story of their year — no competition, no scoring unless the room wants it. FamParty's Spotlight has this story beat built in, after its guessing round."),
 
     H("Christmas Day: the loud ones (games 19–27)"),
     P("Daytime, fed, and restless is a different room. These games move faster, split into teams, and tolerate noise. Keep them short anyway: two loud games back to back is a peak; four is an endurance event."),
@@ -86,9 +86,9 @@ export const CHRISTMAS_FAMILY = {
     GC("25. Finish the Carol", "4–16 players", "10 min", "Nothing",
       "One person sings a carol and stops mid-line; the next player must complete the line and start another carol. Stumble and you're out for the round. Grandparents will carry this; let them."),
     GC("26. Spectrum: Christmas Edition", "3–12 players", "10 min", "A phone each, or hands along an imaginary line",
-      "Place yourself between two opposites — \"Christmas starts in November ↔ Christmas starts on the 24th\" — then see where everyone lands at once. On paper it's pointing along the table; on the TV (FamParty's Spectrum) the avatars land together and the outlier explains themselves."),
+      "Play it yourself: place yourself between two opposites — \"Christmas starts in November ↔ Christmas starts on the 24th\" — by pointing along the table, then reveal together and let the outlier explain themselves. (FamParty's Spectrum does this with its own general pairs; this Christmas pair is the paper version.)"),
     GC("27. Emoji Decoder: Christmas Round", "3–12 players", "10 min", "A TV or laptop, a phone each",
-      "Emoji clues for festive phrases on the big screen — 🎅🦌 is not the hard one — with four choices on every phone and speed scoring. It's the loudest seated game here, and toddlers can play inside a pair."),
+      "Play it yourself with festive clues you write (the Christmas emoji post on this site has forty): read them aloud or show them on a screen, four choices called out, fastest hand scores. FamParty's Emoji Decoder runs the same shape with its own general pack. Toddlers play inside a pair."),
 
     H("Just watch and vote: the reluctant-relative games (games 28–30)"),
     CALL("Just watch and vote is a complete job", "Some relatives will never want a turn, and Christmas is not the day to convert them. Give watching a function: voting, judging applause, holding the bowl of phrases. People offered a real spectator role often drift into playing by the second game; people dragged in rarely do.", "tip"),

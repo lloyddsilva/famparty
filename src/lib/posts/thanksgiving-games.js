@@ -90,7 +90,7 @@ export const THANKSGIVING_GAMES = {
       "Invent kind awards for the day — Best Gravy, Most Dramatic Entrance, Fastest Dishwasher, Most Pie — and vote by slip or hands. The host reads the shortlist like it matters. Everyone should leave with exactly the award they secretly wanted; engineer the categories until that's true."),
     GC("25. Emoji Decoder on the TV", "3–12 players", "About 10 min for a full show", "A TV or laptop, and a phone each",
       "The TV shows an emoji clue — 🍕🎉 — and every phone gets the same four choices. Faster correct answers score more, and the leaderboard lands on the big screen. It's the one game here that runs itself: no cards to write, no answers to check, and anyone can join from the couch. In FamParty it's called Emoji Decoder; the host runs it from their phone while the TV just shows the show."),
-    { type: "tvMock", game: "Emoji Decoder", header: "Emoji Decoder · Round 3", emoji: "🦃🥧", question: "What phrase is this?", choices: ["Thanksgiving Dinner", "Pumpkin Pie Day", "Turkey Nap", "Harvest Festival"], footer: "Four choices on every phone. The leaderboard is on the TV." },
+    { type: "tvMock", game: "Emoji Decoder", header: "Emoji Decoder · Round 3", emoji: "🍕🎉", question: "What phrase is this?", choices: ["Pizza Party", "Movie Night", "Birthday Cake", "Picnic Day"], footer: "A real clue from the app's general pack. Four choices on every phone." },
 
     H("A sample Thanksgiving running order"),
     P("You don't need all 25. Five, placed well, will carry the whole day and leave room for the conversations the games are supposed to start. Here's one order that follows the day's energy rather than fighting it:"),

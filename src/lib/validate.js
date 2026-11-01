@@ -100,7 +100,8 @@ export function clientIp(req) {
  * Never honoured on Vercel. */
 export function rateLimitFor(base) {
   if (!process.env.VERCEL && process.env.FAMPARTY_TEST_ROOM_LIMIT) {
-    return Math.max(base, Number(process.env.FAMPARTY_TEST_ROOM_LIMIT) * 10);
+    const n = Number(process.env.FAMPARTY_TEST_ROOM_LIMIT);
+    if (Number.isFinite(n) && n > 0) return Math.max(base, Math.round(n) * 10);
   }
   return base;
 }

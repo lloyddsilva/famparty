@@ -45,3 +45,16 @@ test("variants and compounds are blocked as whole words", () => {
     assert.equal(isCleanText(s), false, s);
   }
 });
+
+test("rateLimitFor: test scaling only off Vercel, non-numeric ignored", async () => {
+  const { rateLimitFor } = await import("./validate.js");
+  const prev = process.env.FAMPARTY_TEST_ROOM_LIMIT;
+  delete process.env.VERCEL;
+  process.env.FAMPARTY_TEST_ROOM_LIMIT = "abc";
+  assert.equal(rateLimitFor(20), 20);
+  process.env.FAMPARTY_TEST_ROOM_LIMIT = "30";
+  assert.equal(rateLimitFor(20), 300);
+  delete process.env.FAMPARTY_TEST_ROOM_LIMIT;
+  assert.equal(rateLimitFor(20), 20);
+  if (prev !== undefined) process.env.FAMPARTY_TEST_ROOM_LIMIT = prev;
+});

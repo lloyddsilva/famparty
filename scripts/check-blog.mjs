@@ -51,8 +51,13 @@ function postWords(post) {
 const failures = [];
 
 function checkPlain(value, where) {
-  if (typeof value === "string" && /<\/?[a-z][a-z0-9-]*(\s[^>]*)?>/i.test(value)) {
+  if (typeof value !== "string") return;
+  if (/<\/?[a-z][a-z0-9-]*(\s[^>]*)?>/i.test(value)) {
     failures.push(`${where}: HTML found in a plain-text field`);
+  }
+  // markdown emphasis left in plain text renders literally on the page
+  if (/(^|\s)\*[^*\s][^*]*\*(\s|$|[.,;:!?])/.test(value) || /(^|\s)_[^_\s][^_]*_(\s|$)/.test(value)) {
+    failures.push(`${where}: markdown marker found in a plain-text field`);
   }
 }
 function walkStrings(value, where) {

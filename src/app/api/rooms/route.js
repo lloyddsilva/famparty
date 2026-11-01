@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createRoom } from "../../../lib/engine.js";
 import { createRoom as storeRoom } from "../../../lib/roomStore.js";
-import { makeRoomCode, newToken, hashToken, parseJsonBody , clientIp } from "../../../lib/validate.js";
+import { makeRoomCode, newToken, hashToken, parseJsonBody, clientIp, rateLimitFor } from "../../../lib/validate.js";
 import { familyByToken, touchFamily } from "../../../lib/db.js";
 import { rateLimit } from "../../../lib/roomStore.js";
 
@@ -12,10 +12,7 @@ export async function POST(req) {
   try {
     // Room creation is capped per IP (item 7): rooms live 2h in Redis.
     const ip = clientIp(req);
-    // Test-only escape hatch: suites create dozens of rooms from one IP.
-    // Never honoured on Vercel, where the real limit always applies.
-    const createLimit = !process.env.VERCEL && process.env.FAMPARTY_TEST_ROOM_LIMIT ? Number(process.env.FAMPARTY_TEST_ROOM_LIMIT) : 20;
-    if (!(await rateLimit(`create:${ip}`, createLimit, 3600))) {
+    if (!(await rateLimit(`create:${ip}`, rateLimitFor(20), 3600))) {
       return NextResponse.json({ ok: false, error: "Too many rooms created. Try again later." }, { status: 429, headers: noStore });
     }
     const body = await parseJsonBody(req).catch(() => null);
