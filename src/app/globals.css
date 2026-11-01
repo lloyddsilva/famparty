@@ -94,7 +94,8 @@ input[type="range"] { accent-color: var(--violet); padding: 0; }
 .site-header { position: sticky; top: 0; z-index: 40; background: rgba(246,243,255,.92); backdrop-filter: blur(8px); }
 .site-header-in { max-width: 1200px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; gap: 22px; }
 .wordmark { font-family: Gelasio, Georgia, serif; font-weight: 700; font-size: 1.5rem; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
-.wordmark i { width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); display: inline-block; }
+.logo-compact { display: none; }
+@media (max-width: 900px) { .logo-full { display: none; } .logo-compact { display: inline-block; } }
 .site-nav { display: flex; gap: 6px; margin-left: auto; align-items: center; }
 .site-nav > a, .nav-trigger { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .98rem; background: none; border: none; cursor: pointer; padding: 9px 13px; border-radius: 999px; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .header-ctas .btn { white-space: nowrap; }

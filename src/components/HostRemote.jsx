@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogoMark } from "./Logo";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard } from "./SharedViews";
 
@@ -67,6 +68,7 @@ export default function HostRemote() {
   return (
     <main className="shell">
       <div className="card">
+        <span style={{ display: "block", marginBottom: 10 }}><LogoMark size={32} /></span>
         <span className="sticker">Host remote</span>
         <h2 style={{ fontSize: "1.9rem", marginTop: 12 }}>Room {room.code} {view ? <span className="player-chip" style={{ fontSize: ".85rem", verticalAlign: "middle" }}>{view.players.length} in{view.locked ? " · 🔒" : ""}</span> : null}</h2>
         {!view && <p className="sub">Connecting…</p>}

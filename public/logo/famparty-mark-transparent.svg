@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
+
+<g transform="rotate(-10 30 40)"><rect x="8" y="26" width="30" height="28" rx="14" fill="#6c4bff"></rect><text x="23" y="47" text-anchor="middle" font-family="Gelasio, Georgia, serif" font-weight="700" font-style="italic" font-size="19" fill="#fff">F</text></g>
+<g transform="rotate(6 54 40)"><rect x="38" y="26" width="34" height="28" rx="14" fill="#ffd166"></rect><rect x="39.5" y="27.5" width="31" height="25" rx="12.5" fill="none" stroke="#22223b" stroke-width="1.8"></rect><text x="55" y="47" text-anchor="middle" font-family="Gelasio, Georgia, serif" font-weight="700" font-size="19" fill="#22223b">P</text></g>
+<circle cx="68" cy="14" r="3.5" fill="#ff5c8a"></circle><circle cx="12" cy="66" r="3" fill="#ff5c8a"></circle>
+</svg>

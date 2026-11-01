@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogoMark } from "./Logo";
 import { AVATARS, SPOTLIGHT_STARTERS } from "../lib/questions";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, CHOICE_LABELS } from "./SharedViews";
@@ -97,7 +98,8 @@ export default function PlayerClient() {
     return (
       <main className="shell">
         <form className="card" onSubmit={join}>
-          <span className="sticker pink">Join the show</span>
+          <span style={{ display: "block", marginBottom: 10 }}><LogoMark size={32} /></span>
+        <span className="sticker pink">Join the show</span>
           {memberJoin ? (
             <>
               <h2 style={{ fontSize: "2.2rem", marginTop: 14 }}>Joining as a family member</h2>

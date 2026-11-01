@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, Podium, CHOICE_LABELS } from "./SharedViews";
 import { spectrumLayout } from "../lib/spectrumLayout";
+import { LogoReversed } from "./Logo";
 
 export default function TvDisplay({ code }) {
   const joinHost = typeof window !== "undefined" ? `${window.location.host}/join` : "this site /join";
@@ -36,6 +37,8 @@ export default function TvDisplay({ code }) {
      <div className="tv-stage" style={{ transform: `translate(-50%, -50%) scale(${scale})` }}>
      <div className="tv-frame-big"><div className={`tv-panel ${["question", "reveal"].includes(view.phase) ? "yellow" : "white"}`}>
       {view.phase === "lobby" && (
+        <div>
+        <div style={{ marginBottom: 14 }}><span style={{ display: "inline-block", background: "var(--dark)", borderRadius: 16, padding: "10px 14px" }}><LogoReversed width={150} /></span></div>
         <div className="tv-lobby">
           <div className="tv-lobby-left">
             {qr && <img className="qr" src={qr} alt="QR code to join this room" />}
@@ -51,6 +54,7 @@ export default function TvDisplay({ code }) {
               {view.players.length === 0 && <p className="tv-sub">Waiting for players…</p>}
             </div>
           </div>
+        </div>
         </div>
       )}
 

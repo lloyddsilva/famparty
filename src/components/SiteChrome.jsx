@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GAMES, OCCASIONS } from "../lib/siteContent";
 import { CONTACT_EMAIL, OPERATOR } from "../lib/siteConfig";
+import { LogoPrimary, LogoCompact, LogoReversed } from "./Logo";
 
 function Dropdown({ label, panelClass, children, width }) {
   const [open, setOpen] = useState(false);
@@ -33,7 +34,10 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-header-in">
-        <Link className="wordmark" href="/">FamParty <i /></Link>
+        <Link href="/" aria-label="FamParty home" style={{ display: "inline-flex" }}>
+          <span className="logo-full"><LogoPrimary width={140} /></span>
+          <span className="logo-compact"><LogoCompact width={118} /></span>
+        </Link>
         <nav className="site-nav" aria-label="Main">
           <Dropdown label="Games" panelClass="games">
             <span className="nav-grid">
@@ -87,7 +91,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer-in">
-        <Link className="wordmark" href="/" style={{ color: "#fff" }}>FamParty <i /></Link>
+        <Link href="/" aria-label="FamParty home"><LogoReversed width={175} /></Link>
         <nav>
           <Link href="/games">Games</Link>
           <Link href="/for/family-night">Occasions</Link>
