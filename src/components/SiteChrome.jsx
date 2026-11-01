@@ -15,10 +15,11 @@ function Dropdown({ label, panelClass, children, width }) {
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("pointerdown", onClick); };
   }, []);
   return (
-    <span className="nav-item" ref={ref}
-      onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <span className="nav-item" ref={ref} tabIndex={-1}
+      onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}>
       <button type="button" className={`nav-trigger ${open ? "open" : ""}`} aria-expanded={open}
-        onClick={() => setOpen((o) => !o)} onFocus={() => setOpen(true)}>
+        onClick={() => setOpen(true)} onFocus={() => setOpen(true)}>
         {label} <span style={{ fontSize: 10 }}>{open ? "▲" : "▼"}</span>
       </button>
       {open && <span className={`nav-panel ${panelClass}`} style={{ display: "block" }}>{children}</span>}

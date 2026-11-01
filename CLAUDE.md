@@ -49,6 +49,11 @@ config). Production: https://famparty.vercel.app
   kick at any phase; names pass a word filter; joins are rate-limited per IP+room
   *and* per IP globally (12 phones share one home IP — keep limits generous).
 
+## Environment variables (Vercel)
+- `KV_REST_API_URL` / `KV_REST_API_TOKEN` — Upstash (Marketplace).
+- `DATABASE_URL` — Neon production branch (Vercel); local dev uses the Neon `development` branch in `.env.local`.
+- `CRON_SECRET` — **Lloyd to set in Vercel.** `/api/cron/purge-families` fails closed (401) until it exists; Vercel Cron sends it as a Bearer header.
+
 ## Verify
 ```bash
 npm test                                   # pure engine/scoring (node:test)

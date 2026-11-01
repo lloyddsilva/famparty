@@ -121,7 +121,7 @@ export function OccasionDetail({ slug }) {
           <h2 className="lp-h2" style={{ fontSize: "2.2rem" }}>Setup tips</h2>
           <div className="how-list" style={{ maxWidth: 760, margin: "22px auto 0" }}>
             {o.tips.map((tip, i) => (
-              <div key={i} className="how-item"><span className="lp-step-num" style={{ background: o.soft, flex: "none" }}>{i + 1}</span><p style={{ margin: 0, lineHeight: 1.55 }}>{tip.replace(/^ /, "")}</p></div>
+              <div key={i} className="how-item"><span className="lp-step-num" style={{ background: o.soft, flex: "none" }}>{i + 1}</span><p style={{ margin: 0, lineHeight: 1.55 }}>{tip}</p></div>
             ))}
           </div>
           <div className="center"><Link className="btn primary" href="/host" style={{ marginTop: 24, padding: "16px 30px" }}>Host a show</Link></div>

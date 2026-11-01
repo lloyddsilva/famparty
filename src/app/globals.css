@@ -1,14 +1,7 @@
-/* Self-hosted Gelasio + Outfit (latin subsets, Google Fonts, OFL). Downloaded Oct 31 2026. */
-@font-face { font-family: 'Gelasio'; font-style: italic; font-weight: 600; font-display: swap; src: url(/fonts/gelasio-600-italic.woff2) format('woff2'); }
-@font-face { font-family: 'Gelasio'; font-style: italic; font-weight: 700; font-display: swap; src: url(/fonts/gelasio-700-italic.woff2) format('woff2'); }
-@font-face { font-family: 'Gelasio'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/gelasio-600.woff2) format('woff2'); }
-@font-face { font-family: 'Gelasio'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/gelasio-700.woff2) format('woff2'); }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/outfit-400.woff2) format('woff2'); }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/outfit-500.woff2) format('woff2'); }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/outfit-600.woff2) format('woff2'); }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/outfit-700.woff2) format('woff2'); }
-@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 800; font-display: swap; src: url(/fonts/outfit-800.woff2) format('woff2'); }
-
+/* Self-hosted variable fonts (Google Fonts, OFL — see THIRD_PARTY_NOTICES.md). */
+@font-face { font-family: 'Gelasio'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(/fonts/gelasio-var.woff2) format('woff2'); }
+@font-face { font-family: 'Gelasio'; font-style: italic; font-weight: 400 700; font-display: swap; src: url(/fonts/gelasio-var-italic.woff2) format('woff2'); }
+@font-face { font-family: 'Outfit'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(/fonts/outfit-var.woff2) format('woff2'); }
 @import "tailwindcss";
 
 /* FamParty design system — light "poster" theme (design turn 4).
@@ -48,6 +41,7 @@ label { display: block; margin: 14px 0; font-weight: 600; }
 input { width: 100%; margin-top: 6px; padding: 14px; border-radius: 16px; border: 1.5px solid var(--divider); background: #fff; color: var(--ink); font-size: 1.1rem; min-height: 56px; }
 input:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
 .code-input { text-transform: uppercase; letter-spacing: .35em; font-size: 1.5rem; text-align: center; font-weight: 800; color: var(--violet); }
+.notice { background: var(--yellow-pastel); border: 1px solid var(--yellow); color: #5a4a10; padding: 12px 16px; border-radius: 16px; line-height: 1.45; font-size: .9rem; }
 .error { background: var(--pink-light); border: 1px solid var(--pink-pastel); color: #7a1030; padding: 12px 16px; border-radius: 14px; line-height: 1.45; }
 .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
 .avatar { font-size: 2rem; padding: 12px 0; border-radius: 18px; border: 2px solid var(--divider); background: #fff; cursor: pointer; min-height: 66px; transition: transform .15s ease-out; }
@@ -102,7 +96,9 @@ input[type="range"] { accent-color: var(--violet); padding: 0; }
 .wordmark { font-family: Gelasio, Georgia, serif; font-weight: 700; font-size: 1.5rem; color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
 .wordmark i { width: 10px; height: 10px; border-radius: 50%; background: var(--yellow); display: inline-block; }
 .site-nav { display: flex; gap: 6px; margin-left: auto; align-items: center; }
-.site-nav > a, .nav-trigger { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .98rem; background: none; border: none; cursor: pointer; padding: 9px 13px; border-radius: 999px; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
+.site-nav > a, .nav-trigger { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .98rem; background: none; border: none; cursor: pointer; padding: 9px 13px; border-radius: 999px; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.header-ctas .btn { white-space: nowrap; }
+.wordmark { white-space: nowrap; }
 .site-nav > a:hover, .nav-trigger:hover { background: #fff; }
 .nav-item { position: relative; }
 .nav-trigger.open { color: var(--violet); background: #fff; font-weight: 600; }
@@ -242,14 +238,20 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
   .lp-devices .avatar-card { display: none; }
   .lp-devices .avatar-card:first-child, .lp-devices .avatar-card:last-child { display: flex; }
 }
-@media (max-width: 860px) {
+@media (max-width: 1100px) {
   .site-nav { display: none; }
+  .hamburger { display: block; margin-left: auto; }
+  .header-ctas .btn.outline { display: none; }
+}
+@media (max-width: 860px) {
   .hamburger { display: block; margin-left: auto; }
   .header-ctas .btn.outline { display: none; }
   .lp-h1 { font-size: 4.2rem; }
   .callout { display: none; }
   .lp-callouts-mobile { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
   .lp-games, .lp-steps, .lp-occasions, .lp-blog { grid-template-columns: 1fr; }
+  .lp-cta-row { flex-direction: column; align-items: stretch; }
+  .lp-cta-row .btn { width: 100%; text-align: center; }
   .lp-family { grid-template-columns: 1fr; padding: 30px; }
   .lp-devices .avatar-card { display: none !important; }
   .lp-final h2 { font-size: 2.8rem; }
@@ -263,3 +265,23 @@ details.faq-item p { color: var(--muted); line-height: 1.55; }
 
 .tv-panel .card { background: transparent; border: none; box-shadow: none; margin-top: 0; }
 .tv-panel .choice { background: #fff; }
+
+/* TV 4e sizing: 20px floor, 36px question, 120px emoji, fits 1280x720 */
+.tv-shell { padding: 12px 14px 16px; }
+.tv-panel { font-size: 20px; padding: 20px 26px; }
+.tv-panel.yellow { background: var(--yellow); }
+.tv-panel .q-head { font-size: 1.05rem; }
+.tv-panel .player-chip { font-size: 1.1rem; padding: 6px 14px; }
+.tv-panel .player-grid { margin: 10px 0 0; gap: 8px; }
+.tv-question { font-family: Gelasio, Georgia, serif; font-weight: 700; font-size: 36px; margin: 2px 0 10px; color: var(--ink); }
+.tv-panel .big-emoji { font-size: 104px; margin: 4px 0 0; line-height: 1.1; }
+.tv-panel .choices { margin-top: 10px; gap: 8px; }
+.tv-panel .choice { padding: 12px 16px; }
+.tv-lobby { display: grid; grid-template-columns: 330px 1fr; gap: 30px; align-items: center; text-align: left; }
+.tv-lobby-left { text-align: center; }
+.tv-lobby-left .qr { width: 205px; height: 205px; margin: 0 auto 6px; }
+.tv-lobby-left .room-code { font-size: 58px; }
+.tv-join-line { font-size: 20px; font-weight: 600; color: var(--muted); margin: 4px 0 0; }
+.tv-lobby-h { font-size: 46px; margin: 12px 0 6px; }
+.tv-sub { font-size: 20px; color: var(--muted); margin: 0; line-height: 1.45; }
+@media (max-width: 760px) { .tv-lobby { grid-template-columns: 1fr; } }

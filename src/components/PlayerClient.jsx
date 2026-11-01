@@ -13,6 +13,7 @@ export default function PlayerClient() {
   const [memberJoin, setMemberJoin] = useState(null); // {memberId, familyToken}
   const [familyLinkedRoom, setFamilyLinkedRoom] = useState(false);
   const [takenAvatars, setTakenAvatars] = useState([]);
+  const [roomFull, setRoomFull] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -43,10 +44,17 @@ export default function PlayerClient() {
   useEffect(() => {
     if (code.length !== 4) return;
     fetch(`/api/rooms/${code}/peek`).then((r) => r.json()).then((d) => setFamilyLinkedRoom(!!d.familyLinked)).catch(() => {});
-    fetch(`/api/rooms/${code}/state?role=display`).then((r) => r.json()).then((d) => {
-      if (d.view) setTakenAvatars(d.view.players.map((p) => p.avatar));
-    }).catch(() => {});
+    refreshTaken(code);
   }, [code]);
+
+  function refreshTaken(forCode) {
+    fetch(`/api/rooms/${forCode}/state?role=display`).then((r) => r.json()).then((d) => {
+      if (d.view) {
+        setTakenAvatars(d.view.players.map((p) => p.avatar));
+        setRoomFull(d.view.players.length >= 12);
+      }
+    }).catch(() => {});
+  }
 
   const { view, act, serverNow, gone } = useRoom(creds?.code, { role: "player", token: creds?.playerToken || "" });
   const seconds = useCountdown(view, serverNow);
@@ -63,6 +71,13 @@ export default function PlayerClient() {
     }
   }, [gone, kicked, creds]);
 
+  useEffect(() => {
+    if (takenAvatars.includes(avatar)) {
+      const free = AVATARS.find((a) => !takenAvatars.includes(a));
+      if (free) setAvatar(free);
+    }
+  }, [takenAvatars, avatar]);
+
   async function join(e) {
     e.preventDefault();
     setBusy(true); setError("");
@@ -71,7 +86,7 @@ export default function PlayerClient() {
     const res = await fetch(`/api/rooms/${code}/join`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     const data = await res.json();
     setBusy(false);
-    if (!data.ok) return setError(data.error || "Could not join.");
+    if (!data.ok) { refreshTaken(code); return setError(data.error || "Could not join."); }
     localStorage.setItem("famparty:playerCode", data.code);
     localStorage.setItem("famparty:playerToken", data.playerToken);
     setCreds({ code: data.code, playerToken: data.playerToken, playerId: data.playerId });
@@ -81,24 +96,25 @@ export default function PlayerClient() {
     return (
       <main className="shell">
         <form className="card" onSubmit={join}>
-          <p className="eyebrow">JOIN THE SHOW</p>
+          <span className="sticker pink">Join the show</span>
           {memberJoin ? (
             <>
-              <h2>Joining as a family member</h2>
+              <h2 style={{ fontSize: "2.2rem", marginTop: 14 }}>Joining as a family member</h2>
               <p className="sub">Your name and avatar come from the family roster.</p>
               <label>Room code<input className="code-input" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 4))} placeholder="ABCD" required /></label>
             </>
           ) : (
             <>
-              <h2>Pick your avatar</h2>
+              <h2 style={{ fontSize: "2.2rem", marginTop: 14 }}>Who are you tonight?</h2>
               <label>Room code<input className="code-input" value={code} onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 4))} placeholder="ABCD" required /></label>
               <label>Your name<input value={name} onChange={(e) => setName(e.target.value.slice(0, 16))} placeholder="e.g. Alex" required /></label>
               <div className="avatar-grid">{AVATARS.map((a) => <button type="button" key={a} disabled={takenAvatars.includes(a)} title={takenAvatars.includes(a) ? "Taken in this room" : undefined} className={`avatar ${avatar === a ? "selected" : ""}`} onClick={() => setAvatar(a)}>{a}</button>)}</div>
             </>
           )}
-          {familyLinkedRoom && <p className="error">💾 This room belongs to a family album. Saved statements are kept for 60 days. Spotlight true statements and scores may save — you can say "don't save this" on any statement.</p>}
+          {familyLinkedRoom && <p className="notice">💾 This room belongs to a family album. Saved statements are kept for 60 days. Spotlight true statements and scores may save — you can say "don't save this" on any statement.</p>}
+          {roomFull && <p className="error">This room is full (12 players). Ask the host to start a new room, or wait for the next show.</p>}
           {error && <p className="error">{error}</p>}
-          <button className="btn primary big" disabled={busy}>{busy ? "Joining…" : "Join game"}</button>
+          <button className="btn primary big" disabled={busy || roomFull}>{busy ? "Joining…" : roomFull ? "Room full" : "I'm in"}</button>
         </form>
       </main>
     );

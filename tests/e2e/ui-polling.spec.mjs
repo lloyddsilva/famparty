@@ -29,7 +29,7 @@ test("TV + host + 3 phones play a round by polling", async ({ browser, baseURL }
     await page.goto(`${baseURL}/join?code=${code}`);
     await page.locator('input[placeholder="e.g. Alex"]').fill(`Phone${i + 1}`);
     await page.locator(".avatar").nth(i).click();
-    await page.getByRole("button", { name: /Join game/ }).click();
+    await page.getByRole("button", { name: /I'm in/ }).click();
     await expect(page.getByText("You're in!")).toBeVisible();
     phones.push({ ctx, page });
   }
@@ -70,7 +70,7 @@ test("an expired saved room returns the phone to the join form", async ({ browse
   });
   await page.reload();
   // not stuck on Connecting…: the join form comes back with an explanation
-  await expect(page.getByRole("button", { name: /Join game/ })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole("button", { name: /I'm in/ })).toBeVisible({ timeout: 10000 });
   await expect(page.getByText(/room has ended/i)).toBeVisible();
   await ctx.close();
 });

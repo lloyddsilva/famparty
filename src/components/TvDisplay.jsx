@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import QRCode from "qrcode";
 import { useRoom, useCountdown } from "./useRoom";
 import { Leaderboard, Podium, CHOICE_LABELS } from "./SharedViews";
+import { spectrumRows } from "../lib/spectrumLayout";
 
 export default function TvDisplay({ code }) {
+  const joinHost = typeof window !== "undefined" ? `${window.location.host}/join` : "this site /join";
   const { view, error, serverNow } = useRoom(code, { role: "display" });
   const seconds = useCountdown(view, serverNow);
   const [qr, setQr] = useState("");
@@ -24,16 +26,22 @@ export default function TvDisplay({ code }) {
 
   return (
     <main className="tv-shell">
-     <div className="tv-frame-big"><div className="tv-panel white">
+     <div className="tv-frame-big"><div className={`tv-panel ${["question", "reveal"].includes(view.phase) ? "yellow" : "white"}`}>
       {view.phase === "lobby" && (
-        <div className="card center">
-          <p className="eyebrow">SCAN, OR GO TO FAMPARTY.COM/JOIN</p>
-          {qr && <img className="qr" src={qr} alt="QR code to join this room" />}
-          <div className="room-code">{view.code}</div>
-          <h2 style={{ fontSize: "2.6rem" }}>{view.players.length} of 12 are in.</h2><p className="sub">The host starts the show from their phone.</p>
-          <div className="player-grid tv-grid">
-            {view.players.map((p) => <div key={p.id} className="player-chip"><span>{p.avatar}</span>{p.name}</div>)}
-            {view.players.length === 0 && <p className="sub">Waiting for players…</p>}
+        <div className="tv-lobby">
+          <div className="tv-lobby-left">
+            {qr && <img className="qr" src={qr} alt="QR code to join this room" />}
+            <div className="room-code">{view.code}</div>
+            <p className="tv-join-line">Scan, or go to {joinHost}</p>
+          </div>
+          <div className="tv-lobby-right">
+            <span className="sticker">Lobby</span>
+            <h2 className="tv-lobby-h">{view.players.length} of 12 are in.</h2>
+            <p className="tv-sub">The host starts the show from their phone.</p>
+            <div className="player-grid tv-grid" style={{ justifyContent: "flex-start", margin: "14px 0 0" }}>
+              {view.players.map((p) => <div key={p.id} className="player-chip"><span>{p.avatar}</span>{p.name}</div>)}
+              {view.players.length === 0 && <p className="tv-sub">Waiting for players…</p>}
+            </div>
           </div>
         </div>
       )}
@@ -43,7 +51,7 @@ export default function TvDisplay({ code }) {
           <div className="q-head"><span>Round {view.qIndex + 1} / {view.totalQuestions}</span><span className="timer">{view.paused ? "⏸ Paused" : `⏱ ${seconds ?? 20}s`}</span><span>{view.answeredCount} / {view.players.length} answered</span></div>
           <div className="timer-bar"><span style={{ width: `${(((seconds ?? 20) / 20) * 100)}%` }} /></div>
           <div className="big-emoji">{view.question.emoji}</div>
-          <p className="sub">What phrase is this?</p>
+          <p className="tv-question">What phrase is this?</p>
           <div className="choices host-choices">
             {view.question.choices.map((c, i) => <div key={c} className="choice"><b>{CHOICE_LABELS[i]}</b>{c}</div>)}
           </div>
@@ -101,12 +109,13 @@ export default function TvDisplay({ code }) {
           <div className="spectrum-track">
             <span className="spectrum-end">{view.spectrum.left}</span>
             <div className="spectrum-line">
-              {view.phase === "spectrumReveal" && view.spectrum.placements.map((pl, i, arr) => {
-                const p = view.players.find((x) => x.id === pl.id);
-                // Stagger rows when avatars would collide (within 6%).
-                const near = arr.slice(0, i).filter((o) => Math.abs(o.pos - pl.pos) < 6).length;
-                return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%`, top: near % 2 ? -78 : -38 }} title={p?.name}>{p?.avatar}</span>;
-              })}
+              {view.phase === "spectrumReveal" && (() => {
+                const rows = spectrumRows(view.spectrum.placements);
+                return view.spectrum.placements.map((pl) => {
+                  const p = view.players.find((x) => x.id === pl.id);
+                  return <span key={pl.id} className="spectrum-dot" style={{ left: `${pl.pos}%`, top: -38 - (rows.get(pl.id) || 0) * 40 }} title={p?.name}>{p?.avatar}</span>;
+                });
+              })()}
               {view.phase === "spectrumReveal" && <span className="spectrum-median" style={{ left: `${view.spectrum.median}%` }} />}
             </div>
             <span className="spectrum-end">{view.spectrum.right}</span>
