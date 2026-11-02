@@ -1,0 +1,12 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "/images/generations",
+  "prompt": "Warm flat-illustration title card for a family emoji guessing game: big friendly emoji faces around a TV screen, deep purple and warm orange palette, cosy living-room feeling, no text, no letters.",
+  "generatedAt": "2026-11-02T01:27:05.380Z",
+  "file": "content/outputs/art/emoji-decoder-card.webp",
+  "usage": {
+    "input_tokens": 10196,
+    "output_tokens": 1063,
+    "total_tokens": 11259
+  }
+}

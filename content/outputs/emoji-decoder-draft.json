@@ -1,0 +1,7 @@
+{
+  "model": "muse-spark-1.3",
+  "endpoint": "/chat/completions",
+  "prompt": "Write 12 Emoji Decoder rounds for a family party game. Each round: an emoji clue (2-4 emojis), the phrase it represents, and 3 plausible wrong phrases of similar length. Everyday family phrases only (food, home, weather, celebrations, animals, school, holidays). Format each round exactly as: EMOJI | ANSWER | WRONG1 | WRONG2 | WRONG3. Original content only; do not reference any existing game or TV show.",
+  "generatedAt": "2026-11-02T01:28:08.193Z",
+  "output": "🍎🔥🥧 | Hot Apple Pie | Warm Apple Pie | Hot Cherry Pie | Hot Apple Cake\n🧺👕🧦 | Do The Laundry | Fold The Laundry | Do The Dishes | Wash The Laundry\n☀️😎🏖️ | Sunny Day Out | Rainy Day Out | Sunny Day Off | Sunny Park Day\n🎂🕯️🎉 | Birthday Cake Time | Wedding Cake Time | Birthday Party Time | Birthday Cake Day\n🐱🐟🥛 | Cat Drinks Milk | Dog Drinks Milk | Cat Eats Fish | Cat Likes Milk\n🎒📚🚌 | Back To School | Off To School | Back To Class | Pack For School\n🎄🎁❄️ | Christmas Morning Gifts | Holiday Morning Gifts | Christmas Evening Gifts | Christmas Morning Treats\n🍕🧀📺 | Pizza Movie Night | Taco Movie Night | Pizza Family Night | Pizza Lunch Date\n💡🔌💤 | Turn Off The Lights | Leave On The Lights | Turn Off The Lamp | Turn On The Lights\n⛈️🏠☕ | Stormy Night In | Rainy Night In | Stormy Day Out | Snowy Night In\n🎃🍬👻 | Trick Or Treat | Candy Or Treat | Knock And Treat | Dress Up Scare\n❄️☃️🧤 | Build A Snowman | Make A Snowman | Build A Snow Fort | Catch A Snowflake"
+}

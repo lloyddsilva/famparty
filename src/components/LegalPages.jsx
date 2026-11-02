@@ -55,7 +55,7 @@ export function PrivacyPage() {
       <P>We use IP addresses for short-lived rate limiting (stored briefly in Redis to stop abuse). Our host, Vercel, may also keep ordinary request logs for a limited time. Other processor: Upstash (live rooms).</P>
 
       <H>AI</H>
-      <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs are currently hand-written starters, awaiting the offline generation run and human review described on the About page.</P>
+      <P>Player input is never sent to any AI model. Meta's models were used at build time to help write this app; the running app makes no model calls and holds no model API keys. Game content packs were Generated offline with Muse Spark 1.3 (text) and Muse Image 1.0 (title-card art), then edited with Muse in OpenCode, and reviewed by Lloyd. It is not verbatim model output, and it was not tested with real people.</P>
 
       <H>Your rights</H>
       <P>Because there are no accounts and rooms delete themselves within 2 hours, there is usually nothing left to access or delete by the time you'd ask. For anything else — including requests from California or EEA/UK residents — use the contact email below and we'll respond. We don't sell or share personal data.</P>
@@ -87,7 +87,7 @@ export function TermsPage() {
       <P>Rooms are temporary: they expire after about 2 hours, and scores and statements go with them. We don't guarantee the service will always be available.</P>
 
       <H>Game content</H>
-      <P>Game questions and prompts in the current build are hand-written starter packs. They will be regenerated with AI assistance offline and human-reviewed before any release that claims otherwise. Third-party material (fonts, the word list) is credited in our third-party notices.</P>
+      <P>Game questions and prompts in the current build were generated offline with Muse Spark 1.3 (text) and Muse Image 1.0 (title-card art), then edited with Muse in OpenCode, and reviewed by Lloyd. It is not verbatim model output, and it was not tested with real people. Third-party material (fonts, the word list) is credited in our third-party notices.</P>
 
       <H>Warranties and liability</H>
       <P>The service is provided "as is" without warranties of any kind. To the extent the law allows, {OPERATOR} isn't liable for indirect or incidental damages arising from use of the service. Nothing here limits liability that can't be limited by law.</P>
@@ -110,7 +110,7 @@ export function AboutPage() {
       <P>Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — built during this hackathon (first commit: October 31, 2026). The running app makes no live model calls.</P>
 
       <H>How the content is made</H>
-      <P>Today's facts: the content packs in the current build are hand-written starters — the Muse Spark / Muse Image generation run has not happened yet, and no pack is marked reviewed. When the run happens, content will be generated once, offline (scripts, prompts and raw outputs committed in the repository), and a pack will only be marked reviewed after a person has read every line.</P>
+      <P>Today's facts: the content packs were generated offline with Muse Spark 1.3 (text) and Muse Image 1.0 (title-card art), then edited with Muse in OpenCode, and reviewed by Lloyd. It is not verbatim model output, and it was not tested with real people. The generation scripts, prompts and raw outputs are committed in the repository (scripts/generate-content.mjs, content/outputs/), alongside the review list in content/REVIEW.md; the packs are marked reviewed in src/lib/packs.js as Lloyd's recorded decision.</P>
     </Shell>
   );
 }

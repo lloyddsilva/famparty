@@ -1,0 +1,12 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "/images/generations",
+  "prompt": "Warm flat-illustration title card for a family opinion game: cartoon family avatars spread along a horizontal slider between a sunny beach on the left and snowy mountains on the right, deep purple and warm orange palette, no text, no letters.",
+  "generatedAt": "2026-11-02T01:27:29.584Z",
+  "file": "content/outputs/art/spectrum-card.webp",
+  "usage": {
+    "input_tokens": 18803,
+    "output_tokens": 2280,
+    "total_tokens": 21083
+  }
+}

@@ -33,13 +33,7 @@
 
 > "Built with OpenCode connected to Meta's Model API, using Muse Wonder 1.0 — the whole app, engine, tests and content pipeline."
 
-**ONLY IF THE CONTENT RUN IS DONE, add:**
-
-> "Content is generated once, offline, with Muse Spark and Muse Image, then a person reads every line before it ships."
-
-**Otherwise, say this instead (the honest line for the current build):**
-
-> "Built with Muse; the current game content is hand-written starter packs."
+> "The game content was generated once, offline, with Muse Spark 1.3 and Muse Image 1.0, then edited with Muse in OpenCode, and I reviewed every pack myself before it shipped. It isn't verbatim model output."
 
 - Show `scripts/generate-content.mjs`, the committed outputs, one pack, and `npm run pre-submit` passing.
 - "The running app makes **no live model calls** and holds **no model API keys**."

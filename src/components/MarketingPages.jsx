@@ -7,6 +7,14 @@ import { Block } from "./BlogBlocks";
 
 const gameBySlug = (slug) => GAMES.find((g) => g.slug === slug);
 
+// Approved pack title cards (Muse Image 1.0, Lloyd-approved), one per game.
+const PACK_ART = {
+  "emoji-decoder": { src: "/pack-art/emoji-decoder-card.webp", alt: "Emoji faces gathered around a TV in a cozy living room — Emoji Decoder pack art" },
+  "spotlight": { src: "/pack-art/spotlight-card.webp", alt: "A child telling a story on a stage to a seated family audience — Spotlight pack art" },
+  "spectrum": { src: "/pack-art/spectrum-card.webp", alt: "Family members standing behind a long slider between a sunny beach and snowy mountains — Spectrum pack art" },
+  "finish-it": { src: "/pack-art/finish-it-card.webp", alt: "Speech bubbles and a pencil around a TV screen — Finish It pack art" },
+};
+
 export function GamesIndex() {
   return (
     <>
@@ -18,6 +26,7 @@ export function GamesIndex() {
         <div className="lp-games" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))" }}>
           {GAMES.map((g) => (
             <Link key={g.slug} className="lp-game" href={`/games/${g.slug}`} style={{ background: g.soft === "#ffffff" ? "#fff" : g.soft }}>
+              {PACK_ART[g.slug] && <img src={PACK_ART[g.slug].src} alt={PACK_ART[g.slug].alt} width={1920} height={1280} style={{ width: "100%", height: "auto", aspectRatio: "3 / 2", objectFit: "cover", borderRadius: 14, display: "block", marginBottom: 12 }} />}
               <span className="lp-game-icon">{g.icon}</span><span className="lp-game-tag">{g.tag}</span><h3>{g.name}</h3><p>{g.blurb}</p>
               <span className="lp-game-mins">{g.length} · {g.players}</span>
             </Link>

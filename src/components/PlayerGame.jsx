@@ -55,7 +55,7 @@ export default function PlayerGame({ view, act, me, seconds }) {
     : me?.watching ? <div className="center"><h3>👀 You&apos;re just watching</h3><p className="sub">You can still vote on everyone else&apos;s lie.</p></div>
     : (
       <>
-        <p className="sub">Need a start? {SPOTLIGHT_STARTERS[0]}</p>
+        <p className="sub">Need a start? {SPOTLIGHT_STARTERS[[...(me?.id || "")].reduce((a, c) => a + c.charCodeAt(0), 0) % SPOTLIGHT_STARTERS.length]}</p>
         {["A true thing", "Another true thing", "Your lie"].map((label, i) => (
           <label key={label}>{label}<input value={texts[i]} maxLength={120} onChange={(e) => setTexts(texts.map((x, j) => j === i ? e.target.value : x))} placeholder={i === 2 ? "Make it plain…" : "Add a detail…"} /></label>
         ))}

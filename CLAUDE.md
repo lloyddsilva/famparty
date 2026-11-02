@@ -9,12 +9,12 @@ config). Production: https://famparty.vercel.app
 ## Hard rules
 - **No live model calls, no model keys at runtime.** Content is meant to be
   generated once offline (`scripts/generate-content.mjs`, key from env only),
-  human-reviewed, and committed. **That run has not happened yet:** the packs in
-  `src/lib/packs.js` are hand-written starter placeholders with
-  `reviewed: false`, and `npm run check:packs` correctly fails on them (the
-  gate was deliberately proven by flipping a flag; it is not wired into
-  `npm run build` while packs are unreviewed). Do not submit until the Spark/
-  Image run and Lloyd's review flip them.
+  human-reviewed, and committed. **That run has happened:** the packs in
+  `src/lib/packs.js` were generated offline with Muse Spark 1.3 and Muse
+  Image 1.0, then edited with Muse in OpenCode, and reviewed by Lloyd;
+  they are marked `reviewed: true` as his recorded decision (raw outputs and
+  review list in `content/`). Not verbatim model output; not tested with
+  real people.
 - No custom server, no WebSockets without asking Lloyd. State via polling.
 
 ## Architecture

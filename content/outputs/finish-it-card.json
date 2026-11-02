@@ -1,0 +1,12 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "/images/generations",
+  "prompt": "Warm flat-illustration title card for a family fill-in-the-blank comedy game: speech bubbles and a pencil around a TV screen, deep purple and warm orange palette, no text, no letters.",
+  "generatedAt": "2026-11-02T01:27:37.726Z",
+  "file": "content/outputs/art/finish-it-card.webp",
+  "usage": {
+    "input_tokens": 10253,
+    "output_tokens": 1122,
+    "total_tokens": 11375
+  }
+}

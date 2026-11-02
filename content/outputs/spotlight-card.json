@@ -1,0 +1,12 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "/images/generations",
+  "prompt": "Warm flat-illustration title card for a family storytelling game: one cartoon character in a friendly spotlight on a stage telling a story to a seated family audience, deep purple and warm orange palette, no text, no letters.",
+  "generatedAt": "2026-11-02T01:27:12.580Z",
+  "file": "content/outputs/art/spotlight-card.webp",
+  "usage": {
+    "input_tokens": 10151,
+    "output_tokens": 1011,
+    "total_tokens": 11162
+  }
+}
