@@ -17,7 +17,7 @@ export default function Page() {
       <main className="lp">
         <section className="lp-hero">
           <div className="lp-stickers">
-            <span className="sticker">Free · No signup</span>
+            <span className="sticker">Free during beta · No signup</span>
           </div>
           <h1 className="lp-h1">
             Party with<br />
@@ -78,7 +78,7 @@ export default function Page() {
         <section className="lp-final">
           <div className="lp-avatars"><span>🦊</span><span>🐼</span><span>🦄</span><span>🐸</span><span>🦁</span></div>
           <h2>Ready? <em>Scan in.</em></h2>
-          <p className="lp-sub">Free. No signup. Scan, pick an animal, play.</p>
+          <p className="lp-sub">Free during beta. No signup. Scan, pick an animal, play.</p>
           <div className="lp-cta-row"><Link className="btn primary" href="/host" style={{ fontSize: "1.25rem", padding: "20px 40px" }}>Host a show</Link></div>
         </section>
       </main>

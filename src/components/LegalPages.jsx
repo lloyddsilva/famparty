@@ -69,10 +69,10 @@ export function PrivacyPage() {
 export function TermsPage() {
   return (
     <Shell title="Terms of Service">
-      <P>Short version: it's a free party game with no accounts. Be kind, don't abuse it, and export anything you want to keep.</P>
+      <P>Short version: it's a party game, free during the beta, with no accounts. Be kind, don't abuse it, and export anything you want to keep.</P>
 
       <H>What FamParty is</H>
-      <P>FamParty is a free service provided as is. It may change, break, or stop at any time. There are no accounts and no payments.</P>
+      <P>FamParty is currently a free beta, provided as is. It may change, break, or stop at any time. There are no accounts and no payments today. We may add paid features later, and we'll show any price clearly before anyone is charged.</P>
 
       <H>Who can use it</H>
       <P>Hosts must be adults. Children may only play with a parent or guardian in the room.</P>

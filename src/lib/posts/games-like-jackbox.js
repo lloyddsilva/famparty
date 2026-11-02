@@ -11,7 +11,7 @@ export const GAMES_LIKE_JACKBOX = {
   description: "Party games that use a shared screen and everyone's phones, compared on price, player count and setup.",
   dek: "Party games that use a shared screen and everyone's phones, compared on price, player count and setup.",
   published: false,
-  quickAnswer: "The closest Jackbox-shaped alternatives split three ways: another hosted pack (Jackbox itself, or AirConsole's library), free browser games (skribbl.io, Gartic Phone, Codenames Online, Kahoot!), and smaller focused shows like FamParty (free, 3–12 players, prompts written to be family-friendly, TV + phones, no accounts).",
+  quickAnswer: "The closest Jackbox-shaped alternatives split three ways: another hosted pack (Jackbox itself, or AirConsole's library), free browser games (skribbl.io, Gartic Phone, Codenames Online, Kahoot!), and smaller focused shows like FamParty (free during beta, 2–12 players, prompts written to be family-friendly, TV + phones, no accounts).",
   takeaways: [
     "Only the host needs to own Jackbox; everyone else joins free on a phone",
     "Free options trade polish and hosting for zero setup cost",
@@ -23,7 +23,7 @@ export const GAMES_LIKE_JACKBOX = {
     { type: "table", caption: "The short version (checked on official sites, Oct 31 2026)", head: ["Option", "Price", "Players", "Setup"], rows: [
       ["Jackbox Party Starter (jackboxgames.com)", "US$19.99 on console/Steam stores (US$9.99–10.99 seen on PC stores)", "1–8 per game (audience up to 10,000)", "Host buys and installs a pack; players join at jackbox.tv"],
       ["AirConsole (airconsole.com)", "Free to start; full access paid afterwards", "Varies by game", "Browser or TV app as the screen; phones as controllers"],
-      ["FamParty (this site)", "Free; no accounts", "3–12", "Host's phone runs it; TV opens a link; phones scan a QR code"],
+      ["FamParty (this site)", "Free during beta; no accounts", "2–12", "Host's phone runs it; TV opens a link; phones scan a QR code"],
       ["Kahoot! (kahoot.com)", "Free to sign up; premium plans exist", "Built for classrooms and large groups", "Host shows questions on a big screen; players join with a PIN"],
       ["Codenames Online (codenames.game)", "Free online version", "Two teams (the board game is 4–8+)", "Browser; nickname and a room link"],
       ["skribbl.io", "Free", "Public or private rooms (count not published)", "Browser drawing and guessing; no shared TV needed"],
@@ -43,7 +43,7 @@ export const GAMES_LIKE_JACKBOX = {
     { type: "steps", title: "The hosted-pack shape, whoever makes it", items: ["One person owns and launches the show.", "Everyone else joins free on a phone with a room code.", "The host's screen is the stage; phones are controllers."] },
     CALL("The one-owner rule", "With hosted packs, ask who owns the software before the night, not during it. Guests joining free doesn't help if the host's laptop is the one that didn't arrive."),
     H("3. FamParty — the small, family-first show (this site, stated plainly)"),
-    P("FamParty is us, so here are our real limits alongside the pitch. It's free with no accounts; the host runs the show from their phone, the TV only displays, and 3–12 players join by QR code. Four games, with prompts written to be family-friendly, a word filter on typed text, and a host who can hide or remove players — including a storytelling game and a family album that remembers saved stories for sixty days. The honest limits: it needs at least three players, the catalogue is four games rather than hundreds, rooms are live for two hours rather than persistent, and screen-shared remote play is still being tested rather than proven. Choose it for a family room with a TV, a mixed-age group, and no desire to install or buy anything tonight."),
+    P("FamParty is us, so here are our real limits alongside the pitch. It's free during beta with no accounts; the host runs the show from their phone, the TV only displays, and 2–12 players join by QR code. Four games, with prompts written to be family-friendly, a word filter on typed text, and a host who can hide or remove players — including a storytelling game and a family album that remembers saved stories for sixty days. The honest limits: it needs at least two players, the catalogue is four games rather than hundreds, rooms are live for two hours rather than persistent, and screen-shared remote play is still being tested rather than proven. Choose it for a family room with a TV, a mixed-age group, and no desire to install or buy anything tonight."),
     { type: "phoneMock", title: "The host's phone is the remote", lines: ["▶ Start, pause, skip, reveal", "🙈 Hide a player on TV", "Room code: ABCD"] },
     { type: "tvMock", game: "FamParty · Emoji Decoder", header: "Emoji Decoder · Round 3", emoji: "🍕🎉", question: "What phrase is this?", choices: ["Pizza Party", "Movie Night", "Birthday Cake", "Picnic Day"], footer: "The TV displays. Phones answer." },
     H("4. Kahoot! — the quiz at scale"),
@@ -75,7 +75,7 @@ export const GAMES_LIKE_JACKBOX = {
     { type: "pickerChart", title: "Which is right for your group?", items: [
       { if: "Gamers, one host happy to own software, long night", play: "Jackbox", note: "Deepest catalogue; check each game's rating and the family-friendly setting" },
       { if: "You want a library, not a show", play: "AirConsole", note: "Free to start; check what full access unlocks today" },
-      { if: "Family room, TV, ages mixed, nothing to install", play: "FamParty", note: "Free, 2–12 players, four games with family-friendly prompts" },
+      { if: "Family room, TV, ages mixed, nothing to install", play: "FamParty", note: "Free during beta, 2–12 players, four games with family-friendly prompts" },
       { if: "A quiz for a class, team or big group", play: "Kahoot!", note: "You bring or pick the questions" },
       { if: "Word people, two teams, quiet arguments", play: "Codenames Online", note: "Free in the browser" },
       { if: "Drawing and chaos, everyone remote", play: "skribbl.io or Gartic Phone", note: "No shared TV needed; Gartic wants a voice call" },

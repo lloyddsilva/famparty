@@ -139,7 +139,7 @@ const FAQS = [
   ["Who is the host?", "The first person to scan the QR code becomes the host and runs the show from their phone. If you start on your phone instead, you're the host from the beginning. Either way, hosting and playing can happen on the same phone."],
   ["What do I need?", "A TV or laptop for the big screen, and a phone each. That's it — no accounts, nothing to install, nothing to print."],
   ["How many people can play?", "2 to 12 players, depending on the game. Story and comedy games need at least 3; guessing games work with 2. If the room is full, play in pairs and share a phone."],
-  ["Does it cost anything?", "No. There are no payments, no subscriptions, and no accounts. Create a room and play — that's the whole deal."],
+  ["Does it cost anything?", "Not during the beta: no payments, no card, no accounts. We plan to add paid options after the beta, and we plan to keep at least one game free."],
   ["What if someone writes something rude?", "Nobody reads answers before they appear — the game would stall. Instead, the host can hide any player's words from the TV at any moment, or remove them from the room. Names and answers also pass a word filter, but filters can miss things; the host's hide button is the safety net."],
   ["Can someone join late?", "Yes. Scan the QR code at any point: you'll watch the current round and play from the next one. Nothing is disturbed."],
   ["Does it work on a video call?", "That's the idea — share the big screen in the call and everyone plays on their own phone. We are still testing this properly, so try one quick game first."],

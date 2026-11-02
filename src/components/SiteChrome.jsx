@@ -98,7 +98,7 @@ export function SiteFooter() {
           <Link href="/about">About</Link>
           {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
         </nav>
-        <span>© {new Date().getFullYear()} {OPERATOR} · No accounts · No payments · Family-friendly</span>
+        <span>© {new Date().getFullYear()} {OPERATOR} · Free during beta · No accounts · Family-friendly</span>
       </div>
     </footer>
   );
