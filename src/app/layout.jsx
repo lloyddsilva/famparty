@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL } from "../lib/siteConfig";
 
 const description = "The party game show that runs on your TV and everyone's phones. Host from your phone, guests join with a QR code — no accounts, no app, 3–12 players.";
@@ -29,7 +30,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>{children}<Analytics /></body>
     </html>
   );
 }
