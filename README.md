@@ -260,4 +260,4 @@ Environment variables (names only; set your own values, never commit them):
 
 ## License
 
-Code is released under the MIT License (see LICENSE). Third-party components keep their own licenses (see THIRD_PARTY_NOTICES.md). The FamParty name and logo are not covered by the license.
+Copyright (c) 2026 Hilly Shore Inc. All rights reserved. This repository is public for hackathon judging. No license is granted to copy, modify or distribute the code. Third-party components keep their own licenses (see THIRD_PARTY_NOTICES.md).
