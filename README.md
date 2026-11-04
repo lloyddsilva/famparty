@@ -5,7 +5,7 @@
 FamParty is a collection of short bonding games for people who are already together — families in a living room, friends on game night, or a team that needs five warm minutes before a meeting. A host runs the show from their phone, a TV (or any shared screen) displays it, and everyone else joins on their phone by scanning a QR code or typing a 4-letter room code.
 
 > **Live demo:** https://famparty.vercel.app
-> **Intended home:** famparty.com (domain/trademark checks parked — not a launch blocker)
+> **Domain:** famparty.com is registered and being connected. **Live site:** https://famparty.vercel.app
 > **For engineering context:** see `CLAUDE.md`. This README is the product brief.
 
 ---
@@ -232,10 +232,32 @@ FamParty is a Meta hackathon entry. Accurate status:
 - **Production status:** family features and the memory game (currently unavailable) work on the live URL. The whole app runs on two services — Vercel and Upstash Redis (rooms and albums in one store; albums expire automatically 60 days after last activity). The remaining production gap is content: packs are unreviewed placeholders until the Muse Spark/Image run and Lloyd's review.
 - The Spectrum awards (*Lonely Island*, *Mind Reader*, *Dead Center*) and the host-paced Finish It reveal are implemented in the engine and TV view; the earlier README described them before they existed.
 - The visual design is the light "poster" redesign (design handoff turn 4, implemented Oct 31): lavender-white background, Gelasio/Outfit self-hosted type, pastel game cards, dark-framed TV. Keep routes, phases, and control inventories; visual details live in `src/app/globals.css` and the marketing IA in section 6 of this README's sibling files (`src/lib/siteContent.js`).
-- Known non-design gaps: the famparty.com domain is unregistered at time of writing; the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.
+- Known non-design gaps: famparty.com is registered and being connected (the live site is https://famparty.vercel.app); the real-device test pass (physical TV + phones, HDMI + casting, cellular) is still to be run before any public submission.
 
 ---
 
 FamParty was **built during this hackathon** (first commit: Oct 31, 2026).
 
 *Last updated for the Nov 4 submission build. Product owner: Lloyd. This is a private repo; do not change visibility without Lloyd's explicit approval.*
+
+---
+
+## Run it locally
+
+Requires **Node 20 or newer**.
+
+```sh
+npm install
+npm run dev     # local dev on http://localhost:3000
+npm test        # unit tests
+```
+
+Environment variables (names only; set your own values, never commit them):
+
+- `KV_REST_API_URL` / `KV_REST_API_TOKEN` — Upstash Redis for live rooms. Without them the app uses an in-memory stand-in for local dev and tests.
+- `NEXT_PUBLIC_SITE_URL` — canonical site URL.
+- `NEXT_PUBLIC_CONTACT_EMAIL` — optional public contact email.
+
+## License
+
+Code is released under the MIT License (see LICENSE). Third-party components keep their own licenses (see THIRD_PARTY_NOTICES.md). The FamParty name and logo are not covered by the license.

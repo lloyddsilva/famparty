@@ -2,7 +2,7 @@
 
 Private repo (do not change visibility without Lloyd's explicit approval; a full
 history scan for secrets/real family data gates going public). GitHub and Vercel
-accounts are both **lloyddsilva**; commits as `lloyddsilva@gmail.com` (repo-local
+accounts are both **lloyddsilva**; commits under Lloyd's personal GitHub account (repo-local
 config). Production: https://famparty.vercel.app
 (Vercel **Hobby** plan, project `lloyd-dsilvas-projects/famparty`).
 
@@ -99,7 +99,7 @@ vercel ls famparty                         # confirm deployment Ready — a push
   redeploy mid-game) still needs physical devices.
 - Albums live in Redis with automatic 60-day expiry (no purge job). The
   separate-Redis-for-tests backlog item is closed by the in-memory stand-in.
-- `famparty.com` domain/trademark — parked, must not block anything.
+- `famparty.com` is registered and being connected; the live site is https://famparty.vercel.app. Must not block anything.
 - Content packs are unreviewed starter placeholders (see Hard rules); Lloyd's
   human review after the Muse Spark/Image run is the shipping gate.
 - README review (Claude, of `40ffc3e`): Spectrum awards and the host-paced
@@ -108,4 +108,4 @@ vercel ls famparty                         # confirm deployment Ready — a push
   claims about packs, test coverage, production family features, and
   reconnects were corrected to match reality.
 - First commit `3569eba` used a `users.noreply` email (pre-dates the gmail
-  instruction); all later commits use `lloyddsilva@gmail.com`.
+  instruction); all later commits use Lloyd's personal GitHub account.
